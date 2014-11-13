@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xt:extensions xmlns:xt="http://www.oxygenxml.com/ns/extension"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.oxygenxml.com/ns/extension http://www.oxygenxml.com/ns/extension/extensions.xsd">
+    <xt:extension id="v0.0.2">
+        <xt:location href="https://hobots.hogrefe.com/oXygenJATSframework_Literatum/oXygenJATSframework_Literatum.zip"/>
+        <xt:version>0.1.0</xt:version>
+        <xt:oxy_version>15.0+</xt:oxy_version>
+        <xt:type>framework</xt:type>
+        <xt:author>Wendell Piez, Gerrit Imsieke</xt:author>
+        <xt:name>Literatum JATS (v0.1)</xt:name><!--oXygenJATSFramework-->
+        <xt:description xmlns="http://www.w3.org/1999/xhtml">
+          <h2>oXygen XML Editor framework for NISO JATS 1.0, adapted for Atypon’s Literatum platform</h2>
+          <p>NISO JATS Z39.96-2012 defines an XML-based format for the authoring,
+          publication and archiving of journal articles and related information.
+          Its design is based on the NLM Journal Archiving and Publishing DTDs
+          through version 3.0.</p>
+          <p>For submission to its Literatum content delivery platform, Atypon requires
+          some additional conventions to be observed. Most of them will be checked by Schematron
+          rules.</p>
+          <p>Adaption of Wendell Piez’s original JATS framework was commissioned by 
+          Hogrefe Verlag, Göttingen, and was carried out by Gerrit Imsieke of le-tex publishing services.</p>
+        </xt:description>
+        <xt:license><![CDATA[This work is in the public domain. It includes artifacts published by the National
+Library of Medicine (NLM) with the following language:
+
+"This work is in the public domain and may be reproduced, published or 
+otherwise used without the permission of the National Library of Medicine (NLM).
+  
+We request only that the NLM is cited as the source of the work."
+]]></xt:license>
+    </xt:extension>
+</xt:extensions>

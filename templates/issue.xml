@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://hogrefe.com/JATS/schematron/literatum_Issue.sch" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<!DOCTYPE issue-xml
+  PUBLIC "-//Atypon//DTD Atypon JATS Journal Archiving and Interchange Issue XML DTD v1.0 20120831//EN" 
+  "Atypon-Issue-Xml.dtd">
+<issue-xml>
+  <issue-meta>
+    <pub-date><month>13</month> <year>3014</year></pub-date>
+    <volume></volume>
+    <issue></issue>
+    <issue-id pub-id-type="doi">issueDoiSuffix</issue-id>
+    <issue-title></issue-title>
+  </issue-meta>
+  <toc>
+  </toc>
+</issue-xml>

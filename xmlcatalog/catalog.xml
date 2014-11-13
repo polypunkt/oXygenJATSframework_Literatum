@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="public">
+  <rewriteURI uriStartString="http://hogrefe.com/JATS/schematron/" rewritePrefix="../schematron/"/>
+  <public publicId="-//APA//DTD contentItem DTD v1.6 //EN" uri="../schema/contentItem/contentItem.dtd"/>
+  <public publicId="-//Atypon//DTD Atypon JATS Journal Archiving and Interchange Issue XML DTD v1.0 20120831//EN" uri="../schema/issue/Atypon-Issue-Xml.dtd"/>
+  <nextCatalog catalog="../O2-DTD/JATS-catalog-O2.xml"/>
+</catalog>

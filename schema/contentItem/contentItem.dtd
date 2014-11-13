@@ -1,0 +1,3125 @@
+<!--DOCTYPE contentItem [                                          -->
+<!-- ============================================================= -->
+<!-- MODULE:    APA Document Type Definition for an item in 
+                a journal issue                                    -->
+<!-- VERSION:   1.6                                                -->
+<!-- ============================================================= -->
+<!-- Copyright: (C) American Psychological Association 2007
+     Permission to copy in any form is granted for use with 
+     conforming XML systems and applications, provided this notice
+     is included in all copies.
+-->
+<!-- =============================================================
+     Formal Public Identifier:
+"-//APA//DTD contentItem DTD v1.6 //EN"
+     ============================================================= -->
+
+<!-- ============================================================= -->
+<!-- PURPOSE:   Models items published in APA journals             -->
+<!--                                                               -->
+<!-- CREATED:   American Psychological Association (2007)          -->
+<!-- ============================================================= -->
+
+<!-- ============================================================= -->
+<!-- ****************** CHANGE HISTORY **************************  -->
+<!-- ============================================================= -->
+
+<!-- ****************** Version 1.6 *****************************
+33. Changed content model <itemMeta> so that <apaID> is 
+       mandatory rather than optional.
+
+32. Changed the <journalMeta> definition so that <issn> is optional. 
+    This is necessary so that electronic-only journals that have 
+    E-ISSNs but do not have ISSNs can be accomodated.
+
+31. Added a "reply" to the recommended values for @relatedItemType.
+       For items in PsycARTICLES, "reply" should be used to identify
+       a review or commentary author's reply to an original author's
+       response.
+       "reviewerReply" is valid only for items in PsycCRITIQUES.
+       
+30. Added <issueEditors> to content model for <issueMeta> to 
+       capture the names of guest editors of a special issue. Guest
+       editors of a special section are still be captured as <tocText>.
+
+29.  Added language attribute to most elements, including root 
+
+28.  Changed name of <epigram> element to <epigraph>
+
+27.  Added copyright and align attributes to <sp> element
+
+26.  Made <revisionDate> repeatable
+
+25.  Added <eISSN> element
+-->
+<!-- ****************** Version 1.5 *****************************
+
+24. Added <relatedItem> to content models for <tableGroup> and 
+    <figureGroup> to allow for the placement of "correction flags"
+    outside of the <title> element.
+    
+23. Added %formatElements; to content model for <aff> to allow for 
+    superscripts in company names.
+
+22. Changed content model for <title> and <subtitle> to allow 
+    paragraph-level elements such as <equation>, which sometimes
+    occur in figure titles.
+
+21. For <relatedItem>, made piCN attribute implied rather than 
+    required, as not all such items are currently covered in 
+    PsycINFO.
+                                                                   -->
+
+<!-- ****************** Version 1.4 *****************************
+
+20. Within <issueMeta>, made <issue> optional to accomodate articles
+    in Prevention & Treatment, which did not have issues.
+
+19. Expanded content model for all formatting elements to include
+    %inlineGraphicElements;
+    
+18. Added %inlineGraphicElements; to content model for <sp>
+
+                                                                   -->
+<!-- ****************** Version 1.3 *****************************
+
+17. For author, groupAuthor, and reviewer, changed value of id
+    attribute from ID to CDATA. 
+    
+16. Changed id attribute for <inlineGraphic> from #REQUIRED to 
+    #IMPLIED.
+
+15. Added %linkElements to content model for citations
+    (%citationElements;).
+
+     ****************** Version 1.2 *****************************
+    
+14. De-modularized - combined all components into a single dtd
+    file.
+
+13. Added piCN and doi as required attributes for <relatedItem>.
+
+12. Added <overline> element
+
+11. Removed optional title from <body>
+
+10. Changed attribute "strikethrustyle" to "strikethruStyle"
+
+9.  Changed content model for <corr>  added #PCDATA, 
+    <address>, <phone>, and <fax>; made <addressLine> child 
+    element of <address>; removed <extLink> from <addressLine>.
+
+8.  Added <no> element to citation model
+
+7.  Added id attribute to <equation>
+
+6.  Added <translatedTitle> to content model for <relatedItem>
+
+5.  Added <address> to content model for paragraph-level elements 
+
+4.  Changed value of relatedItemType attribute of (<relatedItem> 
+    element) from list of specific values to CDATA. Specific 
+    values currently in use are in commented list preceding 
+    the element and attribute declarations. 
+
+3.  Removed authorType attribute from <authorList> element 
+    - too complicated to populate accurately and not necessary 
+    for linking
+
+2. Changed ID attribute for <author>, <corpauth> and <reviewer> 
+   from #REQUIRED to #IMPLIED - IDs will be used to point to an 
+   authority file and will no longer be used to indicate order of 
+   authorship, as that should be reliably reflected in the document
+   order.
+
+1. Added new parameter entity %personElements and changed parameter 
+   entity %personName to mixed content so that person names in 
+   front matter and in citations are handled consistently.
+-->
+<!-- ============================================================= -->
+<!-- ****************** PARAMETER ENTITIES FOR CONTENT MODELS **** -->
+<!-- ============================================================= -->
+
+<!ENTITY % date         "(#PCDATA | day | month | season | year)*"   >
+
+<!ENTITY % personElements
+                        "givenNames | surname | prefix | suffix
+                         | degree"                                   >
+
+<!ENTITY % personName   "(#PCDATA | %personElements;)*"              >
+
+<!ENTITY % formatElements
+                        "bold | italic | sansSerif | monospace | 
+                        smallcap | roman | underline | strikethru | 
+                        overline | sup | inf"                        >
+
+<!ENTITY % formattedText
+                      "(#PCDATA | %formatElements;)*"                >
+
+<!ENTITY % linkElements
+                        "appendixReference | citationReference | 
+                        figureReference | footnoteReference | 
+                        equationReference | sectionReference |
+                        tableReference | relatedItem | extLink"      >
+
+<!ENTITY % inlineGraphicElements
+                        "inlineGraphic | characterGraphic | anchor"  >
+
+<!ENTITY % phraseLevelElements
+                        "%formatElements; | %linkElements; |
+                        %inlineGraphicElements;"                     >
+                        
+<!ENTITY % phraseLevelContent
+                        "(#PCDATA | %phraseLevelElements;)*"         >
+
+<!ENTITY % paraLevelElements
+                       "address | blockGraphic | citationList | 
+                       blockQuote | definitionList | dialog | 
+                       lit | poem | equation | list | table | 
+                       displayText | epigraph | hypothesis "         >
+                        
+<!ENTITY % paraLevelContent
+                      "(p, (p | %paraLevelElements;)*)"              >
+
+<!ENTITY % sectionLevelElements
+                       "p | %paraLevelElements;"                     >
+
+<!ENTITY % citationElements
+                      "no | authorList | day | month | season | 
+                       year | unpublished | articleTitle | 
+                       transTitle | series | source | transSource | 
+                       isbn | volume | issue | firstPage | lastPage | 
+                       pageRange | articleNumber | supplement | 
+                       edition | publisherLocation | publisherName | 
+                       reportNumber | doi | comment | %linkElements;"       >
+
+<!ENTITY % fullItemModel
+                        "frontMatter, body?, backMatter?, 
+                        footnote*, tableGroup*, 
+                        figureGroup*, sidebar*, subContentItem*"     >
+ 
+<!-- ============================================================= -->
+<!-- ******** PARAMETER ENTITY FOR COPYRIGHT ATTRIBUTES  ********* -->
+<!-- ============================================================= -->
+<!--  For material reproduced or adapted from another source, 
+      gives a general indication of who holds the copyright and 
+      whether electronic rights have been granted (print rights 
+      are assumed)                                                 
+            inherit - copyright held by same person or group 
+                      identified in the item front matter
+            public  - material is in the public domain
+            other   - copyright is held by someone other than
+                      the person or group identified in the
+                      item front matter
+-->
+
+<!ENTITY % copyrightAttributes
+             "copyright
+                       (inherit | public | other)        'inherit'
+              erights  (yes | no)                         'yes'"     >
+              
+<!-- ============================================================= -->
+<!-- ******** PARAMETER ENTITY FOR LANGUAGE ATTRIBUTE  *********** -->
+<!-- ============================================================= -->
+
+<!ENTITY % language
+              "language	(inherit | english | french | german)
+                                                          'inherit'" >
+
+<!-- ============================================================= -->
+<!-- ****************** DOCUMENT STRUCTURE DECLARATION *********** -->
+<!-- ============================================================= -->
+
+<!ELEMENT contentItem   (%fullItemModel;)                            >
+
+<!ATTLIST contentItem
+             contentItemType
+                        (article | correction | header |
+                        review)
+                                                          #REQUIRED  
+              %language;                                            >
+
+<!ELEMENT subContentItem
+                        (%fullItemModel;)                            >
+
+<!ATTLIST subContentItem
+             contentItemType
+                        (article | correction | header |
+                        review)
+                                                          #REQUIRED  
+              %language;                                            >
+                                                          
+<!-- ============================================================= -->
+<!-- ****************** SIMPLE ELEMENTS ************************** -->
+<!-- ============================================================= -->
+
+<!--                    NUMBER ELEMENT                             -->
+<!--  Used in tables, figures, appendixes, footnotes, displayed 
+      equations and occasionaly in citations, sections, and 
+      subsections                                                  -->
+
+<!ELEMENT no            (#PCDATA)                                    >
+
+<!--                    SEARCH TEXT                                -->
+<!--  Unstructured text provided for search functionality but not
+      for display.                                                 -->
+      
+<!ELEMENT searchText    (#PCDATA)                                    >
+
+<!--                    PUBLISHER NAME                             -->
+<!ELEMENT publisherName (#PCDATA)                                    >
+
+<!-- ============================================================= -->
+<!--                    DATE ELEMENTS                              -->
+<!-- ============================================================= -->
+
+<!ELEMENT day           (#PCDATA)                                    >
+
+<!ELEMENT month         (#PCDATA)                                    >
+
+<!ATTLIST month
+             number      CDATA                            #IMPLIED   >
+
+<!ELEMENT year          (#PCDATA)                                    >
+
+<!ELEMENT season        (#PCDATA)                                    >
+
+<!-- ============================================================= -->
+<!--                    NAME ELEMENTS                              -->
+<!-- ============================================================= -->
+
+<!--			PREFIX (Mr., Ms., Sir, Dr., etc.)                        -->
+<!ELEMENT prefix	     (#PCDATA)	                         			     >
+
+<!--                    FIRST OR GIVEN NAMES                       -->
+<!ELEMENT givenNames   (#PCDATA)                                     >
+
+<!--                    SURNAME                                    -->
+<!ELEMENT surname      (#PCDATA)                                     >
+
+<!--                    SUFFIX (Jr., Sr., etc.)                    -->
+<!ELEMENT suffix       (#PCDATA)                                     >
+
+<!--                    DEGREES                                    -->
+<!ELEMENT degree       (#PCDATA)                                     >
+
+<!-- ============================================================= --> 
+<!--                    FORMAT ELEMENTS                            -->
+<!-- ============================================================= --> 
+
+<!--                    BOLD                                       -->
+<!ELEMENT bold          (#PCDATA | %phraseLevelElements;)*           >
+
+<!--                    ITALIC                                     -->
+<!ELEMENT italic        (#PCDATA | %phraseLevelElements;)*           >
+
+<!--                    SAN SERIF FONT                             -->
+<!ELEMENT sansSerif     (#PCDATA | %phraseLevelElements;)*           >
+
+<!--                    TYPEWRITER OR MONOSPACE FONT               -->
+<!ELEMENT monospace     (#PCDATA | %phraseLevelElements;)*           >
+
+<!--                    SMALL CAPS                                 -->
+<!ELEMENT smallcap      (#PCDATA | %phraseLevelElements;)*           >
+
+<!--                    ROMAN                                      -->
+<!ELEMENT roman         (#PCDATA | %phraseLevelElements;)*           >
+
+<!--                    OVERLINE                                   -->
+<!ELEMENT overline      (#PCDATA | %phraseLevelElements;)*           >
+
+<!--                    UNDERLINE                                  -->
+<!ELEMENT underline     (#PCDATA | %phraseLevelElements;)*           >
+
+<!ATTLIST underline
+             underlineStyle
+                        (single | double | triple | dash | dot |
+                         bold | blank | none)               "single" >
+
+<!--                    STRIKETHROUGH                              -->
+<!ELEMENT strikethru    (#PCDATA | %phraseLevelElements;)*           >
+
+<!ATTLIST strikethru
+             strikethrustyle
+                       (single | double | triple | dash | dot |
+                         bold)                              "single" >
+
+<!--                    SUPERIOR (SUPERSCRIPT)                     -->
+<!ELEMENT sup           (#PCDATA | %phraseLevelElements;)*           >
+
+<!ATTLIST sup
+             location   (pre | post)                          "post"
+             arrange    (compact | stagger)                "compact" >
+
+<!--                    INFERIOR (SUBSCRIPT)                       -->
+<!ELEMENT inf           (#PCDATA | %phraseLevelElements;)*           >
+
+<!ATTLIST inf
+             location   (pre | post)                          "post"
+             arrange    (compact | stagger)                "compact" >
+
+
+<!-- ============================================================= -->
+<!-- ****************** PARAGRAPH ELEMENTS *********************** -->
+<!-- ============================================================= -->
+
+<!--                    PARAGRAPH                                  -->
+<!ELEMENT p             (#PCDATA | %phraseLevelElements;  
+                        | %paraLevelElements;)*                      >
+
+<!ATTLIST p
+	           align      (left | center | right)           "left"
+             id         ID                                #IMPLIED
+	           %copyrightAttributes;                                   
+	           %language;                                             >
+
+<!--                    SIMPLE PARAGRAPH                           -->
+<!--  Does not contain other paragraph-level elements, such as
+      block quotes, tables, or lists                               -->
+<!ELEMENT sp       (#PCDATA | %formatElements; | %linkElements;
+                    | %inlineGraphicElements;)*                      >
+
+<!ATTLIST sp            
+	           align      (left | center | right)           "left"
+             id        ID                                 #IMPLIED
+             %copyrightAttributes;                                   
+             %language;                                             >
+
+<!-- ============================================================= -->
+<!-- ****************** TITLE ELEMENTS  ************************** -->
+<!-- ============================================================= -->
+
+<!--                    TITLE                                      -->
+<!ELEMENT title        (#PCDATA | %phraseLevelElements;  
+                        | %paraLevelElements;)*                      >
+
+<!--                    SUBTITLE                                   -->
+<!ELEMENT subtitle     (#PCDATA | %phraseLevelElements;  
+                        | %paraLevelElements;)*                      >
+
+<!-- ============================================================= -->
+<!--                    FRONT MATTER ELEMENTS                      -->
+<!-- ============================================================= -->
+
+<!ELEMENT frontMatter (journalMeta, issueMeta, itemMeta)             >
+
+<!-- ============================================================= -->
+<!--                    JOURNAL-LEVEL METADATA                     -->
+<!-- ============================================================= -->
+<!ELEMENT journalMeta  (journalTitle, issn?, eISSN?, publisherName)   >
+
+<!--                    TITLE of JOURNAL                           -->
+<!ELEMENT journalTitle (#PCDATA)                                     >
+
+<!--                    ISSN (for print version of a journal)      -->
+<!ELEMENT issn          (#PCDATA)                                    >
+
+<!--                    eISSN (for online version of a journal)     -->
+<!ELEMENT eISSN         (#PCDATA)                                     >
+
+<!--                    JOURNAL PUBLISHER                          -->
+<!--ELEM publisherName  declared elsewhere                         -->
+
+<!-- ============================================================= -->
+<!--                    ISSUE-LEVEL METADATA                       -->
+<!-- ============================================================= -->
+
+<!ELEMENT issueMeta    (publicationDate+, volume, issue?, 
+                       issueTitle?, issueEditors?, isbn?)                           >
+
+<!--                    PUBLICATION DATE                           -->
+<!ELEMENT publicationDate
+                       %date;                                        >
+
+<!ATTLIST publicationDate
+             type      CDATA                              #IMPLIED   >
+
+<!--                    ISSUE TITLE                                -->
+<!--  Captures the title of a special issue  -->
+
+<!ELEMENT issueTitle   %formattedText;                             >
+
+<!--                    ISSUE EDITORS                                -->
+<!--  Captures the guest editors of a special issue, if there are any -->
+
+<!ELEMENT issueEditors   %formattedText;                             >
+
+<!--                    ISBN                                       -->
+<!--  Only used for special issues                                 -->
+<!ELEMENT isbn         (#PCDATA)                                     >
+
+<!--                    VOLUME NUMBER                              -->
+
+<!ELEMENT volume       (#PCDATA)                                     >
+
+<!--                    ISSUE NUMBER                               -->
+<!ELEMENT issue        (#PCDATA)                                     >
+
+<!-- ============================================================= -->
+<!--                    ITEM-LEVEL METADATA                        -->
+<!-- ============================================================= -->
+
+<!ELEMENT itemMeta      (apaID, doi?, piCN?, categories, firstPage?, 
+                        lastPage?, pageRange?, articleNumber?, 
+                        copyright, supplementaryMaterial?, 
+                        relatedItemGroup?, titleGroup?, work*, 
+                        (authorGroup | reviewerGroup)?, abs*, 
+                        (keyWord | keyPhrase)*, editorNote?, bios?, 
+                        ackn?, corr*, history?)                      >
+
+<!-- ================== IDENTIFIERS ============================== -->
+
+<!--                    APA IDENTIFICATION NUMBER                  -->
+<!-- Internal ID assigned by APA
+ -->
+<!ELEMENT apaID        (#PCDATA)                                     >
+
+<!--                    DIGITAL OBJECT IDENTIFIER                  -->
+<!ELEMENT doi          (#PCDATA)                                     >
+
+<!--                    PsycINFO CONTROL NUMBER                    -->
+<!--  Unique identifier for the PsycINFO record associated with 
+      the item. Also referred to as an accession number or a UID.
+      Not all items will have an associated PsycINFO record; for
+      example, ads and indexes are not covered in PsycINFO.
+-->
+<!ELEMENT piCN         (#PCDATA)                                     >
+
+<!-- =================  CATEGORIES =============================== -->
+<!ELEMENT categories   (contentType+, tocTitle?, tocSubtitle*, 
+                       tocText?)                                     >
+
+<!--                    CONTENT TYPE                               -->
+<!-- Used internally by APA to distinguish and count various 
+     types of journal content.
+-->
+<!ELEMENT contentType   (#PCDATA | contentType)*                     >
+
+<!--                    TOC TITLE                                  -->
+<!-- Captures a primary-level heading from the table of contents. 
+--> 
+<!ELEMENT tocTitle      %formattedText;                              >
+
+<!--                    TOC SUBTITLE                               -->
+<!--  Captures a non-primary heading from the table of contents 
+-->
+<!ELEMENT tocSubtitle   %formattedText;                              >
+
+<!--                    TOC TEXT                                   -->
+<!--  Captures information provided along with a TOC heading, 
+      for example, the names of guest editors for a special 
+      issue or special section.
+-->
+<!ELEMENT tocText      %formattedText;                               >
+
+<!-- ================= PAGINATION ================================ -->
+
+<!--                    FIRST PAGE                                 -->
+<!--  Number of the first page on which the item appears. When 
+      item appears on discontinuous pages, the pageRange element
+      will be used instead of firstPage and lastPage.
+-->
+<!ELEMENT firstPage    (#PCDATA)                                     >
+
+<!--                    LAST PAGE                                  -->
+<!--  Last page upon which the item appears. When item appears on
+      discontinuous pages, the pageRange element will be used 
+      instead of firstPage and lastPage. If end page is the same 
+      as the start page, the lastPage element will be omitted.
+-->
+<!ELEMENT lastPage     (#PCDATA)                                     >
+ 
+<!--                    PAGE RANGE                                 -->
+<!--  Used to record discontinuous pagination, e.g. 33, 54-55.
+-->
+<!ELEMENT pageRange    (#PCDATA)                                     >
+
+<!--                    ARTICLE NUMBER                             -->
+<!--  APA assignns article numbers rather than page numbes 
+      to online-only items, i.e., the items published in Prevention &
+      Treatment and in the PsycCRITIQUES database.                 
+-->
+<!ELEMENT articleNumber (#PCDATA)                                    >
+
+<!-- ================== COPYRIGHT INFORMATION ==================== -->
+<!ELEMENT copyright    (copyrightStatus, copyrightDate?, 
+                       copyrightHolder?, copyrightStatement?)        >
+
+<!--                    COPYRIGHT STATUS of the ITEM               -->
+<!--  Copyright status can be active, public, or unknown. If 
+      status is active, then copyright date and copyright holder 
+      will be identified.
+-->
+
+<!ELEMENT copyrightStatus
+                       EMPTY                                         >
+
+<!ATTLIST copyrightStatus 
+             status    (active | public | unknown)        "active"   >
+
+<!--                    COPYRIGHT DATE                             -->
+<!ELEMENT copyrightDate  %date;                                      >
+ 
+<!--                    COPYRIGHT HOLDER                           -->
+<!-- Identifies the person  or institution holding the copyright
+-->
+ 
+<!ELEMENT copyrightHolder
+                       %formattedText;                               >
+ 
+<!--                  COPYRIGHT STATEMENT                          -->
+<!-- Captures the exact text and formatting of the copyright statement
+appearing in the print version of the item (if any). 
+-->
+
+<!ELEMENT copyrightStatement  
+                       %formattedText;                               >
+ 
+<!-- ============================================================= -->
+<!--                    SUPPLEMENTARY MATERIAL                     -->
+<!-- ============================================================= -->
+
+<!--                    SUPPLEMENTARY MATERIAL                     -->
+<!ELEMENT supplementaryMaterial
+                        (altText?, suppText?)                        >
+
+<!ATTLIST supplementaryMaterial
+             id        ID                                #IMPLIED
+             %copyrightAttributes;                                   
+             %language;                                             >
+             
+<!--       ALTERNATE TEXT FOR SUPPLEMENTARY MATERIAL               -->
+<!--  Provides a brief description of and a link to the 
+      supplemental material                                        -->
+
+<!ELEMENT altText       %paraLevelContent;                           >
+
+<!ATTLIST altText
+             id         ID                                #IMPLIED
+             %copyrightAttributes;                                   
+             %language;                                             >
+
+<!--       FULL TEXT FOR SUPPLEMENTARY MATERIAL                    -->
+<!--  Available only to APA. APA will make all supplemental material 
+      freely available by means of a DOI link, provided in the 
+      altText element described above                              -->
+
+<!ELEMENT suppText      (title?, (%sectionLevelElements;)*, 
+                        section*, extLink*)                          >
+
+<!ATTLIST suppText
+             id         ID                                #IMPLIED
+             %copyrightAttributes;                                   
+             %language;                                             >
+
+<!-- ============================================================= -->
+<!--                    RELATED ITEM ELEMENTS                      -->
+<!-- ============================================================= -->
+
+<!--                    RELATED ITEM GROUP                         -->
+<!ELEMENT relatedItemGroup	
+                       ((work+, relatedItem*) | 
+                        (work*, relatedItem+))                       >
+
+<!--                    RELATED ITEM                               -->
+<!ELEMENT relatedItem  (#PCDATA | title | transTitle |
+                       %phraseLevelElements;)*                       >
+
+<!--			RELATED ITEM TYPES                                       -->
+<!--
+        originalArticle:  the original article being referenced
+        
+        originalReview:   the original review being referenced
+        
+        authorResponse:   original author's response to a review
+                          or commentary
+        
+       reply:    review or commentary author's reply to an original 
+                          author's response
+        
+        reviewerReply:  review author's reply to an original 
+                    author's reponse. Use this value only in 
+                    PsycCRITIQUES items. Use "reply" for items
+                    in PsycARTICLES.
+                    
+        authorRejoinder:  original author's rejoinder to a review 
+                          or commentary author's reply
+        
+        commentary:       journal article commenting on another 
+                          published journal article
+        
+        correctionTarget: points to the item (published earlier)
+                          now being corrected
+
+        correctionFlag:   used in an item that was later corrected 
+                          to point to the relevant correction item
+-->
+<!ATTLIST relatedItem
+             relatedItemType
+                    CDATA                             #REQUIRED 
+             apaID	CDATA	                            #REQUIRED      
+             piCN   CDATA                             #IMPLIED
+             doi    CDATA                             #REQUIRED      >
+
+<!-- ============================================================= -->
+<!--                    TITLE GROUP ELEMENTS                       -->
+<!-- ============================================================= -->
+
+<!--                    TITLE GROUP                                -->
+<!ELEMENT titleGroup   (title, subtitle*, transTitle*, altTitle*)    >
+
+<!--                    TITLE                                      -->
+<!--ELEM title          declared above                             -->
+
+<!--                    SUBTITLE                                   -->
+<!-- ELEM subtitle     declared above                              -->
+
+<!--                    TRANSLATED TITLE                           -->
+<!ELEMENT transTitle   %phraseLevelContent;                          >
+
+<!--                    ALTERNATE TITLE                            -->
+<!-- May be used to specify running heads, short titles for 
+     HTML display, etc.
+-->
+<!ELEMENT altTitle     %phraseLevelContent;                          >
+
+<!ATTLIST altTitle
+             altTitleType    CDATA                       #REQUIRED   >
+
+<!-- ============================================================= -->
+<!--                    REVIEWED WORK ELEMENTS                     -->
+<!-- ============================================================= -->
+
+<!ELEMENT work           (#PCDATA | %citationElements; |
+                          subWork)*                                  >
+
+<!ATTLIST work
+	           piCN  	    CDATA				                     #IMPLIED    >
+
+<!ELEMENT subWork       (#PCDATA | %citationElements;)*              >
+
+<!ATTLIST subWork
+	           piCN  	    CDATA				                     #IMPLIED    >
+
+<!-- ============================================================= -->
+<!--                    AUTHOR GROUP ELEMENTS                      -->
+<!-- ============================================================= -->
+
+<!--                    AUTHOR GROUP                               -->
+<!ELEMENT authorGroup  ((author | groupAuthor)*, aff*, 
+                        onBehalfOf?)                                 >
+
+<!--                    INDIVIDUAL AUTHOR                          -->
+<!ELEMENT author       %personName;                                  >
+
+<!ATTLIST author
+             id         CDATA                             #IMPLIED 
+             rid        IDREFS                            #IMPLIED   >
+
+<!-- ELEM givenNames    declared above
+     ELEM surname       declared above
+     ELEM prefix        declared above
+     ELEM suffix        declared above
+     ELEM degree        declared above
+-->
+
+<!--                    INSTITUTION OR COLLABORATION AS AUTHOR     -->
+<!ELEMENT groupAuthor   (groupName, location?)                       >
+
+<!ATTLIST groupAuthor      
+             id         CDATA                             #IMPLIED 
+             rid        IDREFS                            #IMPLIED   >
+
+<!ELEMENT groupName     %formattedText;                              >
+
+
+<!--                    AFFILIATION                                -->
+<!ELEMENT aff         (#PCDATA | %formatElements; | location | 
+                       role)*                                        >
+
+<!ATTLIST aff
+             id        ID                                 #REQUIRED  >
+             
+<!--                    ROLE                                       -->
+<!ELEMENT role         (#PCDATA)                                     >
+
+<!--                    AFFILIATION LOCATION                       -->
+<!ELEMENT location      %formattedText;                              >
+
+<!--                    ON BEHALF OF                               -->
+<!--  Used when one or more individual or group authors is reporting
+      on behalf of a larger group. Identifies the name of the larger
+      group.
+-->
+
+<!ELEMENT onBehalfOf   %formattedText;                               >
+
+<!-- ============================================================= -->
+<!--                    REVIEWER GROUP ELEMENTS                    -->
+<!-- ============================================================= -->
+
+<!--                    REVIEWER GROUP                             -->
+<!ELEMENT reviewerGroup        (reviewer+, aff*)>
+
+<!ELEMENT reviewer      %personName;                                 >
+
+<!ATTLIST reviewer
+           id    CDATA                                     #IMPLIED
+           rid   IDREFS                                    #IMPLIED  >
+
+<!-- ELEM givenNames    declared above
+     ELEM surname       declared above
+     ELEM prefix        declared above
+     ELEM suffix        declared above
+     ELEM degree        declared above
+-->
+
+<!-- ============================================================= -->
+<!--                    ABSTRACT ELEMENTS                        \ -->
+<!-- ============================================================= -->
+
+<!--                    ABSTRACT                                   -->
+<!ELEMENT abs           (title?, sp+)                                >
+
+<!ATTLIST abs
+              id        ID                                #IMPLIED
+              language	(english | french | german)       "english"  >
+
+<!-- ============================================================= -->
+<!--                    KEYWORDS AND KEYPHRASES                    -->
+<!-- ============================================================= -->
+
+<!--                    KEYWORD                                    -->
+<!ELEMENT keyWord       %formattedText;                              >
+
+<!ATTLIST keyWord
+             language	(english | french | german)          "english" >
+
+<!--                    KEY PHRASE                                 -->
+<!ELEMENT keyPhrase     %formattedText;                              >
+
+<!ATTLIST keyPhrase      
+             language	(english | french | german)          "english" >
+
+<!-- ============================================================= -->
+<!--                    REMAINING FRONT MATTER ELEMENTS            -->
+<!-- ============================================================= -->
+
+<!--                    EDITOR'S NOTES                             -->
+<!ELEMENT editorNote  (sp+)                                          >
+
+<!--                    BIOGRAPHICAL STATEMENTS                    -->
+<!ELEMENT bios          (sp+)                                        >
+
+<!ATTLIST bios
+             id         ID                                #IMPLIED   >
+
+<!--                    AUTHOR ACKNOWLEDGEMENTS                    -->
+<!ELEMENT ackn          (sp+)                                        >
+
+<!ATTLIST ackn
+          id            ID                                #IMPLIED   >
+
+<!--                    CORRESPONDENCE ADDRESS                     -->
+<!-- Captured exactly as it appears in the printed article.
+     extLink is used to tag email address, if present.              
+     
+     <addressLine> should be used within <address>es that have been
+     broken across lines in print (_ie_ not run together in a single
+     paragraph). Each line should be contained within its own
+     <addressLine> in these instances.
+     
+-->
+
+<!ELEMENT corr          (#PCDATA | address | fax | phone | 
+                        extLink)*                                    >
+                        
+<!ELEMENT address       (#PCDATA | %formatElements; |
+                         addressLine)*                               >
+
+<!ELEMENT addressLine   (#PCDATA | %formatElements;)*                >
+
+<!ELEMENT fax           (#PCDATA)                                    >
+
+<!ELEMENT phone         (#PCDATA)                                    >
+
+<!-- ================== ITEM HISTORY ============================= -->
+
+<!--                    PEER REVIEW HISTORY                        -->
+<!ELEMENT history      (submissionDate?, revisionDate*, 
+                       acceptDate?)                                  >
+
+<!--                    SUBMISSION DATE                            -->
+<!ELEMENT submissionDate 
+                       %date;                                        >
+
+<!--                    REVISION DATE                              -->
+<!ELEMENT revisionDate %date;                                        >
+
+<!--                    ACCEPTANCE DATE                            -->
+<!ELEMENT acceptDate   %date;                                        >
+
+<!-- ELEM day          declared above
+     ELEM month        declared above
+     ELEM year         declared above
+     ELEM season       declared above
+-->
+
+<!-- ============================================================= -->
+<!-- ****************** BODY ELEMENTS  *************************** -->
+<!-- ============================================================= -->
+
+<!--                    BODY                                       -->
+<!ELEMENT body          (title?, (%sectionLevelElements;)*, 
+                         section*)                                   >
+
+<!-- ELEM title         declared above                             -->
+
+<!--                    SECTION                                    -->
+<!ELEMENT section       (no?, title?, subtitle?, 
+                        (%sectionLevelElements;)*, subsect1*)        >
+<!ATTLIST section       
+             id         ID                                #REQUIRED
+	           %copyrightAttributes;                                   
+             %language;                                             >
+
+<!-- ELEM no            declared above
+     ELEM title         declared above
+     ELEM subtitle      declared above
+     ELEM p             declared above
+     ELEM blockGraphic  declared above
+     ELEM equation      declared above
+     ELEM displayText   declared above
+     ELEM blockQuote    declared above
+     ELEM hypothesis    declared above
+     ELEM epigraph      declared above
+     ELEM lit           declared above
+     ELEM list          declared above
+     ELEM definitionList
+                        declared above
+     ELEM citationList  declared above
+     ELEM dialog        declared above
+     ELEM poem          declared above
+     ELEM table         declared in table.ent
+-->     
+     
+<!--                    SUBSECTION 1 (FIRST SUBSECTION)            -->
+<!ELEMENT subsect1      (no?, title, (%sectionLevelElements;)*, 
+                        subsect2*)                                   >
+
+<!ATTLIST subsect1       
+              id         ID                                #REQUIRED
+              displayAs  (subsect2 | subsect3 | subsect4)  #IMPLIED
+	           %copyrightAttributes;                                   
+             %language;                                             >
+	           
+<!-- ELEM no            declared above
+     ELEM title         declared above
+     ELEM subtitle      declared above
+     ELEM p             declared above
+     ELEM blockGraphic  declared above
+     ELEM equation      declared above
+     ELEM displayText   declared above
+     ELEM blockQuote    declared above
+     ELEM hypothesis    declared above
+     ELEM epigraph      declared above
+     ELEM lit           declared above
+     ELEM list          declared above
+     ELEM definitionList
+                        declared above
+     ELEM citationList  declared above
+     ELEM dialog        declared above
+     ELEM poem          declared above
+     ELEM table         declared in table.ent
+-->     
+
+<!--                    SUBSECTION 2 (2ND SUBSECTION)              -->
+<!ELEMENT subsect2      (no?, title, (%sectionLevelElements;)*, 
+                        subsect3*)                                   >
+
+<!ATTLIST subsect2       
+             id         ID                                #REQUIRED
+             displayAs  (subsect1 | subsect3 | subsect4)  #IMPLIED
+	           %copyrightAttributes;                                   
+             %language;                                             >
+			 
+<!-- ELEM no            declared above
+     ELEM title         declared above
+     ELEM subtitle      declared above
+     ELEM p             declared above
+     ELEM blockGraphic  declared above
+     ELEM equation      declared above
+     ELEM displayText   declared above
+     ELEM blockQuote    declared above
+     ELEM hypothesis    declared above
+     ELEM epigraph      declared above
+     ELEM lit           declared above
+     ELEM list          declared above
+     ELEM definitionList
+                        declared above
+     ELEM citationList  declared above
+     ELEM dialog        declared above
+     ELEM poem          declared above
+     ELEM table         declared in table.ent
+-->     
+
+<!--                    SUBSECTION 3 (3RD SUBSECTION)              -->
+<!ELEMENT subsect3      (no?, title, (%sectionLevelElements;)*, 
+                        subsect4*)                                   >
+
+<!ATTLIST subsect3       
+             id         ID                                #REQUIRED
+             displayAs  (subsect1 | subsect2 | subsect4)  #IMPLIED
+	           %copyrightAttributes;                                   
+             %language;                                             >
+			 
+<!-- ELEM no            declared above
+     ELEM title         declared above
+     ELEM subtitle      declared above
+     ELEM p             declared above
+     ELEM blockGraphic  declared above
+     ELEM equation      declared above
+     ELEM displayText   declared above
+     ELEM blockQuote    declared above
+     ELEM hypothesis    declared above
+     ELEM epigraph       declared above
+     ELEM lit           declared above
+     ELEM list          declared above
+     ELEM definitionList
+                        declared above
+     ELEM citationList  declared above
+     ELEM dialog        declared above
+     ELEM poem          declared above
+     ELEM table         declared in table.ent
+-->     
+
+<!--                    SUBSECTION 4 (4TH SUBSECTION)              -->
+<!ELEMENT subsect4      (no?, title, (%sectionLevelElements;)*)      >
+
+<!ATTLIST subsect4       
+             id         ID                                #REQUIRED
+             displayAs  (subsect1 | subsect2 | subsect3)  #IMPLIED
+	           %copyrightAttributes;                                   
+             %language;                                             >
+	           
+<!-- ELEM no            declared above
+     ELEM title         declared above
+     ELEM subtitle      declared above
+     ELEM p             declared above
+     ELEM blockGraphic  declared above
+     ELEM equation      declared above
+     ELEM displayText   declared above
+     ELEM blockQuote    declared above
+     ELEM hypothesis    declared above
+     ELEM epigraph       declared above
+     ELEM lit           declared above
+     ELEM list          declared above
+     ELEM definitionList
+                        declared above
+     ELEM citationList  declared above
+     ELEM dialog        declared above
+     ELEM poem          declared above
+     ELEM table         declared in table.ent
+-->     
+
+<!-- ============================================================= -->
+<!--                    LINKING ELEMENTS                           -->
+<!-- ============================================================= -->
+
+<!-- ================== INTERNAL LINKS =========================== -->
+
+<!--                    APPENDIX REFERENCE                         -->
+<!ELEMENT appendixReference
+                        %formattedText;                              >
+
+<!ATTLIST appendixReference 
+             id         ID                                #REQUIRED 
+             rid        IDREFS                            #REQUIRED  >
+
+<!--                    CITATION REFERENCE                         -->
+<!ELEMENT citationReference
+                        %formattedText;                              >
+
+<!ATTLIST citationReference 
+             id         ID                                #REQUIRED 
+             rid        IDREFS                            #REQUIRED  >
+
+<!--                    FIGURE REFERENCE                           -->
+<!ELEMENT figureReference
+                        %formattedText;                              >
+
+<!ATTLIST figureReference
+             id         ID                                #REQUIRED 
+             rid        IDREFS                            #REQUIRED  >
+
+<!--                    FOOTNOTE REFERENCE                         -->
+<!ELEMENT footnoteReference
+                        %formattedText;                              >
+
+<!ATTLIST footnoteReference 
+             id         ID                                #REQUIRED 
+             rid        IDREFS                            #REQUIRED  >
+
+<!--                    EQUATION REFERENCE                         -->
+<!ELEMENT equationReference
+                        %formattedText;                              >
+
+<!ATTLIST equationReference 
+             id         ID                                #REQUIRED 
+             rid        IDREFS                            #REQUIRED  >
+
+<!--                    SECTION REFERENCE                          -->
+<!ELEMENT sectionReference
+                        %formattedText;                              >
+
+<!ATTLIST sectionReference
+             id         ID                                #REQUIRED 
+             rid        IDREFS                            #REQUIRED  >
+
+<!--                    TABLE REFERENCE                            -->
+<!ELEMENT tableReference
+                        %formattedText;                              >
+
+<!ATTLIST tableReference
+             id         ID                                #REQUIRED 
+             rid        IDREFS                            #REQUIRED  >
+
+<!-- ================== EXTERNAL LINKS =========================== -->
+
+<!--                    LINK TO RELATED ITEM                       -->
+
+<!--ELEMENT relatedItem  (#PCDATA | title | transTitle |
+                       %phraseLevelElements;)*                     -->
+
+<!--			RELATED ITEM TYPES                                       -->
+<!--    The following values are currently in use. Additional
+        values may be created as the need arises.
+        
+        originalArticle:  the original article being referenced
+        
+        originalReview:   the original review being referenced
+        
+        authorResponse:   original author's response to a review
+                          or commentary
+        
+        reviewerReply:    review author's reply to an original 
+                          author's response
+        
+        authorRejoinder:  original author's rejoinder to review 
+                          author's reply
+        
+        commentary:       journal article commenting on another 
+                          published journal article
+        
+        correctionTarget: points to the item (published earlier)
+                          now being corrected
+
+        correctionFlag:   used in an item that was later corrected 
+                          to point to the relevant correction item
+-->
+<!--ATTLIST relatedItem
+             relatedItemType
+                    CDATA                             #REQUIRED 
+             apaID	CDATA	                            #REQUIRED    -->
+
+<!--                    LINK TO EXTERNAL FILE                      -->
+<!ELEMENT extLink       %formattedText;                              >
+
+
+<!--  Suggested values for extLinkType attribute:
+                 doi
+                 url
+                 email
+                 file
+      link - contains the full path to the linked item
+      status - indicates whether the link is operational
+-->
+<!ATTLIST extLink
+             extLinkType
+                        CDATA                             #IMPLIED
+             id         ID                                #IMPLIED
+             link       CDATA                             #IMPLIED  
+             status     (live | dead)                     "live"     >
+
+<!-- ============================================================= -->
+<!--                    INLINE GRAPHIC ELEMENTS                    -->
+<!-- ============================================================= -->
+
+<!--              INLINE GRAPHIC                                     -->
+<!--  Used to call a graphic image that will be displayed in line 
+      with surrounding text. Will most often be used for inline 
+      mathematical expressions that cannot be expressed with standard 
+      characters and formatting (%formatElements;)
+-->
+<!ELEMENT inlineGraphic EMPTY                                        >
+
+<!ATTLIST inlineGraphic
+             id         ID                                #IMPLIED
+             file       CDATA                             #REQUIRED
+             %copyrightAttributes;                                   >
+
+<!--              CHARACTER GRAPHIC                                -->
+<!--  Used to call a graphic image for a single character glyph 
+      that will be displayed in line with surrounding text, for 
+      example, Chinese or Japanese characters that were presented 
+      to subjects as stimuli.
+-->
+<!ELEMENT characterGraphic
+                        EMPTY                                        >
+
+<!ATTLIST characterGraphic
+             file       CDATA                             #REQUIRED
+             %copyrightAttributes;                                   >
+
+<!--                    ANCHOR FOR DISPLAY OF TABLES, FIGURES,
+                        AND SIDEBARS                               -->
+<!--  Used to indicate preferred placement of tableGroup, 
+      figureGroup, and sidebar elements in online delivery and 
+      whether such placement is required (fixed) or optional (float).
+-->
+
+<!ELEMENT anchor        EMPTY                                        >
+
+<!ATTLIST anchor
+             rid        IDREFS                            #REQUIRED
+             position   (fixed | float)                  "float"     >
+
+<!-- ================= GRAPHIC ELEMENTS ========================== -->
+
+<!--              BLOCK GRAPHIC                                    -->
+<!--  Used to call a graphic image that will be displayed as a 
+      block in text or as part of a tableGroup or figureGroup
+-->
+
+<!ELEMENT blockGraphic       EMPTY                                   >
+
+<!ATTLIST blockGraphic
+             id         ID                                #REQUIRED
+             file       CDATA                             #REQUIRED
+             %copyrightAttributes;                                   >
+
+<!--                    DISPLAYED EQUATION                         -->
+<!ELEMENT equation     (blockGraphic+, no?)                          >
+
+<!ATTLIST equation
+             id         ID                                #REQUIRED
+             %copyrightAttributes;                                   >
+
+<!--                    DISPLAY TEXT                               -->
+<!--  Used to capture unusually formatted textual material that 
+      must be reproduced exactly as it appeared in print, usually 
+      at the author's request. The element actually consists of 
+      a graphic and unformatted text provided for searching but 
+      not for display.
+-->
+
+<!ELEMENT displayText   (blockGraphic, searchText)                   >
+
+<!-- ============================================================= -->
+<!--                    TEXT ELEMENTS                              -->
+<!-- ============================================================= -->
+
+<!--                    BLOCK QUOTE                                -->
+<!ELEMENT blockQuote    %paraLevelContent;                           >
+
+<!ATTLIST blockQuote
+             %copyrightAttributes;                                   
+             %language;                                             >
+
+<!--                    HYPOTHESIS                                 -->
+<!ELEMENT hypothesis    %paraLevelContent;                           >
+
+<!--                    EPIGRAPH                                   -->
+<!-- Quoted material sometimes placed at the beginning of the
+     text portion of an article, indented and set off from the
+     following text. 
+-->
+<!ELEMENT epigraph      (p+, attribution?)                           >
+
+<!--  An attribution for an epigraph is displayed on a separate line 
+      (or lines) and is typically right-aligned. The attribution
+      may or may not begin with a dash.
+-->
+
+<!ELEMENT attribution   %phraseLevelContent;                         >
+
+<!--                    LITERAL TEXT                               -->
+<!--  Text in which lines and spaces are to be preserved           -->
+
+<!ELEMENT lit           %formattedText;                              >
+
+<!ATTLIST lit           
+          xml:space    (preserve)                  #FIXED "preserve" > 
+
+<!--                    SEQUENTIAL LIST                            -->
+<!ELEMENT list         (listHead?, listItem)*                        >
+
+<!ATTLIST list
+             id        ID                                 #IMPLIED
+             listType
+                       (arabic | upper_alpha | upper_roman | 
+                        bullet | dash | unlabelled | 
+                        lower_alpha | lower_roman)        #REQUIRED
+             start     CDATA                              #IMPLIED
+             %copyrightAttributes;                                   
+             %language;                                             >
+
+<!ELEMENT listHead      %formattedText;                              >
+
+<!ELEMENT listItem     %paraLevelContent;                            >
+
+<!ATTLIST listItem          
+             id          ID                               #IMPLIED
+    	       %copyrightAttributes;                                   
+             %language;                                             >
+
+<!--                    DEFINITION LIST                            -->
+<!--  Title applies to the list as a whole; termHead and 
+      definitionHead are the headings for the term and
+      definition columns, respectively.
+-->
+<!ELEMENT definitionList
+                       (title?, termHead?, definitionHead?, 
+                       definitionItem*)*                             >
+
+<!ATTLIST definitionList       
+             id        ID                                 #IMPLIED
+             %copyrightAttributes;                                   
+             %language;                                             >
+
+<!ELEMENT termHead      (#PCDATA | %formatElements; | 
+                        %linkElements;)*                             >
+
+<!ELEMENT definitionHead
+                       (#PCDATA | %formatElements; | 
+                       %linkElements;)*                              >
+
+<!ELEMENT definitionItem
+                       (term, definition)                            >
+
+<!ELEMENT term         (#PCDATA | %formatElements; | 
+                        %linkElements;)*                             >
+
+<!ATTLIST term          
+             id        ID                                 #IMPLIED
+             %copyrightAttributes;                                   
+             %language;                                             >
+
+<!ELEMENT definition   %paraLevelContent;                            >
+
+<!ATTLIST definition
+             id        ID                                 #IMPLIED   >
+
+
+<!--                    DIALOG                                     -->
+<!ELEMENT dialog        (speech | annotation)+                       >
+
+<!--                    SPEECH                                     -->
+<!ELEMENT speech        (speaker, (p | annotation)+)                 >
+
+<!--                    SPEAKER                                    -->
+<!ELEMENT speaker       %formattedText;                              >
+
+<!ELEMENT annotation    %formattedText;                              >
+
+<!--                    POEM                                       -->
+<!ELEMENT poem         (stanza+ | poemLine+)                         >
+
+<!ATTLIST poem
+             %copyrightAttributes;                                   
+             %language;                                             >
+
+<!ELEMENT stanza       (poemLine)+                                  >
+
+<!ELEMENT poemLine     (#PCDATA | %formatElements; | 
+                        continuedLine)*                              >
+
+<!ELEMENT continuedLine
+                       %formattedText;                               >
+<!-- ============================================================= -->
+<!-- ******************  BACK MATTER ****************************  -->
+<!-- ============================================================= -->
+
+<!ELEMENT backMatter       ((footnoteGroup | citationList)*, 
+                            appMatter?)                              >
+
+<!--                    FOOTNOTE  GROUP                            -->
+<!--  Contains a group of footnotes that must appear together as
+      part of the back matter of an article, e.g., numbered endnotes. 
+      This is not used as a container for footnotes that can appear 
+      throughout an article.                                       -->
+<!ELEMENT footnoteGroup    (footnote*)                               >
+
+                       
+<!-- ============================================================= -->
+<!--                    CITATION ELEMENTS                          -->
+<!-- ============================================================= -->
+
+<!--                    CITATION LIST                              -->
+<!-- Commonly appears in a separate section, titled "References."
+     May also appear within the body of an article or in an 
+     appendix.                                                     -->
+
+<!ELEMENT citationList  (title?, sp?, citation)*                     >
+
+<!--                    CITATION                                   -->             
+<!ELEMENT citation      (#PCDATA | %citationElements;)*              >
+
+<!-- meta - indicates whether a citation should be marked as having 
+            been included in a meta-analysis
+     referenceType 
+          - identifies citations that unambiguously point to a book 
+            or journal. If the reference type for the citation is 
+            at all ambiguous, then the attribute should not be used. 
+            When present, the attribute values can be used to filter 
+            out citations that will not be found in a particular linking 
+            service (e.g., no books will be found in PubMed).
+-->
+<!-- mapsTo . . . 
+          - temporary additions to facilitate mapping of citation content
+             across diverging file sets. Will be removed from the DTD
+             prior to delivery of the 2007 reload                                     -->
+<!ATTLIST citation
+             id         ID                                #REQUIRED
+             meta       (yes | no)                        "no"              
+             referenceType  
+                        (book | journal)                  #IMPLIED   
+              mapsToFilename
+                        CDATA                    #IMPLIED                            
+              mapsToApaID
+                        CDATA                    #IMPLIED                            
+              mapsToCitationID
+                        CDATA                    #IMPLIED     
+              mapsToDocOrder
+                        CDATA                    #IMPLIED  >
+             
+<!--                    AUTHOR LIST                                -->
+<!ELEMENT authorList    (#PCDATA | person | group | etal | role)*    >
+
+<!--                    INDIVIDUAL AUTHOR                          -->
+<!ELEMENT person        %personName;                                 >
+           
+<!--                    INSTITUTION OR COLLABORATION AS AUTHOR     -->
+<!ELEMENT group         %formattedText;                              >
+
+<!--                    ET AL                                      -->
+<!ELEMENT etal          (#PCDATA)                                    >
+
+<!--                    NO PUBLICATION DATE
+                        (Unpublished work)                         --> 
+<!ELEMENT unpublished   (#PCDATA)                                    >
+
+<!--                    ARTICLE TITLE                              -->
+<!--  Title of journal, or title of article or chapter in a book   -->
+
+<!ELEMENT articleTitle  %formattedText;                              >
+
+<!--                    ISSUE SUPPLEMENT                           -->
+<!ELEMENT supplement    %formattedText;                              >
+
+
+<!--                    TITLE OF BOOK SERIES                       --> 
+<!ELEMENT series        %formattedText;                              >
+
+<!--                    SOURCE TITLE                               -->
+<!-- Used to capture titles of periodicals, books, book series, 
+     manuscripts, stand-alone reports, software, etc.
+-->
+
+<!ELEMENT source        %formattedText;                              >
+
+<!--                    TRANSLATED SOURCE TITLE                    -->
+<!ELEMENT transSource   %formattedText;                              >
+
+<!--                    BOOK EDITION                               -->
+<!ELEMENT edition       %formattedText;                              >
+
+<!--                    REPORT NUMBER                              -->
+<!ELEMENT reportNumber  %formattedText;                              >
+
+<!--                    PUBLISHER INFORMATION                      -->
+<!ELEMENT publisherLocation  
+                        %formattedText;                              >
+                        
+<!-- ELEM publisherName declared above                             -->
+
+<!--                    OTHER CITATION INFORMATION                 -->
+<!ELEMENT comment       %formattedText;                              >
+
+
+<!-- ============================================================= -->
+<!--                    APPENDIX MATTER ELEMENTS                   -->
+<!-- ============================================================= -->
+
+<!--                    APPENDIX MATTER                            -->
+<!ELEMENT appMatter     (appendix+)                                  >
+
+<!--                    APPENDIX                                   -->
+<!ELEMENT appendix      (no?, title?, (%sectionLevelElements;)*, 
+                         section*, appendixNote?)                    >
+
+<!ATTLIST appendix
+             id         ID                                #REQUIRED
+	           %copyrightAttributes;                                   
+             %language;                                             >
+
+<!-- ELEM no            declared above
+     ELEM title         declared above
+     ELEM p             declared above
+     ELEM blockGraphic  declared above
+     ELEM equation      declared above
+     ELEM displayText   declared above
+     ELEM blockQuote    declared above
+     ELEM hypothesis    declared above
+     ELEM epigraph      declared above
+     ELEM lit           declared above
+     ELEM list          declared above
+     ELEM definitionList
+                        declared above
+     ELEM citationList  declared above
+     ELEM dialog        declared above
+     ELEM poem          declared above
+     ELEM table         declared in table.ent
+     ELEM section       declared in body.ent
+-->
+
+<!--                     APPENDIX NOTE                             -->
+<!--  Used to capture text that appears at the end of an appendix. 
+      In print, this text usually is separated from the body of 
+      the appendix with a horizontal rule and often begins with 
+      'Note:'.                                                     -->
+<!ELEMENT appendixNote        %paraLevelContent;                     >
+
+<!-- ELEM p             declared above
+     ELEM blockGraphic  declared above
+     ELEM equation      declared above
+     ELEM displayText   declared above
+     ELEM blockQuote    declared above
+     ELEM hypothesis    declared above
+     ELEM epigraph      declared above
+     ELEM lit           declared above
+     ELEM list          declared above
+     ELEM definitionList
+                        declared above
+     ELEM citationList  declared above
+     ELEM dialog        declared above
+     ELEM poem          declared above
+     ELEM table         declared in table.ent
+-->
+
+<!-- ============================================================= -->
+<!-- ****************** TABLE ELEMENTS *************************** -->
+<!-- ============================================================= -->
+
+<!--                    TABLE GROUP                                -->
+<!--  Used to capture tables, usually numbered, that are intended 
+      to "float" relative to the text. For initial capture, the 
+      table will be fully tagged and captured as one or more graphic 
+      elements. For delivery, the graphics will be supplied and the 
+      tagged table will be converted to the searchText element to 
+      provide searchability. 
+-->
+<!ELEMENT tableGroup    (no?, title?, relatedItem*, blockGraphic+, 
+                        (table | searchText))                        >
+<!ATTLIST tableGroup
+             id         ID                                #REQUIRED  >
+
+<!-- ELEM title         declared above
+     ELEM blockGraphic  declared above
+     ELEM table         declared in table.ent
+     ELEM searchText    declared above
+-->
+
+<!-- ============================================================= -->
+<!--                    TABLE MODULE                               -->
+<!-- ============================================================= -->
+<!--
+    This is adapted from the HTML 4.0 Strict DTD, which excludes 
+    the presentation attributes and elements that W3C expects to 
+    phase out as support for style sheets matures. 
+    
+          Draft: -Date: 1998/03/27 11:54:38-
+
+          Authors:
+              Dave Raggett <dsr@w3.org>
+              Arnaud Le Hors <lehors@w3.org>
+              Ian Jacobs <ij@w3.org>
+
+    Further information about HTML 4.0 is available at:
+
+        http://www.w3.org/TR/REC-html40
+-->
+<!-- ============================================================= -->
+
+<!-- ============================================================= -->
+<!-- - - - - - - - - -  PARAMETER ENTITIES USED IN HTML TABLES - - -->
+<!-- ============================================================= -->
+
+<!--  All the Parameter entities below are defined in the HTML DTD, 
+      outside the section that explicitly concerns "table"s, but 
+      are used in the Table Section.                              -->
+
+
+<!-- ============================================================= -->
+<!--                    ATTRIBUTE VALUES FOR SIZES.LENGTHS         -->
+<!-- ============================================================= -->
+
+
+<!--                    CHARACTER                                  -->
+<!--                    A single character from [ISO10646]         -->
+<!ENTITY % character    "CDATA"                                      >
+
+
+<!--                    CHARACTER                                  -->
+<!--                    A language code, as per [RFC1766]          -->
+<!ENTITY % languagecode "CDATA"                                       >
+
+
+<!--                    LENGTH                                     -->
+<!--                    Length defined in strict DTD for
+                        cellpadding/cellspacing. "nn" for pixels or 
+                        "nn%" for percentage length                -->
+<!ENTITY % length       "CDATA"                                      >
+
+
+<!--                    MULTILENGTH                                -->
+<!--                    Pixel, percentage, or relative             -->
+<!ENTITY % multilength  "CDATA"                                      >
+
+
+<!--                    MULTILENGTH                                -->
+<!--                    Integer representing length in pixels      -->
+<!ENTITY % pixels       "CDATA"                                      >
+
+
+<!--                    RESERVED                                   -->
+<!--                    Reserved for future use                    -->
+<!ENTITY % reserved     ""                                           >
+
+
+<!--                    SCRIPT EXPRESSION                          -->
+<!ENTITY % script       "CDATA"                                      >
+
+
+<!--                    STYLESHEET DATA                            -->
+<!ENTITY % stylesheet   "CDATA"                                      >
+
+
+<!--                    TEXT                                       -->
+<!ENTITY % text         "CDATA"                                      >
+
+
+<!-- ============================================================= -->
+<!--                    GENERIC ATTRIBUTES                         -->
+<!-- ============================================================= -->
+
+
+<!--                    HTML'S CORE ATTIBUTES                      -->
+<!--         id         Document-wide unique id
+             class      Space separated list of classes
+             style      Associated style info  
+             title      Advisory title/amplification               -->
+<!ENTITY % coreattrs
+            "id         ID                     #IMPLIED 
+             class      CDATA                  #IMPLIED 
+             style      %stylesheet;           #IMPLIED  
+             title      %text;                 #IMPLIED"             >
+
+
+<!--                    INTERNATIONALIZATION ATTRIBUTES            -->
+<!--         lang       Language code
+             dir        Direction for weak/neutral text            -->
+<!ENTITY % i18n
+            "lang       %languagecode;         #IMPLIED 
+             dir        (ltr|rtl)              #IMPLIED"             >
+
+
+<!--                    INTERACTION EVENT CAPTURING ATTRIBUTES     -->
+<!--         onclick    A pointer button was clicked
+             ondblclick A pointer button was double clicked
+             onmousedown  
+                        A pointer button was pressed down 
+             onmouseup  A pointer button was released
+             onmouseover   
+                        A pointer was moved onto
+             onmousemove   
+                        A pointer was moved within
+             onmouseout A pointer was moved away
+             onkeypress A key was pressed and released 
+             onkeydown  A key was pressed down
+             onkeyup    A key was released                         -->
+<!ENTITY % events
+            "onclick    %script;               #IMPLIED 
+             ondblclick %script;               #IMPLIED
+             onmousedown 
+                        %script;               #IMPLIED
+             onmouseup  %script;               #IMPLIED
+             onmouseover 
+                        %script;               #IMPLIED 
+             onmousemove 
+                        %script;               #IMPLIED
+             onmouseout %script;               #IMPLIED
+             onkeypress %script;               #IMPLIED
+             onkeydown  %script;               #IMPLIED
+             onkeyup    %script;               #IMPLIED"             >
+
+
+<!--                    GENERIC ATTRIBUTES COLLECTED               -->
+<!ENTITY % attrs        "%coreattrs; %i18n; %events;"                >
+
+
+<!-- ============================================================= -->
+<!-- - - - - - - - - -  TABLE MATERIAL DIRECTLY FROM HTML  - - - - -->
+<!-- ============================================================= -->
+
+
+<!--================== tables ==================================== -->
+
+<!-- IETF HTML table standard, see [RFC1942] -->
+
+<!--
+ The BORDER attribute sets the thickness of the frame around the
+ table. The default units are screen pixels.
+
+ The FRAME attribute specifies which parts of the frame around
+ the table should be rendered. The values are not the same as
+ CALS to avoid a name clash with the VALIGN attribute.
+
+ The value "border" is included for backwards compatibility with
+ <TABLE BORDER> which yields frame=border and border=implied
+ For <TABLE BORDER=1> you get border=1 and frame=implied. In this
+ case, it is appropriate to treat this as frame=border for backwards
+ compatibility with deployed browsers.
+-->
+<!ENTITY % tframe "(void|above|below|hsides|lhs|rhs|vsides|box|border)">
+
+<!--
+ The RULES attribute defines which rules to draw between cells:
+
+ If RULES is absent then assume:
+     "none" if BORDER is absent or BORDER=0 otherwise "all"
+-->
+
+<!ENTITY % trules "(none | groups | rows | cols | all)">
+  
+<!-- horizontal placement of table relative to document -->
+<!ENTITY % talign "(left|center|right)">
+
+<!-- horizontal alignment attributes for cell contents -->
+<!ENTITY % cellhalign
+  "align      (left|center|right|justify|char) #IMPLIED
+   char       %character;    #IMPLIED
+   charoff    %length;       #IMPLIED">
+
+<!-- vertical alignment attributes for cell contents -->
+<!ENTITY % cellvalign "valign     (top|middle|bottom|baseline) #IMPLIED">
+
+<!ELEMENT table ((col*|colgroup*)+, thead?, tfoot?, tbody+)>
+
+<!ELEMENT thead    (tr)+>
+<!ELEMENT tfoot    (tr)+>
+<!ELEMENT tbody    (tr)+>
+<!ELEMENT colgroup (col|colgroup)*>
+<!ELEMENT col      EMPTY>
+<!ELEMENT tr       (th|td)+>
+<!ELEMENT th       (#PCDATA | %formatElements; | %linkElements;| p)* >
+<!ELEMENT td       (#PCDATA | %formatElements; | %linkElements; | p)* >
+
+<!-- ELEM p                     declared above
+     ELEM bold                  declared above
+     ELEM italic                declared above
+     ELEM sansSerif             declared above
+     ELEM monospace             declared above
+     ELEM smallcap              declared above
+     ELEM roman                 declared above
+     ELEM underline             declared above
+     ELEM strikethru            declared above
+     ELEM sup                   declared above
+     ELEM inf                   declared above
+     ELEM appendixReference     declared above
+     ELEM citationReference     declared above
+     ELEM equationReference     declared above
+     ELEM figureReference       declared above
+     ELEM footnoteReference     declared above
+     ELEM sectionReference      declared above
+     ELEM tableReference        declared above
+     ELEM relatedItem           declared above
+     ELEM extLink               declared above
+-->
+
+<!ATTLIST table
+  %attrs;      
+  summary     %text;         #IMPLIED  
+  width       %length;       #IMPLIED  
+  border      %pixels;       #IMPLIED  
+  frame       %tframe;       #IMPLIED  
+  rules       %trules;       #IMPLIED  
+  cellspacing %length;       #IMPLIED  
+  cellpadding %length;       #IMPLIED  
+  %reserved;                           
+  datapagesize CDATA         #IMPLIED  
+             %copyrightAttributes;
+             %language;                                             >
+
+<!ENTITY % calign "(top|bottom|left|right)">
+
+<!--
+COLGROUP groups a set of COL elements. It allows you to group
+several semantically related columns together.
+-->
+<!ATTLIST colgroup
+  %attrs;         
+  span        NMTOKEN         "1"         
+  width       %multilength;  #IMPLIED  
+  %cellhalign;                         
+  %cellvalign;                         
+  >
+
+<!--
+ COL elements define the alignment properties for cells in
+ one or more columns.
+
+ The WIDTH attribute specifies the width of the columns, e.g.
+
+     width=64        width in screen pixels
+     width=0.5*      relative width of 0.5
+
+ The SPAN attribute causes the attributes of one
+ COL element to apply to more than one column.
+-->
+<!ATTLIST col
+  %attrs;    
+  span        NMTOKEN         "1"         
+  width       %multilength;  #IMPLIED  
+  %cellhalign;                         
+  %cellvalign;                      >
+
+<!--
+    Use THEAD to duplicate headers when breaking table
+    across page boundaries, or for static headers when
+    TBODY sections are rendered in scrolling panel.
+
+    Use TFOOT to duplicate footers when breaking table
+    across page boundaries, or for static footers when
+    TBODY sections are rendered in scrolling panel.
+
+    Use multiple TBODY sections when rules are needed
+    between groups of table rows.
+-->
+
+<!ATTLIST thead
+  %attrs;                    
+  %cellhalign;               
+  %cellvalign;               
+  >
+
+<!ATTLIST tbody
+  %attrs;                    
+  %cellhalign;               
+  %cellvalign;               
+  >
+
+<!ATTLIST tfoot
+  %attrs;                    
+  %cellhalign;               
+  %cellvalign;               
+  >
+
+
+<!ATTLIST tr   
+  %attrs;      
+  %cellhalign; 
+  %cellvalign; 
+  >
+
+
+
+<!-- Scope is simpler than axes attribute for common tables -->
+<!ENTITY % scope "(row|col|rowgroup|colgroup)">
+
+<!-- TH is for headers, TD for data, but for cells acting as both use TD -->
+<!ATTLIST th
+  %attrs;          
+  abbr        %text;         #IMPLIED  
+  axis        CDATA          #IMPLIED  
+  headers     IDREFS         #IMPLIED  
+  scope       %scope;        #IMPLIED  
+  rowspan     NMTOKEN         "1"         
+  colspan     NMTOKEN         "1"         
+  %cellhalign;                         
+  %cellvalign; >
+
+<!ATTLIST td
+  %attrs;   
+  abbr        %text;         #IMPLIED 
+  axis        CDATA          #IMPLIED 
+  headers     IDREFS         #IMPLIED 
+  scope       %scope;        #IMPLIED 
+  rowspan     NMTOKEN         "1"        
+  colspan     NMTOKEN         "1"        
+  %cellhalign;                        
+  %cellvalign;                        
+  >
+
+<!-- ============================================================= -->
+<!-- ****************** FIGURE ELEMENTS  ************************* -->
+<!-- ============================================================= -->
+
+<!--                    FIGURE GROUP                               -->
+<!--  Used to capture figures, usually numbered, that are intended 
+      to "float" relative to the text. There are two models for 
+      figures: (a) image followed by number and caption and (b) 
+      number, followed by title, then image, then an optional note. 
+      Most of the journals in PsycARTICLES use model a; the American 
+      Psychologist uses model b.
+-->
+<!ELEMENT figureGroup   (no?, title?, relatedItem*,blockGraphic+, 
+                        (caption | figureNote?))                     >
+
+<!ATTLIST figureGroup
+             id         ID                                #REQUIRED  >
+
+<!-- ELEM no            declared above
+     ELEM title         declared above
+     ELEM blockGraphic  declared above
+-->
+
+<!ELEMENT caption       %paraLevelContent;                           >
+
+<!--                    FIGURE NOTE                                --> 
+<!--  In American Psychologist, figures typically have a title, 
+      which appears above the graphic, and an optional note, which 
+      appears below the graphic.
+-->
+<!ELEMENT figureNote    %paraLevelContent;                           >
+
+<!-- ============================================================= -->
+<!-- ****************** FOOTNOTE ELEMENTS ************************ -->
+<!-- ============================================================= -->
+
+<!--                    FOOTNOTE                                   -->
+<!ELEMENT footnote       (no?, %paraLevelContent;)                   >
+
+<!ATTLIST footnote
+             id         ID                                #IMPLIED
+             %copyrightAttributes;                                   
+             %language;                                             >
+
+<!-- ============================================================= -->
+<!-- ****************** SIDEBAR ELEMENT ************************** -->
+<!-- ============================================================= -->
+<!--                    SIDEBAR                                    -->
+<!--  Used to capture material presented alongside narrative text.
+      Like an appendix, a sidebar can contain any or all of the 
+      structures that are allowed within the body.
+-->
+
+<!ELEMENT sidebar       (title?, (%sectionLevelElements;)*, 
+                         section*)                                   >
+
+<!ATTLIST sidebar
+             id         ID                               #REQUIRED
+             %copyrightAttributes;                                   
+             %language;                                             >
+
+<!-- ============================================================= -->
+<!--                    SPECIAL CHARACTERS                         -->
+<!-- ============================================================= -->
+
+
+<!-- character entity references inherited from the 
+     ISO 8879 sets and mapped to UCS codepoints -->  
+
+     
+<!-- ISO 8879-1986//ENTITIES Numeric and Special  Graphic//EN -->
+     
+<!ENTITY half    "&#x00BD;">
+<!ENTITY frac12  "&#x00BD;">
+<!ENTITY frac14  "&#x00BC;">
+<!ENTITY frac34  "&#x00BE;">
+<!ENTITY frac18  "&#x215B;">
+<!ENTITY frac38  "&#x215C;">
+<!ENTITY frac58  "&#x215D;">
+<!ENTITY frac78  "&#x215E;">
+<!ENTITY sup1    "&#x00B9;">
+<!ENTITY sup2    "&#x00B2;">
+<!ENTITY sup3    "&#x00B3;"> 
+<!ENTITY plus    "&#x002B;">
+<!ENTITY plusmn  "&#x00B1;">
+<!ENTITY equals  "&#x003D;">
+<!ENTITY divide  "&#x00F7;">
+<!ENTITY times   "&#x00D7;">
+<!ENTITY curren  "&#x00A4;">
+<!ENTITY pound   "&#x00A3;">
+<!ENTITY dollar  "&#x0024;">
+<!ENTITY cent    "&#x00A2;">
+<!ENTITY yen     "&#x00A5;">
+<!ENTITY num     "&#x0023;">
+<!ENTITY percnt  "&#x0025;">
+<!ENTITY ast     "&#x002A;">
+<!ENTITY commat  "&#x0040;">
+<!ENTITY lsqb    "&#x005B;">
+<!ENTITY bsol    "&#x005C;">
+<!ENTITY rsqb    "&#x005D;">
+<!ENTITY lcub    "&#x007B;">
+<!ENTITY horbar  "&#x2015;">
+<!ENTITY verbar  "&#x007C;">
+<!ENTITY rcub    "&#x007D;">
+<!ENTITY micro   "&#x00B5;">
+<!ENTITY ohm     "&#x2126;">
+<!ENTITY deg     "&#x00B0;">
+<!ENTITY ordm    "&#x00BA;">
+<!ENTITY ordf    "&#x00AA;">
+<!ENTITY sect    "&#x00A7;">
+<!ENTITY para    "&#x00B6;">
+<!ENTITY middot  "&#x00B7;">
+<!ENTITY larr    "&#x2190;">
+<!ENTITY rarr    "&#x2192;">
+<!ENTITY uarr    "&#x2191;">
+<!ENTITY darr    "&#x2193;">
+<!ENTITY copy    "&#x00A9;">
+<!ENTITY reg     "&#x00AE;">
+<!ENTITY trade   "&#x2122;">
+<!ENTITY brvbar  "&#x00A6;">
+<!ENTITY not     "&#x00AC;">
+<!ENTITY sung    "&#x266A;">
+<!ENTITY excl    "&#x0021;">
+<!ENTITY iexcl   "&#x00A1;">
+<!ENTITY lpar    "&#x0028;">
+<!ENTITY rpar    "&#x0029;">
+<!ENTITY comma   "&#x002C;">
+<!ENTITY lowbar  "&#x005F;">
+<!ENTITY hyphen  "-">
+<!ENTITY period  "&#x002E;">
+<!ENTITY sol     "&#x002F;">
+<!ENTITY colon   "&#x003A;">
+<!ENTITY semi    "&#x003B;">
+<!ENTITY quest   "&#x003F;">
+<!ENTITY iquest  "&#x00BF;">
+<!ENTITY laquo   "&#x00AB;">
+<!ENTITY raquo   "&#x00BB;">
+<!ENTITY lsquo   "&#x2018;">
+<!ENTITY rsquo   "&#x2019;">
+<!ENTITY ldquo   "&#x201C;">
+<!ENTITY rdquo   "&#x201D;">
+<!ENTITY nbsp    "&#x00A0;">
+<!ENTITY shy     "&#x00AD;">
+
+<!-- ISO 8879-1986//ENTITIES Publishing//EN -->
+
+<!ENTITY  emsp     "&#x2003;">
+<!ENTITY  ensp     "&#x2002;">
+<!ENTITY  emsp13   "&#x2004;">
+<!ENTITY  emsp14   "&#x2005;">
+<!ENTITY  numsp    "&#x2007;">
+<!ENTITY  puncsp   "&#x2008;">
+<!ENTITY  thinsp   "&#x2009;">
+<!ENTITY  hairsp   "&#x200A;">
+<!ENTITY  mdash    "&#x2014;">
+<!ENTITY  ndash    "&#x2013;">
+<!ENTITY  dash     "&#x2010;">
+<!ENTITY  blank    "&#x2423;">
+<!ENTITY  hellip   "&#x2026;">
+<!ENTITY  nldr     "&#x2025;">
+<!ENTITY  frac13   "&#x2153;">
+<!ENTITY  frac23   "&#x2154;">
+<!ENTITY  frac15   "&#x2155;">
+<!ENTITY  frac25   "&#x2156;">
+<!ENTITY  frac35   "&#x2157;">
+<!ENTITY  frac45   "&#x2158;">
+<!ENTITY  frac16   "&#x2159;">
+<!ENTITY  frac56   "&#x215A;">
+<!ENTITY  incare   "&#x2105;">
+<!ENTITY  block    "&#x2588;">
+<!ENTITY  uhblk    "&#x2580;">
+<!ENTITY  lhblk    "&#x2584;">
+<!ENTITY  blk14    "&#x2591;">
+<!ENTITY  blk12    "&#x2592;">
+<!ENTITY  blk34    "&#x2593;">
+<!ENTITY  marker   "&#x25AE;">
+<!ENTITY  cir      "&#x25CB;">
+<!ENTITY  squ      "&#x25A1;">
+<!ENTITY  rect     "&#x25AD;">
+<!ENTITY  utri     "&#x25B5;">
+<!ENTITY  dtri     "&#x25BF;">
+<!ENTITY  star     "&#x2606;">
+<!ENTITY  bull     "&#x2022;">
+<!ENTITY  squf     "&#x25AA;">
+<!ENTITY  utrif    "&#x25B4;">
+<!ENTITY  dtrif    "&#x25BE;">
+<!ENTITY  ltrif    "&#x25C2;">
+<!ENTITY  rtrif    "&#x25B8;">
+<!ENTITY  clubs    "&#x2663;">
+<!ENTITY  diams    "&#x2666;">
+<!ENTITY  hearts   "&#x2665;">
+<!ENTITY  spades   "&#x2660;">
+<!ENTITY  malt     "&#x2720;">
+<!ENTITY  dagger   "&#x2020;">
+<!ENTITY  Dagger   "&#x2021;">
+<!ENTITY  check    "&#x2713;">
+<!ENTITY  cross    "&#x2717;">
+<!ENTITY  sharp    "&#x266F;">
+<!ENTITY  flat     "&#x266D;">
+<!ENTITY  male     "&#x2642;">
+<!ENTITY  female   "&#x2640;">
+<!ENTITY  phone    "&#x260E;">
+<!ENTITY  telrec   "&#x2315;">
+<!ENTITY  copysr   "&#x2117;">
+<!ENTITY  caret    "&#x2041;">
+<!ENTITY  lsquor   "&#x201A;">
+<!ENTITY  ldquor   "&#x201E;">
+<!ENTITY  fflig    "&#xFB00;">
+<!ENTITY  filig    "&#xFB01;">
+<!ENTITY  fjlig    "fj">
+<!ENTITY  ffilig   "&#xFB03;">
+<!ENTITY  ffllig   "&#xFB04;">
+<!ENTITY  fllig    "&#xFB02;">
+<!ENTITY  mldr     "&#x2026;">
+<!ENTITY  rdquor   "&#x201D;">
+<!ENTITY  rsquor   "&#x2019;">
+<!ENTITY  vellip   "&#x22EE;">
+<!ENTITY  hybull   "&#x2043;">
+<!ENTITY  loz      "&#x25CA;">
+<!ENTITY  lozf     "&#x29EB;">
+<!ENTITY  ltri     "&#x25C3;">
+<!ENTITY  rtri     "&#x25B9;">
+<!ENTITY  starf    "&#x2605;">
+<!ENTITY  natur    "&#x266E;">
+<!ENTITY  rx       "&#x211E;">
+<!ENTITY  sext     "&#x2736;">
+<!ENTITY  target   "&#x2316;">
+<!ENTITY  dlcrop   "&#x230D;">
+<!ENTITY  drcrop   "&#x230C;">
+<!ENTITY  ulcrop   "&#x230F;">
+<!ENTITY  urcrop   "&#x230E;">
+
+<!-- ISO   8879-1986//ENTITIES   General Technical//EN -->
+
+<!ENTITY  aleph    "&#x2135;">
+<!ENTITY  and      "&#x2227;">
+<!ENTITY  ang90    "&#x221F;">
+<!ENTITY  angsph   "&#x2222;">
+<!ENTITY  ap       "&#x2248;">
+<!ENTITY  becaus   "&#x2235;">
+<!ENTITY  bottom   "&#x22A5;">
+<!ENTITY  cap      "&#x2229;">
+<!ENTITY  cong     "&#x2245;">
+<!ENTITY  conint   "&#x222E;">
+<!ENTITY  cup      "&#x222A;">
+<!ENTITY  equiv    "&#x2261;">
+<!ENTITY  exist    "&#x2203;">
+<!ENTITY  forall   "&#x2200;">
+<!ENTITY  fnof     "&#x0192;">
+<!ENTITY  ge       "&#x2265;">
+<!ENTITY  iff      "&#x21D4;">
+<!ENTITY  infin    "&#x221E;">
+<!ENTITY  int      "&#x222B;">
+<!ENTITY  isin     "&#x2208;">
+<!ENTITY  lang     "&#x2329;">
+<!ENTITY  lArr     "&#x21D0;">
+<!ENTITY  le       "&#x2264;">
+<!ENTITY  minus    "&#x2212;">
+<!ENTITY  mnplus   "&#x2213;">
+<!ENTITY  nabla    "&#x2207;">
+<!ENTITY  ne       "&#x2260;">
+<!ENTITY  ni       "&#x220B;">
+<!ENTITY  or       "&#x2228;">
+<!ENTITY  par      "&#x2225;">
+<!ENTITY  part     "&#x2202;">
+<!ENTITY  permil   "&#x2030;">
+<!ENTITY  perp     "&#x22A5;">
+<!ENTITY  prime    "&#x2032;">
+<!ENTITY  Prime    "&#x2033;">
+<!ENTITY  prop     "&#x221D;">
+<!ENTITY  radic    "&#x221A;">
+<!ENTITY  rang     "&#x232A;">
+<!ENTITY  rArr     "&#x21D2;">
+<!ENTITY  sim      "&#x223C;">
+<!ENTITY  sime     "&#x2243;">
+<!ENTITY  square   "&#x25A1;">
+<!ENTITY  sub      "&#x2282;">
+<!ENTITY  sube     "&#x2286;">
+<!ENTITY  sup      "&#x2283;">
+<!ENTITY  supe     "&#x2287;">
+<!ENTITY  there4   "&#x2234;">
+<!ENTITY  Verbar   "&#x2016;">
+<!ENTITY  angst    "&#x212B;">
+<!ENTITY  bernou   "&#x212C;">
+<!ENTITY  compfn   "&#x2218;">
+<!ENTITY  Dot      "&#x00A8;">
+<!ENTITY  DotDot   "&#x20DC;">
+<!ENTITY  hamilt   "&#x210B;">
+<!ENTITY  lagran   "&#x2112;">
+<!ENTITY  lowast   "&#x2217;">
+<!ENTITY  notin    "&#x2209;">
+<!ENTITY  order    "&#x2134;">
+<!ENTITY  phmmat   "&#x2133;">
+<!ENTITY  tdot     "&#x20DB;">
+<!ENTITY  tprime   "&#x2034;">
+<!ENTITY  wedgeq   "&#x2259;">
+
+<!-- ISO   8879-1986//ENTITIES   Diacritical -->
+
+<!ENTITY  acute    "&#x00B4;">
+<!ENTITY  breve    "&#x02D8;">
+<!ENTITY  caron    "&#x02C7;">
+<!ENTITY  cedil    "&#x00B8;">
+<!ENTITY  circ     "&#x02C6;">
+<!ENTITY  dblac    "&#x02DD;">
+<!ENTITY  die      "&#x00A8;">
+<!ENTITY  dot      "&#x02D9;">
+<!ENTITY  grave    "&#x0060;">
+<!ENTITY  macr     "&#x00AF;">
+<!ENTITY  ogon     "&#x02DB;">
+<!ENTITY  ring     "&#x02DA;">
+<!ENTITY  tilde    "&#x02DC;">
+<!ENTITY  uml      "&#x00A8;">
+
+<!-- ISO 8879-1986//ENTITIES Added Latin 1//EN -->
+
+<!ENTITY  aacute   "&#x00E1;">
+<!ENTITY  Aacute   "&#x00C1;">
+<!ENTITY  acirc    "&#x00E2;">
+<!ENTITY  Acirc    "&#x00C2;">
+<!ENTITY  agrave   "&#x00E0;">
+<!ENTITY  Agrave   "&#x00C0;">
+<!ENTITY  aring    "&#x00E5;">
+<!ENTITY  Aring    "&#x00C5;">
+<!ENTITY  atilde   "&#x00E3;">
+<!ENTITY  Atilde   "&#x00C3;">
+<!ENTITY  auml     "&#x00E4;">
+<!ENTITY  Auml     "&#x00C4;">
+<!ENTITY  aelig    "&#x00E6;">
+<!ENTITY  AElig    "&#x00C6;">
+<!ENTITY  ccedil   "&#x00E7;">
+<!ENTITY  Ccedil   "&#x00C7;">
+<!ENTITY  eth      "&#x00F0;">
+<!ENTITY  ETH      "&#x00D0;">
+<!ENTITY  eacute   "&#x00E9;">
+<!ENTITY  Eacute   "&#x00C9;">
+<!ENTITY  ecirc    "&#x00EA;">
+<!ENTITY  Ecirc    "&#x00CA;">
+<!ENTITY  egrave   "&#x00E8;">
+<!ENTITY  Egrave   "&#x00C8;">
+<!ENTITY  euml     "&#x00EB;">
+<!ENTITY  Euml     "&#x00CB;">
+<!ENTITY  iacute   "&#x00ED;">
+<!ENTITY  Iacute   "&#x00CD;">
+<!ENTITY  icirc    "&#x00EE;">
+<!ENTITY  Icirc    "&#x00CE;">
+<!ENTITY  igrave   "&#x00EC;">
+<!ENTITY  Igrave   "&#x00CC;">
+<!ENTITY  iuml     "&#x00EF;">
+<!ENTITY  Iuml     "&#x00CF;">
+<!ENTITY  ntilde   "&#x00F1;">
+<!ENTITY  Ntilde   "&#x00D1;">
+<!ENTITY  oacute   "&#x00F3;">
+<!ENTITY  Oacute   "&#x00D3;">
+<!ENTITY  ocirc    "&#x00F4;">
+<!ENTITY  Ocirc    "&#x00D4;">
+<!ENTITY  ograve   "&#x00F2;">
+<!ENTITY  Ograve   "&#x00D2;">
+<!ENTITY  oslash   "&#x00F8;">
+<!ENTITY  Oslash   "&#x00D8;">
+<!ENTITY  otilde   "&#x00F5;">
+<!ENTITY  Otilde   "&#x00D5;">
+<!ENTITY  ouml     "&#x00F6;">
+<!ENTITY  Ouml     "&#x00D6;">
+<!ENTITY  szlig    "&#x00DF;">
+<!ENTITY  thorn    "&#x00FE;">
+<!ENTITY  THORN    "&#x00DE;">
+<!ENTITY  uacute   "&#x00FA;">
+<!ENTITY  Uacute   "&#x00DA;">
+<!ENTITY  ucirc    "&#x00FB;">
+<!ENTITY  Ucirc    "&#x00DB;">
+<!ENTITY  ugrave   "&#x00F9;">
+<!ENTITY  Ugrave   "&#x00D9;">
+<!ENTITY  uuml     "&#x00FC;">
+<!ENTITY  Uuml     "&#x00DC;">
+<!ENTITY  yacute   "&#x00FD;">
+<!ENTITY  Yacute   "&#x00DD;">
+<!ENTITY  yuml     "&#x00FF;">
+
+<!-- ISO 8879-1986//ENTITIES Added Latin 2//EN -->
+
+<!ENTITY  abreve   "&#x0103;">
+<!ENTITY  Abreve   "&#x0102;">
+<!ENTITY  amacr    "&#x0101;">
+<!ENTITY  Amacr    "&#x0100;">
+<!ENTITY  aogon    "&#x0105;">
+<!ENTITY  Aogon    "&#x0104;">
+<!ENTITY  cacute   "&#x0107;">
+<!ENTITY  Cacute   "&#x0106;">
+<!ENTITY  ccaron   "&#x010D;">
+<!ENTITY  Ccaron   "&#x010C;">
+<!ENTITY  ccirc    "&#x0109;">
+<!ENTITY  Ccirc    "&#x0108;">
+<!ENTITY  cdot     "&#x010B;">
+<!ENTITY  Cdot     "&#x010A;">
+<!ENTITY  dcaron   "&#x010F;">
+<!ENTITY  Dcaron   "&#x010E;">
+<!ENTITY  dstrok   "&#x0111;">
+<!ENTITY  Dstrok   "&#x0110;">
+<!ENTITY  ecaron   "&#x011B;">
+<!ENTITY  Ecaron   "&#x011A;">
+<!ENTITY  edot     "&#x0117;">
+<!ENTITY  Edot     "&#x0116;">
+<!ENTITY  emacr    "&#x0113;">
+<!ENTITY  Emacr    "&#x0112;">
+<!ENTITY  eogon    "&#x0119;">
+<!ENTITY  Eogon    "&#x0118;">
+<!ENTITY  gacute   "&#x01F5;">
+<!ENTITY  gbreve   "&#x011F;">
+<!ENTITY  Gbreve   "&#x011E;">
+<!ENTITY  Gcedil   "&#x0122;">
+<!ENTITY  gcirc    "&#x011D;">
+<!ENTITY  Gcirc    "&#x011C;">
+<!ENTITY  gdot     "&#x0121;">
+<!ENTITY  Gdot     "&#x0120;">
+<!ENTITY  hcirc    "&#x0125;">
+<!ENTITY  Hcirc    "&#x0124;">
+<!ENTITY  hstrok   "&#x0127;">
+<!ENTITY  Hstrok   "&#x0126;">
+<!ENTITY  Idot     "&#x0130;">
+<!ENTITY  Imacr    "&#x012A;">
+<!ENTITY  imacr    "&#x012B;">
+<!ENTITY  ijlig    "&#x0133;">
+<!ENTITY  IJlig    "&#x0132;">
+<!ENTITY  inodot   "&#x0131;">
+<!ENTITY  iogon    "&#x012F;">
+<!ENTITY  Iogon    "&#x012E;">
+<!ENTITY  itilde   "&#x0129;">
+<!ENTITY  Itilde   "&#x0128;">
+<!ENTITY  jcirc    "&#x0135;">
+<!ENTITY  Jcirc    "&#x0134;">
+<!ENTITY  kcedil   "&#x0137;">
+<!ENTITY  Kcedil   "&#x0136;">
+<!ENTITY  kgreen   "&#x0138;">
+<!ENTITY  lacute   "&#x013A;">
+<!ENTITY  Lacute   "&#x0139;">
+<!ENTITY  lcaron   "&#x013E;">
+<!ENTITY  Lcaron   "&#x013D;">
+<!ENTITY  lcedil   "&#x013C;">
+<!ENTITY  Lcedil   "&#x013B;">
+<!ENTITY  lmidot   "&#x0140;">
+<!ENTITY  Lmidot   "&#x013F;">
+<!ENTITY  lstrok   "&#x0142;">
+<!ENTITY  Lstrok   "&#x0141;">
+<!ENTITY  nacute   "&#x0144;">
+<!ENTITY  Nacute   "&#x0143;">
+<!ENTITY  eng      "&#x014B;">
+<!ENTITY  ENG      "&#x014A;">
+<!ENTITY  napos    "&#x0149;">
+<!ENTITY  ncaron   "&#x0148;">
+<!ENTITY  Ncaron   "&#x0147;">
+<!ENTITY  ncedil   "&#x0146;">
+<!ENTITY  Ncedil   "&#x0145;">
+<!ENTITY  odblac   "&#x0151;">
+<!ENTITY  Odblac   "&#x0150;">
+<!ENTITY  Omacr    "&#x014C;">
+<!ENTITY  omacr    "&#x014D;">
+<!ENTITY  oelig    "&#x0153;">
+<!ENTITY  OElig    "&#x0152;">
+<!ENTITY  racute   "&#x0155;">
+<!ENTITY  Racute   "&#x0154;">
+<!ENTITY  rcaron   "&#x0159;">
+<!ENTITY  Rcaron   "&#x0158;">
+<!ENTITY  rcedil   "&#x0157;">
+<!ENTITY  Rcedil   "&#x0156;">
+<!ENTITY  sacute   "&#x015B;">
+<!ENTITY  Sacute   "&#x015A;">
+<!ENTITY  scaron   "&#x0161;">
+<!ENTITY  Scaron   "&#x0160;">
+<!ENTITY  scedil   "&#x015F;">
+<!ENTITY  Scedil   "&#x015E;">
+<!ENTITY  scirc    "&#x015D;">
+<!ENTITY  Scirc    "&#x015C;">
+<!ENTITY  tcaron   "&#x0165;">
+<!ENTITY  Tcaron   "&#x0164;">
+<!ENTITY  tcedil   "&#x0163;">
+<!ENTITY  Tcedil   "&#x0162;">
+<!ENTITY  tstrok   "&#x0167;">
+<!ENTITY  Tstrok   "&#x0166;">
+<!ENTITY  ubreve   "&#x016D;">
+<!ENTITY  Ubreve   "&#x016C;">
+<!ENTITY  udblac   "&#x0171;">
+<!ENTITY  Udblac   "&#x0170;">
+<!ENTITY  umacr    "&#x016B;">
+<!ENTITY  Umacr    "&#x016A;">
+<!ENTITY  uogon    "&#x0173;">
+<!ENTITY  Uogon    "&#x0172;">
+<!ENTITY  uring    "&#x016F;">
+<!ENTITY  Uring    "&#x016E;">
+<!ENTITY  utilde   "&#x0169;">
+<!ENTITY  Utilde   "&#x0168;">
+<!ENTITY  wcirc    "&#x0175;">
+<!ENTITY  Wcirc    "&#x0174;">
+<!ENTITY  ycirc    "&#x0177;">
+<!ENTITY  Ycirc    "&#x0176;">
+<!ENTITY  Yuml     "&#x0178;">
+<!ENTITY  zacute   "&#x017A;">
+<!ENTITY  Zacute   "&#x0179;">
+<!ENTITY  zcaron   "&#x017E;">
+<!ENTITY  Zcaron   "&#x017D;">
+<!ENTITY  zdot     "&#x017C;">
+<!ENTITY  Zdot     "&#x017B;">
+
+<!-- ISO 8879-1986//ENTITIES Greek Letters//EN -->
+
+<!ENTITY  agr      "&#x03B1;">
+<!ENTITY  Agr      "&#x0391;">
+<!ENTITY  bgr      "&#x03B2;">
+<!ENTITY  Bgr      "&#x0392;">
+<!ENTITY  ggr      "&#x03B3;">
+<!ENTITY  Ggr      "&#x0393;">
+<!ENTITY  dgr      "&#x03B4;">
+<!ENTITY  Dgr      "&#x0394;">
+<!ENTITY  egr      "&#x03B5;">
+<!ENTITY  Egr      "&#x0395;">
+<!ENTITY  zgr      "&#x03B6;">
+<!ENTITY  Zgr      "&#x0396;">
+<!ENTITY  eegr     "&#x03B7;">
+<!ENTITY  EEgr     "&#x0397;">
+<!ENTITY  thgr     "&#x03B8;">
+<!ENTITY  THgr     "&#x0398;">
+<!ENTITY  igr      "&#x03B9;">
+<!ENTITY  Igr      "&#x0399;">
+<!ENTITY  kgr      "&#x03BA;">
+<!ENTITY  Kgr      "&#x039A;">
+<!ENTITY  lgr      "&#x03BB;">
+<!ENTITY  Lgr      "&#x039B;">
+<!ENTITY  mgr      "&#x03BC;">
+<!ENTITY  Mgr      "&#x039C;">
+<!ENTITY  ngr      "&#x03BD;">
+<!ENTITY  Ngr      "&#x039D;">
+<!ENTITY  xgr      "&#x03BE;">
+<!ENTITY  Xgr      "&#x039E;">
+<!ENTITY  ogr      "&#x03BF;">
+<!ENTITY  Ogr      "&#x039F;">
+<!ENTITY  pgr      "&#x03C0;">
+<!ENTITY  Pgr      "&#x03A0;">
+<!ENTITY  rgr      "&#x03C1;">
+<!ENTITY  Rgr      "&#x03A1;">
+<!ENTITY  sgr      "&#x03C3;">
+<!ENTITY  Sgr      "&#x03A3;">
+<!ENTITY  sfgr     "&#x03C2;">
+<!ENTITY  tgr      "&#x03C4;">
+<!ENTITY  Tgr      "&#x03A4;">
+<!ENTITY  ugr      "&#x03C5;">
+<!ENTITY  Ugr      "&#x03A5;">
+<!ENTITY  phgr     "&#x03C6;">
+<!ENTITY  PHgr     "&#x03A6;">
+<!ENTITY  khgr     "&#x03C7;">
+<!ENTITY  KHgr     "&#x03A7;">
+<!ENTITY  psgr     "&#x03C8;">
+<!ENTITY  PSgr     "&#x03A8;">
+<!ENTITY  ohgr     "&#x03C9;">
+<!ENTITY  OHgr     "&#x03A9;">
+
+<!-- ISO 8879-1986//ENTITIES Greek Symbols//EN -->
+
+<!ENTITY  alpha      "&#x03B1;">
+<!ENTITY  beta       "&#x03B2;">
+<!ENTITY  gamma      "&#x03B3;">
+<!ENTITY  Gamma      "&#x0393;">
+<!ENTITY  gammad     "&#x03DD;">
+<!ENTITY  delta      "&#x03B4;">
+<!ENTITY  Delta      "&#x0394;">
+<!ENTITY  epsi       "&#x03F5;">
+<!ENTITY  epsiv      "&#x03B5;">
+<!ENTITY  epsis      "&#x220A;">
+<!ENTITY  zeta       "&#x03B6;">
+<!ENTITY  eta        "&#x03B7;">
+<!ENTITY  thetas     "&#x03B8;">
+<!ENTITY  Theta      "&#x0398;">
+<!ENTITY  thetav     "&#x03D1;">
+<!ENTITY  iota       "&#x03B9;">
+<!ENTITY  kappa      "&#x03BA;">
+<!ENTITY  kappav     "&#x03F0;">
+<!ENTITY  lambda     "&#x03BB;">
+<!ENTITY  Lambda     "&#x039B;">
+<!ENTITY  mu         "&#x03BC;">
+<!ENTITY  nu         "&#x03BD;">
+<!ENTITY  xi         "&#x03BE;">
+<!ENTITY  Xi         "&#x039E;">
+<!ENTITY  pi         "&#x03C0;">
+<!ENTITY  piv        "&#x03D6;">
+<!ENTITY  Pi         "&#x03A0;">
+<!ENTITY  rho        "&#x03C1;">
+<!ENTITY  rhov       "&#x03F1;">
+<!ENTITY  sigma      "&#x03C3;">
+<!ENTITY  Sigma      "&#x03A3;">
+<!ENTITY  sigmav     "&#x03C2;">
+<!ENTITY  tau        "&#x03C4;">
+<!ENTITY  upsi       "&#x03C5;">
+<!ENTITY  Upsi       "&#x03D2;">
+<!ENTITY  phis       "&#x03C6;">
+<!ENTITY  Phi        "&#x03A6;">
+<!ENTITY  phiv       "&#x03C6;">
+<!ENTITY  chi        "&#x03C7;">
+<!ENTITY  psi        "&#x03C8;">
+<!ENTITY  Psi        "&#x03A8;">
+<!ENTITY  omega      "&#x03C9;">
+<!ENTITY  Omega      "&#x03A9;">
+
+<!-- ISO   8879-1986//ENTITIES   Monotoniko Greek//EN -->
+
+<!ENTITY  aacgr    "&#x03AC;">
+<!ENTITY  Aacgr    "&#x0386;">
+<!ENTITY  eacgr    "&#x03AD;">
+<!ENTITY  Eacgr    "&#x0388;">
+<!ENTITY  eeacgr   "&#x03AE;">
+<!ENTITY  EEacgr   "&#x0389;">
+<!ENTITY  idigr    "&#x03CA;">
+<!ENTITY  Idigr    "&#x03AA;">
+<!ENTITY  iacgr    "&#x03AF;">
+<!ENTITY  Iacgr    "&#x038A;">
+<!ENTITY  idiagr   "&#x0390;">
+<!ENTITY  oacgr    "&#x03CC;">
+<!ENTITY  Oacgr    "&#x038C;">
+<!ENTITY  udigr    "&#x03CB;">
+<!ENTITY  Udigr    "&#x03AB;">
+<!ENTITY  uacgr    "&#x03CD;">
+<!ENTITY  Uacgr    "&#x038E;">
+<!ENTITY  udiagr   "&#x03B0;">
+<!ENTITY  ohacgr   "&#x03CE;">
+<!ENTITY  OHacgr   "&#x038F;">
+
+<!-- ISO 8879-1986//ENTITIES Added Math Symbols:  Ordinary//EN -->
+
+<!ENTITY  ang      "&#x2220;">
+<!ENTITY  angmsd   "&#x2221;">
+<!ENTITY  beth     "&#x2136;">
+<!ENTITY  bprime   "&#x2035;">
+<!ENTITY  comp     "&#x2201;">
+<!ENTITY  daleth   "&#x2138;">
+<!ENTITY  ell      "&#x2113;">
+<!ENTITY  empty    "&#x2205;">
+<!ENTITY  gimel    "&#x2137;">
+<!ENTITY  jnodot   "&#x006A;">
+<!ENTITY  nexist   "&#x2204;">
+<!ENTITY  oS       "&#x24C8;">
+<!ENTITY  planck   "&#x210F;">
+<!ENTITY  real     "&#x211C;">
+<!ENTITY  sbsol    "&#xFE68;">
+<!ENTITY  vprime   "&#x2032;">
+<!ENTITY  weierp   "&#x2118;">
+
+<!-- ISO 8879-1986//ENTITIES Added Math Symbols: Binary Operators//EN -->
+
+<!ENTITY  amalg    "&#x2A3F;">
+<!ENTITY  Barwed   "&#x2306;">
+<!ENTITY  barwed   "&#x2305;">
+<!ENTITY  Cap      "&#x22D2;">
+<!ENTITY  Cup      "&#x22D3;">
+<!ENTITY  cuvee    "&#x22CE;">
+<!ENTITY  cuwed    "&#x22CF;">
+<!ENTITY  diam     "&#x22C4;">
+<!ENTITY  divonx   "&#x22C7;">
+<!ENTITY  intcal   "&#x22BA;">
+<!ENTITY  lthree   "&#x22CB;">
+<!ENTITY  ltimes   "&#x22C9;">
+<!ENTITY  minusb   "&#x229F;">
+<!ENTITY  oast     "&#x229B;">
+<!ENTITY  ocir     "&#x229A;">
+<!ENTITY  odash    "&#x229D;">
+<!ENTITY  odot     "&#x2299;">
+<!ENTITY  ominus   "&#x2296;">
+<!ENTITY  oplus    "&#x2295;">
+<!ENTITY  osol     "&#x2298;">
+<!ENTITY  otimes   "&#x2297;">
+<!ENTITY  plusb    "&#x229E;">
+<!ENTITY  plusdo   "&#x2214;">
+<!ENTITY  rthree   "&#x22CC;">
+<!ENTITY  rtimes   "&#x22CA;">
+<!ENTITY  sdot     "&#x22C5;">
+<!ENTITY  sdotb    "&#x22A1;">
+<!ENTITY  setmn    "&#x2216;">
+<!ENTITY  sqcap    "&#x2293;">
+<!ENTITY  sqcup    "&#x2294;">
+<!ENTITY  ssetmn   "&#x2216;">
+<!ENTITY  sstarf   "&#x22C6;">
+<!ENTITY  timesb   "&#x22A0;">
+<!ENTITY  top      "&#x22A4;">
+<!ENTITY  uplus    "&#x228E;">
+<!ENTITY  wreath   "&#x2240;">
+<!ENTITY  xcirc    "&#x25EF;">
+<!ENTITY  xdtri    "&#x25BD;">
+<!ENTITY  xutri    "&#x25B3;">
+<!ENTITY  coprod   "&#x2210;">
+<!ENTITY  prod     "&#x220F;">
+<!ENTITY  sum      "&#x2211;">
+
+<!-- ISO 8879-1986//ENTITIES Added Math Symbols:  Relations//EN -->
+
+<!ENTITY  ape      "&#x224A;">
+<!ENTITY  asymp    "&#x2248;">
+<!ENTITY  bcong    "&#x224C;">
+<!ENTITY  bepsi    "&#x03F6;">
+<!ENTITY  bowtie   "&#x22C8;">
+<!ENTITY  bsim     "&#x223D;">
+<!ENTITY  bsime    "&#x22CD;">
+<!ENTITY  bump     "&#x224E;">
+<!ENTITY  bumpe    "&#x224F;">
+<!ENTITY  cire     "&#x2257;">
+<!ENTITY  colone   "&#x2254;">
+<!ENTITY  cuepr    "&#x22DE;">
+<!ENTITY  cuesc    "&#x22DF;">
+<!ENTITY  cupre    "&#x227C;">
+<!ENTITY  dashv    "&#x22A3;">
+<!ENTITY  ecir     "&#x2256;">
+<!ENTITY  ecolon   "&#x2255;">
+<!ENTITY  eDot     "&#x2251;">
+<!ENTITY  esdot    "&#x2250;">
+<!ENTITY  efDot    "&#x2252;">
+<!ENTITY  egs      "&#x2A96;">
+<!ENTITY  els      "&#x2A95;">
+<!ENTITY  erDot    "&#x2253;">
+<!ENTITY  fork     "&#x22D4;">
+<!ENTITY  frown    "&#x2322;">
+<!ENTITY  gap      "&#x2A86;">
+<!ENTITY  gsdot    "&#x22D7;">
+<!ENTITY  gE       "&#x2267;">
+<!ENTITY  gel      "&#x22DB;">
+<!ENTITY  gEl      "&#x2A8C;">
+<!ENTITY  ges      "&#x2A7E;">
+<!ENTITY  Gg       "&#x22D9;">
+<!ENTITY  gl       "&#x2277;">
+<!ENTITY  gsim     "&#x2273;">
+<!ENTITY  Gt       "&#x226B;">
+<!ENTITY  lap      "&#x2A85;">
+<!ENTITY  ldot     "&#x22D6;">
+<!ENTITY  lE       "&#x2266;">
+<!ENTITY  lEg      "&#x2A8B;">
+<!ENTITY  leg      "&#x22DA;">
+<!ENTITY  les      "&#x2A7D;">
+<!ENTITY  lg       "&#x2276;">
+<!ENTITY  Ll       "&#x22D8;">
+<!ENTITY  lsim     "&#x2272;">
+<!ENTITY  Lt       "&#x226A;">
+<!ENTITY  ltrie    "&#x22B4;">
+<!ENTITY  mid      "&#x2223;">
+<!ENTITY  models   "&#x22A7;">
+<!ENTITY  pr       "&#x227A;">
+<!ENTITY  prap     "&#x2AB7;">
+<!ENTITY  pre      "&#x2AAF;">
+<!ENTITY  prsim    "&#x227E;">
+<!ENTITY  rtrie    "&#x22B5;">
+<!ENTITY  samalg   "&#x2210;">
+<!ENTITY  sc       "&#x227B;">
+<!ENTITY  scap     "&#x2AB8;">
+<!ENTITY  sccue    "&#x227D;">
+<!ENTITY  sce      "&#x2AB0;">
+<!ENTITY  scsim    "&#x227F;">
+<!ENTITY  sfrown   "&#x2322;">
+<!ENTITY  smid     "&#x2223;">
+<!ENTITY  smile    "&#x2323;">
+<!ENTITY  spar     "&#x2225;">
+<!ENTITY  sqsub    "&#x228F;">
+<!ENTITY  sqsube   "&#x2291;">
+<!ENTITY  sqsup    "&#x2290;">
+<!ENTITY  sqsupe   "&#x2292;">
+<!ENTITY  ssmile   "&#x2323;">
+<!ENTITY  Sub      "&#x22D0;">
+<!ENTITY  subE     "&#x2AC5;">
+<!ENTITY  Sup      "&#x22D1;">
+<!ENTITY  supE     "&#x2AC6;">
+<!ENTITY  thkap    "&#x2248;">
+<!ENTITY  thksim   "&#x223C;">
+<!ENTITY  trie     "&#x225C;">
+<!ENTITY  twixt    "&#x226C;">
+<!ENTITY  vdash    "&#x22A2;">
+<!ENTITY  Vdash    "&#x22A9;">
+<!ENTITY  vDash    "&#x22A8;">
+<!ENTITY  veebar   "&#x22BB;">
+<!ENTITY  vltri    "&#x22B2;">
+<!ENTITY  vprop    "&#x221D;">
+<!ENTITY  vrtri    "&#x22B3;">
+<!ENTITY  Vvdash   "&#x22AA;">
+
+<!-- ISO 8879-1986//ENTITIES Added Math Symbols: Negated Relations//EN -->
+
+<!ENTITY  gnap     "&#x2A8A;">
+<!ENTITY  gne      "&#x2A88;">
+<!ENTITY  gnE      "&#x2269;">
+<!ENTITY  gnsim    "&#x22E7;">
+<!ENTITY  gvnE     "&#x02269;&#x0FE00;">
+<!ENTITY  lnap     "&#x2A89;">
+<!ENTITY  lnE      "&#x2268;">
+<!ENTITY  lne      "&#x2A87;">
+<!ENTITY  lnsim    "&#x22E6;">
+<!ENTITY  lvnE     "&#x02268;&#x0FE00;">
+<!ENTITY  nap      "&#x2249;">
+<!ENTITY  ncong    "&#x2247;">
+<!ENTITY  nequiv   "&#x2262;">
+<!ENTITY  ngE      "&#x02267;&#x00338;">
+<!ENTITY  nge      "&#x2271;">
+<!ENTITY  nges     "&#x02A7E;&#x00338;">
+<!ENTITY  ngt      "&#x226F;">
+<!ENTITY  nle      "&#x2270;">
+<!ENTITY  nlE      "&#x02266;&#x00338;">
+<!ENTITY  nles     "&#x02A7D;&#x00338;">
+<!ENTITY  nlt      "&#x226E;">
+<!ENTITY  nltri    "&#x22EA;">
+<!ENTITY  nltrie   "&#x22EC;">
+<!ENTITY  nmid     "&#x2224;">
+<!ENTITY  npar     "&#x2226;">
+<!ENTITY  npr      "&#x2280;">
+<!ENTITY  npre     "&#x02AAF;&#x00338;">
+<!ENTITY  nrtri    "&#x22EB;">
+<!ENTITY  nrtrie   "&#x22ED;">
+<!ENTITY  nsc      "&#x2281;">
+<!ENTITY  nsce     "&#x02AB0;&#x00338;">
+<!ENTITY  nsim     "&#x2241;">
+<!ENTITY  nsime    "&#x2244;">
+<!ENTITY  nsmid    "&#x2224;">
+<!ENTITY  nspar    "&#x2226;">
+<!ENTITY  nsub     "&#x2284;">
+<!ENTITY  nsube    "&#x2288;">
+<!ENTITY  nsubE    "&#x02AC5;&#x00338;">
+<!ENTITY  nsup     "&#x2285;">
+<!ENTITY  nsupE    "&#x02AC6;&#x00338;">
+<!ENTITY  nsupe    "&#x2289;">
+<!ENTITY  nvdash   "&#x22AC;">
+<!ENTITY  nvDash   "&#x22AD;">
+<!ENTITY  nVDash   "&#x22AF;">
+<!ENTITY  nVdash   "&#x22AE;">
+<!ENTITY  prnap    "&#x2AB9;">
+<!ENTITY  prnE     "&#x2AB5;">
+<!ENTITY  prnsim   "&#x22E8;">
+<!ENTITY  scnap    "&#x2ABA;">
+<!ENTITY  scnE     "&#x2AB6;">
+<!ENTITY  scnsim   "&#x22E9;">
+<!ENTITY  subne    "&#x228A;">
+<!ENTITY  subnE    "&#x2ACB;">
+<!ENTITY  supne    "&#x228B;">
+<!ENTITY  supnE    "&#x2ACC;">
+<!ENTITY  vsubnE   "&#x02ACB;&#x0FE00;">
+<!ENTITY  vsubne   "&#x0228A;&#x0FE00;">
+<!ENTITY  vsupne   "&#x0228B;&#x0FE00;">
+<!ENTITY  vsupnE   "&#x02ACC;&#x0FE00;">
+
+<!-- ISO 8879-1986//ENTITIES Added Math Symbols: Delimiters//EN  -->
+
+<!ENTITY  rceil    "&#x2309;">
+<!ENTITY  rfloor   "&#x230B;">
+<!ENTITY  rpargt   "&#x2994;">
+<!ENTITY  urcorn   "&#x231D;">
+<!ENTITY  drcorn   "&#x231F;">
+<!ENTITY  lceil    "&#x2308;">
+<!ENTITY  lfloor   "&#x230A;">
+<!ENTITY  lpargt   "&#x29A0;">
+<!ENTITY  ulcorn   "&#x231C;">
+<!ENTITY  dlcorn   "&#x231E;">
+
+<!-- ISO 8879-1986//ENTITIES Added Math Symbols: Arrow Relations//EN -->
+
+<!ENTITY  cularr   "&#x21B6;">
+<!ENTITY  curarr   "&#x21B7;">
+<!ENTITY  dArr     "&#x21D3;">
+<!ENTITY  darr2    "&#x21CA;">
+<!ENTITY  dharl    "&#x21C3;">
+<!ENTITY  dharr    "&#x21C2;">
+<!ENTITY  lAarr    "&#x21DA;">
+<!ENTITY  Larr     "&#x219E;">
+<!ENTITY  larr2    "&#x21C7;">
+<!ENTITY  larrhk   "&#x21A9;">
+<!ENTITY  larrlp   "&#x21AB;">
+<!ENTITY  larrtl   "&#x21A2;">
+<!ENTITY  lhard    "&#x21BD;">
+<!ENTITY  lharu    "&#x21BC;">
+<!ENTITY  hArr     "&#x21D4;">
+<!ENTITY  harr     "&#x2194;">
+<!ENTITY  lrarr2   "&#x21C6;">
+<!ENTITY  rlarr2   "&#x21C4;">
+<!ENTITY  harrw    "&#x21AD;">
+<!ENTITY  rlhar2   "&#x21CC;">
+<!ENTITY  lrhar2   "&#x21CB;">
+<!ENTITY  lsh      "&#x21B0;">
+<!ENTITY  map      "&#x21A6;">
+<!ENTITY  mumap    "&#x22B8;">
+<!ENTITY  nearr    "&#x2197;">
+<!ENTITY  nlArr    "&#x21CD;">
+<!ENTITY  nlarr    "&#x219A;">
+<!ENTITY  nhArr    "&#x21CE;">
+<!ENTITY  nharr    "&#x21AE;">
+<!ENTITY  nrarr    "&#x219B;">
+<!ENTITY  nrArr    "&#x21CF;">
+<!ENTITY  nwarr    "&#x2196;">
+<!ENTITY  olarr    "&#x21BA;">
+<!ENTITY  orarr    "&#x21BB;">
+<!ENTITY  rAarr    "&#x21DB;">
+<!ENTITY  Rarr     "&#x21A0;">
+<!ENTITY  rarr2    "&#x21C9;">
+<!ENTITY  rarrhk   "&#x21AA;">
+<!ENTITY  rarrlp   "&#x21AC;">
+<!ENTITY  rarrtl   "&#x21A3;">
+<!ENTITY  rarrw    "&#x219D;">
+<!ENTITY  rhard    "&#x21C1;">
+<!ENTITY  rharu    "&#x21C0;">
+<!ENTITY  rsh      "&#x21B1;">
+<!ENTITY  drarr    "&#x2198;">
+<!ENTITY  dlarr    "&#x2199;">
+<!ENTITY  uArr     "&#x21D1;">
+<!ENTITY  uarr2    "&#x21C8;">
+<!ENTITY  vArr    "&#x21D5;">
+<!ENTITY  varr    "&#x2195;">
+<!ENTITY  uharl   "&#x21BF;">
+<!ENTITY  uharr   "&#x21BE;">
+<!ENTITY  xlArr   "&#x27F8;">
+<!ENTITY  xhArr   "&#x27FA;">
+<!ENTITY  xharr   "&#x27F7;">
+<!ENTITY  xrArr   "&#x27F9;">
+
+<!-- ISO 9573-13:1991//ENTITIES Math Alphabets: Open Face //EN -->
+
+<!ENTITY  Aopf       "&#x1D538;" >
+<!ENTITY  Bopf       "&#x1D539;" >
+<!ENTITY  Copf       "&#x2102;" >
+<!ENTITY  Dopf       "&#x1D53B;" >
+<!ENTITY  Eopf       "&#x1D53C;" >
+<!ENTITY  Fopf       "&#x1D53D;" >
+<!ENTITY  Gopf       "&#x1D53E;" >
+<!ENTITY  Hopf       "&#x210D;" >
+<!ENTITY  Iopf       "&#x1D540;" >
+<!ENTITY  Jopf       "&#x1D541;" >
+<!ENTITY  Kopf       "&#x1D542;" >
+<!ENTITY  Lopf       "&#x1D543;" >
+<!ENTITY  Mopf       "&#x1D544;" >
+<!ENTITY  Nopf       "&#x2115;" >
+<!ENTITY  Oopf       "&#x1D546;" >
+<!ENTITY  Popf       "&#x2119;" >
+<!ENTITY  Qopf       "&#x211A;" >
+<!ENTITY  Ropf       "&#x211D;" >
+<!ENTITY  Sopf       "&#x1D54A;" >
+<!ENTITY  Topf       "&#x1D54B;" >
+<!ENTITY  Uopf       "&#x1D54C;" >
+<!ENTITY  Vopf       "&#x1D54D;" >
+<!ENTITY  Wopf       "&#x1D54E;" >
+<!ENTITY  Xopf       "&#x1D54F;" >
+<!ENTITY  Yopf       "&#x1D550;" >
+<!ENTITY  Zopf       "&#x2124;" >
+
+
+<!-- ISO 9573-13:1991//ENTITIES Math Alphabets: Script //EN -->
+     
+<!ENTITY  ascr       "&#x1D4B6;" >
+<!ENTITY  Ascr       "&#x1D49C;" >
+<!ENTITY  bscr       "&#x1D4B7;" >
+<!ENTITY  Bscr       "&#x212C;" >
+<!ENTITY  cscr       "&#x1D4B8;" >
+<!ENTITY  Cscr       "&#x1D49E;" >
+<!ENTITY  dscr       "&#x1D4B9;" >
+<!ENTITY  Dscr       "&#x1D49F;" >
+<!ENTITY  escr       "&#x212F;" >
+<!ENTITY  Escr       "&#x2130;" >
+<!ENTITY  fscr       "&#x1D4BB;" >
+<!ENTITY  Fscr       "&#x2131;" >
+<!ENTITY  gscr       "&#x210A;" >
+<!ENTITY  Gscr       "&#x1D4A2;" >
+<!ENTITY  hscr       "&#x1D4BD;" >
+<!ENTITY  Hscr       "&#x210B;" >
+<!ENTITY  iscr       "&#x1D4BE;" >
+<!ENTITY  Iscr       "&#x2110;" >
+<!ENTITY  jscr       "&#x1D4BF;" >
+<!ENTITY  Jscr       "&#x1D4A5;" >
+<!ENTITY  kscr       "&#x1D4C0;" >
+<!ENTITY  Kscr       "&#x1D4A6;" >
+<!ENTITY  lscr       "&#x1D4C1;" >
+<!ENTITY  Lscr       "&#x2112;" >
+<!ENTITY  mscr       "&#x1D4C2;" >
+<!ENTITY  Mscr       "&#x2133;" >
+<!ENTITY  nscr       "&#x1D4C3;" >
+<!ENTITY  Nscr       "&#x1D4A9;" >
+<!ENTITY  oscr       "&#x2134;" >
+<!ENTITY  Oscr       "&#x1D4AA;" >
+<!ENTITY  pscr       "&#x1D4C5;" >
+<!ENTITY  Pscr       "&#x1D4AB;" >
+<!ENTITY  qscr       "&#x1D4C6;" >
+<!ENTITY  Qscr       "&#x1D4AC;" >
+<!ENTITY  rscr       "&#x1D4C7;" >
+<!ENTITY  Rscr       "&#x211B;" >
+<!ENTITY  sscr       "&#x1D4C8;" >
+<!ENTITY  Sscr       "&#x1D4AE;" >
+<!ENTITY  tscr       "&#x1D4C9;" >
+<!ENTITY  Tscr       "&#x1D4AF;" >
+<!ENTITY  uscr       "&#x1D4CA;" >
+<!ENTITY  Uscr       "&#x1D4B0;" >
+<!ENTITY  vscr       "&#x1D4CB;" >
+<!ENTITY  Vscr       "&#x1D4B1;" >
+<!ENTITY  wscr       "&#x1D4CC;" >
+<!ENTITY  Wscr       "&#x1D4B2;" >
+<!ENTITY  xscr       "&#x1D4CD;" >
+<!ENTITY  Xscr       "&#x1D4B3;" >
+<!ENTITY  yscr       "&#x1D4CE;" >
+<!ENTITY  Yscr       "&#x1D4B4;" >
+<!ENTITY  zscr       "&#x1D4CF;" >
+<!ENTITY  Zscr       "&#x1D4B5;" >
+
+<!-- ISO 9573-13:1991//ENTITIES Math Alphabets: Fraktur //EN -->
+
+<!ENTITY  afr        "&#x1D51E;" >
+<!ENTITY  Afr        "&#x1D504;" >
+<!ENTITY  bfr        "&#x1D51F;" >
+<!ENTITY  Bfr        "&#x1D505;" >
+<!ENTITY  cfr        "&#x1D520;" >
+<!ENTITY  Cfr        "&#x212D;" >
+<!ENTITY  dfr        "&#x1D521;" >
+<!ENTITY  Dfr        "&#x1D507;" >
+<!ENTITY  efr        "&#x1D522;" >
+<!ENTITY  Efr        "&#x1D508;" >
+<!ENTITY  ffr        "&#x1D523;" >
+<!ENTITY  Ffr        "&#x1D509;" >
+<!ENTITY  gfr        "&#x1D524;" >
+<!ENTITY  Gfr        "&#x1D50A;" >
+<!ENTITY  hfr        "&#x1D525;" >
+<!ENTITY  Hfr        "&#x210C;" >
+<!ENTITY  ifr        "&#x1D526;" >
+<!ENTITY  Ifr        "&#x2111;" >
+<!ENTITY  jfr        "&#x1D527;" >
+<!ENTITY  Jfr        "&#x1D50D;" >
+<!ENTITY  kfr        "&#x1D528;" >
+<!ENTITY  Kfr        "&#x1D50E;" >
+<!ENTITY  lfr        "&#x1D529;" >
+<!ENTITY  Lfr        "&#x1D50F;" >
+<!ENTITY  mfr        "&#x1D52A;" >
+<!ENTITY  Mfr        "&#x1D510;" >
+<!ENTITY  nfr        "&#x1D52B;" >
+<!ENTITY  Nfr        "&#x1D511;" >
+<!ENTITY  ofr        "&#x1D52C;" >
+<!ENTITY  Ofr        "&#x1D512;" >
+<!ENTITY  pfr        "&#x1D52D;" >
+<!ENTITY  Pfr        "&#x1D513;" >
+<!ENTITY  qfr        "&#x1D52E;" >
+<!ENTITY  Qfr        "&#x1D514;" >
+<!ENTITY  rfr        "&#x1D52F;" >
+<!ENTITY  Rfr        "&#x211C;" >
+<!ENTITY  sfr        "&#x1D530;" >
+<!ENTITY  Sfr        "&#x1D516;" >
+<!ENTITY  tfr        "&#x1D531;" >
+<!ENTITY  Tfr        "&#x1D517;" >
+<!ENTITY  ufr        "&#x1D532;" >
+<!ENTITY  Ufr        "&#x1D518;" >
+<!ENTITY  vfr        "&#x1D533;" >
+<!ENTITY  Vfr        "&#x1D519;" >
+<!ENTITY  wfr        "&#x1D534;" >
+<!ENTITY  Wfr        "&#x1D51A;" >
+<!ENTITY  xfr        "&#x1D535;" >
+<!ENTITY  Xfr        "&#x1D51B;" >
+<!ENTITY  yfr        "&#x1D536;" >
+<!ENTITY  Yfr        "&#x1D51C;" >
+<!ENTITY  zfr        "&#x1D537;" >
+<!ENTITY  Zfr        "&#x2128;" >
+
+<!--  ISO  8879-1986//ENTITIES  Box  and  Line  Drawing//EN -->
+
+<!-- All names are in the form: box1234, where:
+ box = constants that identify a box drawing entity.
+ 1&2 = v, V, u, U, d, D, Ud, or uD, as follows:
+   v = vertical line for full height.
+   u = upper half of vertical line.
+   d = downward (lower) half of vertical line.
+ 3&4 = h, H, l, L, r, R, Lr, or lR, as follows:
+   h = horizontal line for full width.
+   l = left half of horizontal line.
+   r = right half of horizontal line.
+ In all cases, an upper-case letter means a double or heavy line.
+-->
+
+<!ENTITY  boxh     "&#x2500;">
+<!ENTITY  boxv     "&#x2502;">
+<!ENTITY  boxur    "&#x2514;">
+<!ENTITY  boxul    "&#x2518;">
+<!ENTITY  boxdl    "&#x2510;">
+<!ENTITY  boxdr    "&#x250C;">
+<!ENTITY  boxvr    "&#x251C;">
+<!ENTITY  boxhu    "&#x2534;">
+<!ENTITY  boxvl    "&#x2524;">
+<!ENTITY  boxhd    "&#x252C;">
+<!ENTITY  boxvh    "&#x253C;">
+<!ENTITY  boxvR    "&#x255E;">
+<!ENTITY  boxhU    "&#x2568;">
+<!ENTITY  boxvL    "&#x2561;">
+<!ENTITY  boxhD    "&#x2565;">
+<!ENTITY  boxvH    "&#x256A;">
+<!ENTITY  boxH     "&#x2550;">
+<!ENTITY  boxV     "&#x2551;">
+<!ENTITY  boxUR    "&#x255A;">
+<!ENTITY  boxUL    "&#x255D;">
+<!ENTITY  boxDL    "&#x2557;">
+<!ENTITY  boxDR    "&#x2554;">
+<!ENTITY  boxVR    "&#x2560;">
+<!ENTITY  boxHU    "&#x2569;">
+<!ENTITY  boxVL    "&#x2563;">
+<!ENTITY  boxHD    "&#x2566;">
+<!ENTITY  boxVH    "&#x256C;">
+<!ENTITY  boxVr    "&#x255F;">
+<!ENTITY  boxHu    "&#x2567;">
+<!ENTITY  boxVl    "&#x2562;">
+<!ENTITY  boxHd    "&#x2564;">
+<!ENTITY  boxVh    "&#x256B;">
+<!ENTITY  boxuR    "&#x2558;">
+<!ENTITY  boxUl    "&#x255C;">
+<!ENTITY  boxdL    "&#x2555;">
+<!ENTITY  boxDr    "&#x2553;">
+<!ENTITY  boxUr    "&#x2559;">
+<!ENTITY  boxuL    "&#x255B;">
+<!ENTITY  boxDl    "&#x2556;">
+<!ENTITY  boxdR    "&#x2552;">
+
+
+<!-- ISO 8879:1986//ENTITIES Russian Cyrillic//EN -->
+
+<!ENTITY  acy      "&#x0430;">
+<!ENTITY  Acy      "&#x0410;">
+<!ENTITY  bcy      "&#x0431;">
+<!ENTITY  Bcy      "&#x0411;">
+<!ENTITY  vcy      "&#x0432;">
+<!ENTITY  Vcy      "&#x0412;">
+<!ENTITY  gcy      "&#x0433;">
+<!ENTITY  Gcy      "&#x0413;">
+<!ENTITY  dcy      "&#x0434;">
+<!ENTITY  Dcy      "&#x0414;">
+<!ENTITY  iecy     "&#x0435;">
+<!ENTITY  IEcy     "&#x0415;">
+<!ENTITY  iocy     "&#x0451;">
+<!ENTITY  IOcy     "&#x0401;">
+<!ENTITY  zhcy     "&#x0436;">
+<!ENTITY  ZHcy     "&#x0416;">
+<!ENTITY  zcy      "&#x0437;">
+<!ENTITY  Zcy      "&#x0417;">
+<!ENTITY  icy      "&#x0438;">
+<!ENTITY  Icy      "&#x0418;">
+<!ENTITY  jcy      "&#x0439;">
+<!ENTITY  Jcy      "&#x0419;">
+<!ENTITY  kcy      "&#x043A;">
+<!ENTITY  Kcy      "&#x041A;">
+<!ENTITY  lcy      "&#x043B;">
+<!ENTITY  Lcy      "&#x041B;">
+<!ENTITY  mcy      "&#x043C;">
+<!ENTITY  Mcy      "&#x041C;">
+<!ENTITY  ncy      "&#x043D;">
+<!ENTITY  Ncy      "&#x041D;">
+<!ENTITY  ocy      "&#x043E;">
+<!ENTITY  Ocy      "&#x041E;">
+<!ENTITY  pcy      "&#x043F;">
+<!ENTITY  Pcy      "&#x041F;">
+<!ENTITY  rcy      "&#x0440;">
+<!ENTITY  Rcy      "&#x0420;">
+<!ENTITY  scy      "&#x0441;">
+<!ENTITY  Scy      "&#x0421;">
+<!ENTITY  tcy      "&#x0442;">
+<!ENTITY  Tcy      "&#x0422;">
+<!ENTITY  ucy      "&#x0443;">
+<!ENTITY  Ucy      "&#x0423;">
+<!ENTITY  fcy      "&#x0444;">
+<!ENTITY  Fcy      "&#x0424;">
+<!ENTITY  khcy     "&#x0445;">
+<!ENTITY  KHcy     "&#x0425;">
+<!ENTITY  tscy     "&#x0446;">
+<!ENTITY  TScy     "&#x0426;">
+<!ENTITY  chcy     "&#x0447;">
+<!ENTITY  CHcy     "&#x0427;">
+<!ENTITY  shcy     "&#x0448;">
+<!ENTITY  SHcy     "&#x0428;">
+<!ENTITY  shchcy   "&#x0449;">
+<!ENTITY  SHCHcy   "&#x0429;">
+<!ENTITY  hardcy   "&#x044A;">
+<!ENTITY  HARDcy   "&#x042A;">
+<!ENTITY  ycy      "&#x044B;">
+<!ENTITY  Ycy      "&#x042B;">
+<!ENTITY  softcy   "&#x044C;">
+<!ENTITY  SOFTcy   "&#x042C;">
+<!ENTITY  ecy      "&#x044D;">
+<!ENTITY  Ecy      "&#x042D;">
+<!ENTITY  yucy     "&#x044E;">
+<!ENTITY  YUcy     "&#x042E;">
+<!ENTITY  yacy     "&#x044F;">
+<!ENTITY  YAcy     "&#x042F;">
+<!ENTITY  numero   "&#x2116;">
+
+<!-- ISO 8879:1986//ENTITIES Non-Russian Cyrillic//EN -->
+
+<!ENTITY  djcy     "&#x0452;">
+<!ENTITY  DJcy     "&#x0402;">
+<!ENTITY  gjcy     "&#x0453;">
+<!ENTITY  GJcy     "&#x0403;">
+<!ENTITY  jukcy    "&#x0454;">
+<!ENTITY  Jukcy    "&#x0404;">
+<!ENTITY  dscy     "&#x0455;">
+<!ENTITY  DScy     "&#x0405;">
+<!ENTITY  iukcy    "&#x0456;">
+<!ENTITY  Iukcy    "&#x0406;">
+<!ENTITY  yicy     "&#x0457;">
+<!ENTITY  YIcy     "&#x0407;">
+<!ENTITY  jsercy   "&#x0458;">
+<!ENTITY  Jsercy   "&#x0408;">
+<!ENTITY  ljcy     "&#x0459;">
+<!ENTITY  LJcy     "&#x0409;">
+<!ENTITY  njcy     "&#x045A;">
+<!ENTITY  NJcy     "&#x040A;">
+<!ENTITY  tshcy    "&#x045B;">
+<!ENTITY  TSHcy    "&#x040B;">
+<!ENTITY  kjcy     "&#x045C;">
+<!ENTITY  KJcy     "&#x040C;">
+<!ENTITY  ubrcy    "&#x045E;">
+<!ENTITY  Ubrcy    "&#x040E;">
+<!ENTITY  dzcy     "&#x045F;">
+<!ENTITY  DZcy     "&#x040F;">
+
+<!--
+    custom IPA character entity definitions
+
+    Used by American Psychological Association to create entities for 
+    phonetic characters not represented in ISO 8879
+    
+-->
+
+
+<!ENTITY schwa   "&#x0259;">
+<!ENTITY hschwa  "&#x025A;">
+<!ENTITY llsci   "&#x026A;">
+<!ENTITY lpba    "&#x2329;">
+<!ENTITY rpba    "&#x232A;">
+<!ENTITY lsloo   "&#x0254;">
+<!ENTITY lslup   "&#x028A;">
+<!ENTITY lsltv   "&#x028C;">
+<!ENTITY ezh     "&#x0292;">
+<!ENTITY esh     "&#x0283;">
+<!ENTITY eopen   "&#x025B;">
+<!ENTITY opene   "&#x0190;">
+<!ENTITY lsalpha "&#x0251;">
+<!ENTITY alphatd "&#x0252;">
+<!ENTITY rturned "&#x0279;">
+<!ENTITY lslre   "&#x0258;">
+<!ENTITY lslroe  "&#x025C;">
+<!ENTITY lslroeh "&#x025D;">
+<!ENTITY istrok  "&#x0268;">
+<!ENTITY tesh    "&#x02A7;">
+<!ENTITY dezh    "&#x02A4;">
+<!ENTITY emptyv  "&#x2205;">
+<!ENTITY enghe   "&#x04A5;">
+<!ENTITY lslbo   "&#x0275;">
+
+<!-- 
+     misc custom character entity definitions
+
+	 Used by American Psychological Association to create 
+	 entities for characters not represented in ISO 8879.
+-->
+
+<!ENTITY bcir     "&#x25CF;">
+<!ENTITY barro    "&#x04E9;">
+<!ENTITY bhat	  "&#x0062;">
+<!ENTITY cstrw    "&#x272A;">
+<!ENTITY circ1    "&#x2460;">
+<!ENTITY circ2    "&#x2461;">
+<!ENTITY circ3    "&#x2462;">
+<!ENTITY dhat     "&#x0064;">
+<!ENTITY euro     "&#x20AC;">
+<!ENTITY gcaron   "&#x01E7;">
+<!ENTITY prml     "&#x2030;">
+<!ENTITY rhat     "&#x0072;">
+
+<!--================ END OF CONTENT ITEM DTD ===================== -->
+<!--                                                              ]-->
