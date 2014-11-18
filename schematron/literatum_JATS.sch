@@ -14,7 +14,13 @@
   <pattern id="doi">
     <rule context="article-id[@pub-id-type = 'doi']">
       <assert test="matches(., '^10\.\d+/')" id="doi-prefix-regex" role="warn">The DOI prefix must start with '10.', followed by digits and a slash.</assert>
-      <assert test="matches(., '^[^/]+/[-a-z0-9.]+$', 'i')" id="doi-suffix-regex" role="warn">Because the DOI will be re-used for several file naming purposes, you should avoid characters other than digits, A-Z letters of any case, dots, and dashes.</assert>
+      <assert test="matches(., '^[^/]+/[-a-z0-9.]+$', 'i')" id="doi-suffix-regex" role="warn">Because the DOI will be re-used for several file naming purposes, 
+        you should avoid characters other than digits, A-Z letters of any case, dots, and dashes. This does not apply to the first slash, which separates the publisher part from the DOI suffix.</assert>
+    </rule>
+  </pattern>
+  <pattern id="closing-german-quotes">
+    <rule context="*[(ancestor-or-self::*/@xml:lang)[last()] = 'de'][some $t in text() satisfies (matches($t, '”'))]">
+      <report test="true()" role="warn">The character '”' (U+201D) is uncommon in German texts. Did you mean the German closing quote, '&#x201c;' (U+201C)?</report>
     </rule>
   </pattern>
 </schema>
