@@ -3,13 +3,14 @@
 @namespace xlink "http://www.w3.org/1999/xlink";
 
 article, book, book-part-wrapper {
+  font-family: Cambria, Times, serif;
   display: block;
   margin:0.5em
 }
 
 front, front-matter {
   display: block;
-  font-family: sans-serif;
+  font-family: Calibri, sans-serif;
   font-size:90%;
   border: thin black solid;
   padding-top: 1em;
@@ -282,7 +283,7 @@ fn {
 }
 
 title {
-  font-family: sans-serif;
+  font-family: Calibri, sans-serif;
   display: block;
   font-weight: bold;
   font-size:100%;
@@ -788,7 +789,7 @@ index-entry > ext-link:before, nav-pointer:before {
   content: " " }
 
 see-entry:before, see-also-entry:before {
-  font-family: sans-serif;
+  font-family: Calibri, sans-serif;
   font-size: 85%; font-style: italic }
 
 see-entry:before { content: "See: " }
