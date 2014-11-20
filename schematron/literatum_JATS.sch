@@ -7,7 +7,7 @@
     </rule>
   </pattern>
   <pattern id="label">
-    <rule context="fn | list-item | sec | app">
+    <rule context="fn | list-item | sec | app | fig | table-wrap">
       <assert test="exists(label)" id="must-have-label" role="warn">According to Sect. 2.10 of the Literatum Content Tagging Guide, this item must have an explicit label.</assert>
     </rule>
   </pattern>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article
-  PUBLIC "-//NLM//DTD JATS (Z39.96) Article Authoring DTD v1.0 20120330//EN"
+  PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Archiving and Interchange DTD v1.0 20120330//EN"
   "JATS-articleauthoring1.dtd">
 <article dtd-version="1.0" xmlns:xlink="http://www.w3.org/1999/xlink"
   xmlns:mml="http://www.w3.org/1998/Math/MathML"
@@ -39,7 +39,7 @@
   </front>
   <body>
     <p>JATS, the journal article tag suite, serves as a basis for Atypon’s Literatum content delivery platform. Articles may be
-      delivered according to version 1.0 of the JATS archiving (“green”) DTD.</p>
+      delivered according to version 1.0 of the JATS archiving (“green”) DTD. Please consult Atypon’s Literatum Content Tagging Guide&#xa0;[<xref rid="bib-lctg" ref-type="bibr"/>].</p>
     <p>A typical delivery to Literatum consists of all articles that belong to a given journal issue. In order to describe the
       contents of an issue, Atypon has added a lightweight issue-xml DTD that utilizes JATS vocabulary where available. In
       addition to blank templates for journal articles, this framework also contains a template for issue XML. Issue XML files
@@ -48,10 +48,54 @@
     <p>There are Schematron checks for both article and issue XML that help content workers comply with Atypon’s requirements,
       such as naming or tagging conventions.</p>
     <sec>
+      <title>Installation</title>
+      <p>In oXygen 16, go to “Help &gt; Install new add-ons…” as depicted in <xref ref-type="fig" rid="fig-01-install"/>.</p>
+      <fig id="fig-01-install">
+        <label>Figure 1</label>
+        <caption>
+          <title>Menu item “Help &gt; Install new add-ons…” in oXygen 16.1</title>
+        </caption>
+        <graphic xlink:href="img/01-install.jpg"/>
+      </fig>
+      <p>Enter the update URL <uri>https://hobots.hogrefe.com/oXygenJATSframework_Literatum/oXygenJATSframework_Literatum.xml</uri>.
+      The most recent version (not necessarily v0.2 as depicted in <xref ref-type="fig" rid="fig-02-install"/>) of the framework will 
+        be offered for installation.</p>
+      <fig id="fig-02-install">
+        <label>Figure 2</label>
+        <caption>
+          <title>Entering the update URL in oXygen 16.1’s “Install Add-ons” dialog</title>
+        </caption>
+        <graphic xlink:href="img/02-install.jpg"/>
+      </fig>
+      <p>Please note that oXygen version prior to 15.0 are currently not supported. If there is demand, we might be looking into
+      supporting 14.x versions.</p>
+      <fig id="fig-03-install">
+        <label>Figure 3</label>
+        <caption>
+          <title>Warning: Package is not digitally signed</title>
+        </caption>
+        <graphic xlink:href="img/03-install.jpg"/>
+      </fig>
+      <p>The package is not digitally signed. We might sign it at a later stage. If you trust the people who control the server
+        providing the download link, chances are high that the package hasn’t been tampered with. So press “Continue anyway”
+          (<xref ref-type="fig" rid="fig-03-install"/>)</p>
+      <p>After restarting the application, there should be two new document templates in the “Literatum JATS” category when you
+        select “File &gt; New…” from the menu (<xref ref-type="fig" rid="fig-04-install"/>).</p>
+      <fig id="fig-04-install">
+        <label>Figure 4</label>
+        <caption>
+          <title>New document templates: Issue XML and Literatum JATS article</title>
+        </caption>
+        <graphic xlink:href="img/04-install-new.jpg"/>
+      </fig>
+    </sec>
+    <sec>
       <title>Preview stylesheets and transformations</title>
       <p>Preview stylesheets capable of rendering Publishing (blue) and Authoring (orange) articles are included from
           <ext-link>https://github.com/NCBITools/JATSPreviewStylesheets</ext-link>. They are designed for local customization
         and extension, and include many options, as described in their documentation.</p>
+      <p>Please note that the documents that may be created and checked with this Literatum framework are essentially Archiving
+        (green) JATS documents. Archiving is the richest of all JATS frameworks. Some elements may not be rendered properly.</p>
       <sec>
         <title>Transformations generating HTML</title>
         <p>HTML files resulting from running these scenarios will point to a CSS file here (distributed with the
@@ -99,4 +143,11 @@
         </list>If you make such extensions, please consider sharing them with the community!</p>
     </sec>
   </body>
+  <back>
+    <ref-list>
+      <ref id="bib-lctg">
+        <mixed-citation><institution>Atypon, Inc.</institution>: <source>Literatum Content Tagging Guide</source> <comment>[URL unknown]</comment></mixed-citation>
+      </ref>
+    </ref-list>
+  </back>
 </article>

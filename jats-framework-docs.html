@@ -77,9 +77,10 @@
       <div id="article1-body" class="body">
          <p class="first" id="d1e32">JATS, the journal article tag suite, serves as a basis for Atypon’s Literatum content
             delivery platform. Articles may be
-            delivered according to version 1.0 of the JATS archiving (“green”) DTD.
+            delivered according to version 1.0 of the JATS archiving (“green”) DTD. Please consult
+            Atypon’s Literatum Content Tagging Guide&nbsp;[<a href="#bib-lctg"><span class="generated">1</span></a>].
          </p>
-         <p id="d1e34">A typical delivery to Literatum consists of all articles that belong to a given journal
+         <p id="d1e36">A typical delivery to Literatum consists of all articles that belong to a given journal
             issue. In order to describe the
             contents of an issue, Atypon has added a lightweight issue-xml DTD that utilizes JATS
             vocabulary where available. In
@@ -89,66 +90,114 @@
             'build-issue' will then collect all
             articles in that directory.
          </p>
-         <p id="d1e36">There are Schematron checks for both article and issue XML that help content workers
+         <p id="d1e38">There are Schematron checks for both article and issue XML that help content workers
             comply with Atypon’s requirements,
             such as naming or tagging conventions.
          </p>
-         <div class="section"><a id="d1e38">
+         <div class="section"><a id="d1e40">
+               <!-- named anchor --></a><h2 class="main-title">Installation</h2>
+            <p id="d1e43">In oXygen 16, go to “Help &gt; Install new add-ons…” as depicted in <a href="#fig-01-install">Figure&nbsp;1</a>.
+            </p>
+            <div class="fig panel" style="display: float; clear: both"><a id="fig-01-install">
+                  <!-- named anchor --></a><h5 class="label">Figure&nbsp;1</h5>
+               <div class="caption">
+                  <h4 class="subsection-title">Menu item “Help &gt; Install new add-ons…” in oXygen 16.1</h4>
+               </div><img alt="img/01-install.jpg" src="img/01-install.jpg"></div>
+            <p id="d1e54">Enter the update URL <a target="xrefwindow" href="https://hobots.hogrefe.com/oXygenJATSframework_Literatum/oXygenJATSframework_Literatum.xml" id="d1e56">https://hobots.hogrefe.com/oXygenJATSframework_Literatum/oXygenJATSframework_Literatum.xml</a>.
+               The most recent version (not necessarily v0.2 as depicted in <a href="#fig-02-install">Figure&nbsp;2</a>) of the framework will 
+               be offered for installation.
+            </p>
+            <div class="fig panel" style="display: float; clear: both"><a id="fig-02-install">
+                  <!-- named anchor --></a><h5 class="label">Figure&nbsp;2</h5>
+               <div class="caption">
+                  <h4 class="subsection-title">Entering the update URL in oXygen 16.1’s “Install Add-ons” dialog</h4>
+               </div><img alt="img/02-install.jpg" src="img/02-install.jpg"></div>
+            <p id="d1e68">Please note that oXygen version prior to 15.0 are currently not supported. If there
+               is demand, we might be looking into
+               supporting 14.x versions.
+            </p>
+            <div class="fig panel" style="display: float; clear: both"><a id="fig-03-install">
+                  <!-- named anchor --></a><h5 class="label">Figure&nbsp;3</h5>
+               <div class="caption">
+                  <h4 class="subsection-title">Warning: Package is not digitally signed</h4>
+               </div><img alt="img/03-install.jpg" src="img/03-install.jpg"></div>
+            <p id="d1e77">The package is not digitally signed. We might sign it at a later stage. If you trust
+               the people who control the server
+               providing the download link, chances are high that the package hasn’t been tampered
+               with. So press “Continue anyway”
+               (<a href="#fig-03-install">Figure&nbsp;3</a>)
+            </p>
+            <p id="d1e81">After restarting the application, there should be two new document templates in the
+               “Literatum JATS” category when you
+               select “File &gt; New…” from the menu (<a href="#fig-04-install">Figure&nbsp;4</a>).
+            </p>
+            <div class="fig panel" style="display: float; clear: both"><a id="fig-04-install">
+                  <!-- named anchor --></a><h5 class="label">Figure&nbsp;4</h5>
+               <div class="caption">
+                  <h4 class="subsection-title">New document templates: Issue XML and Literatum JATS article</h4>
+               </div><img alt="img/04-install-new.jpg" src="img/04-install-new.jpg"></div>
+         </div>
+         <div class="section"><a id="d1e92">
                <!-- named anchor --></a><h2 class="main-title">Preview stylesheets and transformations</h2>
-            <p id="d1e41">Preview stylesheets capable of rendering Publishing (blue) and Authoring (orange)
+            <p id="d1e95">Preview stylesheets capable of rendering Publishing (blue) and Authoring (orange)
                articles are included from
-               <a target="xrefwindow" href="https://github.com/NCBITools/JATSPreviewStylesheets" id="d1e43">https://github.com/NCBITools/JATSPreviewStylesheets</a>. They are designed for local customization
+               <a target="xrefwindow" href="https://github.com/NCBITools/JATSPreviewStylesheets" id="d1e97">https://github.com/NCBITools/JATSPreviewStylesheets</a>. They are designed for local customization
                and extension, and include many options, as described in their documentation.
             </p>
-            <div class="section"><a id="d1e46">
+            <p id="d1e100">Please note that the documents that may be created and checked with this Literatum
+               framework are essentially Archiving
+               (green) JATS documents. Archiving is the richest of all JATS frameworks. Some elements
+               may not be rendered properly.
+            </p>
+            <div class="section"><a id="d1e102">
                   <!-- named anchor --></a><h3 class="section-title">Transformations generating HTML</h3>
-               <p id="d1e49">HTML files resulting from running these scenarios will point to a CSS file here (distributed
+               <p id="d1e105">HTML files resulting from running these scenarios will point to a CSS file here (distributed
                   with the
                   XSLT):<pre class="preformat">${frameworks}/jats/jats-preview-xslt/jats-preview.css</pre></p>
             </div>
-            <div class="section"><a id="d1e53">
+            <div class="section"><a id="d1e109">
                   <!-- named anchor --></a><h3 class="section-title">Transformations generating PDF</h3>
-               <p id="d1e56">The Preview stylesheets also include XSL-FO stylesheets for generating PDF. These
+               <p id="d1e112">The Preview stylesheets also include XSL-FO stylesheets for generating PDF. These
                   require a capable XSL-FO formatting
                   engine (they were tested with AntennaHouse). So they are left for local users to set
                   up.
                </p>
             </div>
          </div>
-         <div class="section"><a id="d1e58">
+         <div class="section"><a id="d1e114">
                <!-- named anchor --></a><h2 class="main-title">Submission Package Builder</h2>
-            <p id="d1e61">There is an XProc transformation scenario 'build-issue' that operates on an issue-xml
+            <p id="d1e117">There is an XProc transformation scenario 'build-issue' that operates on an issue-xml
                file, collects all JATS articles
                in the same directory and assembles them to a Literatum submission Zip file. This
                is currently a prototype and needs
                further development.
             </p>
          </div>
-         <div class="section"><a id="d1e63">
+         <div class="section"><a id="d1e119">
                <!-- named anchor --></a><h2 class="main-title">Document templates</h2>
-            <p id="d1e66">Document templates are provided only for the Archiving (green) document type, using
+            <p id="d1e122">Document templates are provided only for the Archiving (green) document type, using
                the HTML table model.
             </p>
          </div>
-         <div class="section"><a id="d1e68">
+         <div class="section"><a id="d1e124">
                <!-- named anchor --></a><h2 class="main-title">Extending the framework</h2>
-            <p id="d1e71">Local developers may wish to do any or all of the following, extending the customization
+            <p id="d1e127">Local developers may wish to do any or all of the following, extending the customization
                that this Literatum JATS framework already contains:
-               <div class="list"><a id="d1e73">
+               <div class="list"><a id="d1e129">
                      <!-- named anchor --></a><ul>
                      <li>
-                        <p id="d1e75">Rewrite the parameter setting in the HTML Transformation Scenario to point to a local
+                        <p id="d1e131">Rewrite the parameter setting in the HTML Transformation Scenario to point to a local
                            (customized) CSS.
                         </p>
                      </li>
                      <li>
-                        <p id="d1e78">Provide transformation scenarios for any of the JATS Preview transformations or production
+                        <p id="d1e134">Provide transformation scenarios for any of the JATS Preview transformations or production
                            pipelines given in the
                            package, or for customized transformations.
                         </p>
                      </li>
                      <li>
-                        <p id="d1e81">Provide templates using the JATS DTDs supporting OASIS tables instead of or in addition
+                        <p id="d1e137">Provide templates using the JATS DTDs supporting OASIS tables instead of or in addition
                            to the templates
                            here.
                         </p>
@@ -156,15 +205,15 @@
                   </ul>
                </div>
             </p>
-            <p id="d1e83">In addition, there are many enhancements possible to this framework, including (but
+            <p id="d1e139">In addition, there are many enhancements possible to this framework, including (but
                not limited to)
-               <div class="list"><a id="d1e85">
+               <div class="list"><a id="d1e141">
                      <!-- named anchor --></a><ul>
                      <li>
-                        <p id="d1e87">More and better CSS.</p>
+                        <p id="d1e143">More and better CSS.</p>
                      </li>
                      <li>
-                        <p id="d1e90">Custom actions, tools and buttons in oXygen for operations useful in writing and editing
+                        <p id="d1e146">Custom actions, tools and buttons in oXygen for operations useful in writing and editing
                            JATS documents, such as
                            graphics, list and table support.
                         </p>
@@ -172,6 +221,26 @@
                   </ul>
                </div>If you make such extensions, please consider sharing them with the community!
             </p>
+         </div>
+      </div>
+      <div id="article1-back" class="back">
+         <div class="back-section"><a id="d1e150">
+               <!-- named anchor --></a><h2 class="main-title">References</h2>
+            <div class="section ref-list"><a id="d1e150">
+                  <!-- named anchor --></a><div class="ref-list table">
+                  <div class="row">
+                     <div class="ref-label cell">
+                        <p class="ref-label"><span class="label"><span class="generated">1</span></span>&nbsp;<a id="bib-lctg">
+                              <!-- named anchor --></a></p>
+                     </div>
+                     <div class="ref-content cell">
+                        <p class="citation"><a id="d1e152">
+                              <!-- named anchor --></a>Atypon, Inc.: Literatum Content Tagging Guide [URL unknown]
+                        </p>
+                     </div>
+                  </div>
+               </div>
+            </div>
          </div>
       </div>
       <div id="article1-footer" class="footer">
