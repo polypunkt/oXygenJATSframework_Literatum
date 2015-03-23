@@ -11,6 +11,8 @@
     <issue-id pub-id-type="doi">issueDoiSuffix</issue-id>
     <issue-title></issue-title>
   </issue-meta>
-  <toc>
-  </toc>
+  <!-- toc will be generated. You may override this according to Sect. 3.1.7 of the Literatum Content
+    Tagging Guide. No consistency checks will be performed within the framework though.
+    <toc>
+  </toc>-->
 </issue-xml>

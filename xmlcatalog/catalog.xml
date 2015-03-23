@@ -1,7 +1,19 @@
 <?xml version="1.0"?>
 <catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="public">
-  <rewriteURI uriStartString="http://hogrefe.com/JATS/schematron/" rewritePrefix="../schematron/"/>
+  <rewriteURI uriStartString="http://hogrefe.com/JATS/" rewritePrefix="../"/>
   <public publicId="-//APA//DTD contentItem DTD v1.6 //EN" uri="../schema/contentItem/contentItem.dtd"/>
+  <public publicId="-//Atypon//DTD Literatum Content Submission Manifest DTD v4.1 20100405//EN" uri="../schema/submissionmanifest/submissionmanifest.4.1.dtd"/>
   <public publicId="-//Atypon//DTD Atypon JATS Journal Archiving and Interchange Issue XML DTD v1.0 20120831//EN" uri="../schema/issue/Atypon-Issue-Xml.dtd"/>
+  <!-- The original DTDs will have preference over Wendell’s versions.
+    Both versions should be equivalent, but we added the original versions on 
+    Atypon’s request. The advantage of Wendell’s versions has been better editing
+    tooltips in oXygen. Recent oXygen versions make use of the embedded comments
+    in the DTDs sufficiently well, so Wendell’s versions do not seem to add
+    siginifcant value (prove us wrong on this). 
+    This is the original JATS catalog: -->
+  <nextCatalog catalog="../schema/JATS-1.0/dtd/catalog-jats-v1.xml"/>
+  <!-- This is the catalog for Wendell’s original flattened DTDs: -->
   <nextCatalog catalog="../O2-DTD/JATS-catalog-O2.xml"/>
+  <nextCatalog catalog="../xproc-util/xmlcatalog/catalog.xml"/>
+  <nextCatalog catalog="../xslt-util/xslt-based-catalog-resolver/xmlcatalog/catalog.xml"/>
 </catalog>

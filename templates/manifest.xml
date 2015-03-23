@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE submission PUBLIC "-//Atypon//DTD Literatum Content Submission Manifest DTD v4.1 20100405//EN" "submissionmanifest.4.1.dtd">
+<submission group-doi="10.000/dummy" submission-type="full">
+  <ext-id><!-- an optional arbitrary handle for retrieving additional submission reports --></ext-id>
+  <callback>
+    <email></email>
+    <email></email>
+  </callback>
+  <processing-instructions>
+    <make-live at-time="2016-10-25 16:00:00" on-condition="no-warnings"/>
+  </processing-instructions>
+</submission>

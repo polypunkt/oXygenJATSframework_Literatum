@@ -1,0 +1,29 @@
+<!--
+    "-//Atypon//DTD Literatum Content Submission Manifest DTD v4.1 20100405//EN"
+    Delivered as file "submissionmanifest.4.1.dtd"
+-->
+
+<!ELEMENT submission (ext-id?, callback?, processing-instructions?)>
+<!ATTLIST submission
+     group-doi CDATA #REQUIRED
+     submission-type (full|partial) #REQUIRED
+>
+
+<!ELEMENT ext-id (#PCDATA)>
+
+<!ELEMENT callback (email+)>
+<!ELEMENT email (#PCDATA)>
+
+<!ELEMENT processing-instructions (priority?, make-live?)>
+
+<!ELEMENT priority EMPTY>
+<!ATTLIST priority
+	level (low|normal|high) #REQUIRED
+>
+
+<!ELEMENT make-live EMPTY>
+<!ATTLIST make-live
+	on-condition (no-warnings|no-errors|no-fatals) #IMPLIED
+	at-time CDATA #IMPLIED
+>
+
