@@ -7,6 +7,7 @@
   xmlns:l="http://xproc.org/library" 
   xmlns:letex="http://www.le-tex.de/namespace"
   xmlns:pxp="http://exproc.org/proposed/steps"
+  xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
   xmlns:transpect="http://www.le-tex.de/namespace/transpect"
   xmlns:xlink="http://www.w3.org/1999/xlink"
   xmlns:xs="http://www.w3.org/2001/XMLSchema" 
@@ -40,6 +41,7 @@
   <p:import href="http://transpect.le-tex.de/xproc-util/xproc.org/library/recursive-directory-list.xpl"/>
   <p:import href="http://transpect.le-tex.de/xproc-util/store-debug/store-debug.xpl"/>
   <p:import href="rng.xpl"/>
+  <p:import href="recursive-delete.xpl"/>
 
   <p:variable name="exclude-regex" select="'(/(__MACOSX|thumbs\.db)|\.(tmp|debug)/|~$)'"/>
 
@@ -117,7 +119,8 @@
         </p:input>
         <p:input port="schema">
           <p:document href="http://hogrefe.com/JATS/schema/submissionmanifest/submissionmanifest.4.1.rng">
-            <p:documentation>If 4.2 is a superset of 4.1, we should use 4.2. If Atypon would be so kind as to provide it.</p:documentation>
+            <p:documentation>If 4.2 is a superset of 4.1, we should use 4.2. If Atypon would be so kind as to provide
+              it.</p:documentation>
           </p:document>
         </p:input>
       </letex:validate-with-rng>
@@ -133,24 +136,28 @@
     </p:viewport>
 
     <p:xslt name="referenced-files">
-      <p:input port="parameters"><p:empty/></p:input>
+      <p:input port="parameters">
+        <p:empty/>
+      </p:input>
       <p:input port="stylesheet">
         <p:document href="referenced-files.xsl"/>
       </p:input>
     </p:xslt>
-    
+
     <letex:store-debug pipeline-step="1.referenced-files" active="yes">
       <p:with-option name="base-uri" select="$debug-dir-uri"/>
     </letex:store-debug>
-    
+
     <p:xslt name="denote-actions">
-      <p:input port="parameters"><p:empty/></p:input>
+      <p:input port="parameters">
+        <p:empty/>
+      </p:input>
       <p:input port="stylesheet">
         <p:document href="actions.xsl"/>
       </p:input>
       <p:with-param name="dest-uri" select="$tmpdir-uri"/>
     </p:xslt>
-    
+
     <letex:store-debug pipeline-step="2.denote-actions" active="yes">
       <p:with-option name="base-uri" select="$debug-dir-uri"/>
     </letex:store-debug>
@@ -225,7 +232,9 @@
       <p:input port="source">
         <p:pipe port="result" step="denote-actions"/>
       </p:input>
-      <p:input port="parameters"><p:empty/></p:input>
+      <p:input port="parameters">
+        <p:empty/>
+      </p:input>
       <p:input port="stylesheet">
         <p:document href="zip-manifest.xsl"/>
       </p:input>
@@ -234,9 +243,6 @@
     <letex:store-debug pipeline-step="3.zip-manifest" active="yes">
       <p:with-option name="base-uri" select="$debug-dir-uri"/>
     </letex:store-debug>
-    <!--<cx:message>
-      <p:with-option name="message" select="'ZZZZZZZZZZZZZZZ ', $tmpdir-uri, ' ', $zip-uri"/>
-    </cx:message>-->
 
     <p:sink/>
 
@@ -262,8 +268,46 @@
         <p:pipe port="report" step="sch"/>
       </p:input>
     </letex:store-debug>
+  
+    <p:choose name="conditionally-zip">
+      <p:when test="not(exists(/*/(svrl:failed-assert | svrl:successful-report)/@role[. = 'fatal']))">
+        <p:output port="result" primary="true">
+          <p:pipe port="result" step="zip"/>
+        </p:output>
+        <pxp:zip name="zip" compression-method="deflated" command="create">
+          <p:with-option name="href" select="$zip-uri"/>
+          <p:input port="manifest">
+            <p:pipe port="result" step="zip-manifest"/>
+          </p:input>
+          <p:input port="source">
+            <p:empty/>
+          </p:input>
+        </pxp:zip>
+        <letex:recursive-delete name="del" cx:depends-on="zip">
+          <p:with-option name="href" select="$tmpdir-uri"/>
+        </letex:recursive-delete>
+        <p:sink/>
+        <!--<cxf:delete recursive="true" fail-on-error="true" name="del" cx:depends-on="zip">
+          <p:with-option name="href" select="$tmpdir-uri"/>
+        </cxf:delete>-->
+      </p:when>
+      <p:otherwise>
+        <p:output port="result" primary="true"/>
+        <p:identity>
+          <p:input port="source">
+            <p:inline><c:errors><c:error>No Zip output because there were fatal errors.</c:error></c:errors></p:inline>
+          </p:input>
+        </p:identity>
+      </p:otherwise>
+    </p:choose>
+
+    <p:sink/>
 
     <p:xslt name="svrl2html">
+      <p:input port="source">
+        <p:pipe port="report" step="sch"/>
+        <p:pipe port="result" step="conditionally-zip"/>
+      </p:input>
       <p:input port="parameters">
         <p:empty/>
       </p:input>
@@ -272,21 +316,11 @@
       </p:input>
     </p:xslt>
 
-    <p:sink/>
+    <!--<cx:message name="msg" cx:depends-on="conditionally-zip">
+      <p:with-option name="message" select="'ZZZZZZZZZZZZZZZ ', $tmpdir-uri, ' ', $zip-uri"/>
+    </cx:message>-->
 
-    <pxp:zip name="zip" compression-method="deflated" command="create">
-      <p:with-option name="href" select="$zip-uri"/>
-      <p:input port="manifest">
-        <p:pipe port="result" step="zip-manifest"/>
-      </p:input>
-      <p:input port="source">
-        <p:empty/>
-      </p:input>
-    </pxp:zip>
-    
-    <cxf:delete recursive="true" fail-on-error="true" name="del" cx:depends-on="zip">
-      <p:with-option name="href" select="$tmpdir-uri"/>
-    </cxf:delete>
+    <p:sink/>
 
     <p:identity>
       <p:input port="source">

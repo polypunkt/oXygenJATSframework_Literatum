@@ -45,16 +45,63 @@
 
     <xsl:variable name="ok" as="element(html:tr)+">
       <tr xmlns="http://www.w3.org/1999/xhtml">
-        <td xmlns="http://www.w3.org/1999/xhtml" class="Status" colspan="4"><p class="ok">Ok</p></td>
+        <td class="Status" colspan="4"><p class="ok">Ok</p></td>
       </tr>
+    </xsl:variable>
+
+    <xsl:variable name="zip" as="element(html:p)">
+      <xsl:choose>
+        <xsl:when test="collection()[2]/c:zipfile">
+          <xsl:variable name="highest-impact" as="xs:string*">
+            <xsl:for-each-group select="$content/html:td[contains(@class, 'impact')]" group-by="@class">
+              <xsl:sort select="html:impact-sortkey(.)" data-type="number" order="descending"/>
+              <xsl:sequence select="replace(@class, '\s*impact\s*', '')"/>
+            </xsl:for-each-group>
+          </xsl:variable>
+          <p xmlns="http://www.w3.org/1999/xhtml" class="{$highest-impact[1]}">
+            <xsl:text>Result: </xsl:text>
+            <a>
+              <xsl:copy-of select="collection()[2]/c:zipfile/@href"/>
+              <xsl:value-of select="replace(collection()[2]/c:zipfile/@href, '^.+/', '')"/>
+            </a>
+          </p>
+        </xsl:when>
+        <xsl:otherwise>
+          <p xmlns="http://www.w3.org/1999/xhtml" class="fatal">
+            <xsl:value-of select="collection()[2]"/>
+          </p>
+        </xsl:otherwise>
+      </xsl:choose>
     </xsl:variable>
 
     <xsl:call-template name="output-table">
       <xsl:with-param name="validated-doc-uri" select="$doc-uri" />
+      <xsl:with-param name="pre" select="$zip"/>
       <xsl:with-param name="content" select="if ($content) then $content else $ok" />
     </xsl:call-template>
   </xsl:template>
 
+  <xsl:function name="html:impact-sortkey" as="xs:integer">
+    <xsl:param name="elt" as="element(*)"/>
+    <xsl:variable name="class" select="if($elt/@class) then replace($elt/@class, '\s*impact\s*', '') else ''"/>
+    <xsl:choose>
+      <xsl:when test="$class = 'fatal'">
+        <xsl:sequence select="4"/>
+      </xsl:when>
+      <xsl:when test="$class = 'error'">
+        <xsl:sequence select="3"/>
+      </xsl:when>
+      <xsl:when test="$class = 'warning'">
+        <xsl:sequence select="2"/>
+      </xsl:when>
+      <xsl:when test="$class = 'info'">
+        <xsl:sequence select="1"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:sequence select="0"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:function>
   <xsl:template name="statistics">
     <xsl:param name="content" as="element(html:tr)*"/>
     <xsl:param name="td-class" as="xs:string"/>
@@ -75,6 +122,7 @@
 
   <xsl:template name="output-table">
     <xsl:param name="validated-doc-uri" as="xs:string"/>
+    <xsl:param name="pre" as="element(*)*"/>
     <xsl:param name="content" as="element(html:tr)*"/>
     <xsl:if test="$content">
       <html xmlns="http://www.w3.org/1999/xhtml">
@@ -93,6 +141,7 @@
           </style>
         </head>
         <body xmlns="http://www.w3.org/1999/xhtml">
+          <xsl:sequence select="$pre"/>
           <table xmlns="http://www.w3.org/1999/xhtml" border="1" valign="top">
             <tr xmlns="http://www.w3.org/1999/xhtml">
               <th xmlns="http://www.w3.org/1999/xhtml">pattern-id</th>

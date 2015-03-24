@@ -46,7 +46,7 @@
     <rule context="/c:directory/c:file/submission">
       <report test="@group-doi = '10.000/dummy'" role="error">Please fill in the 'group-doi' attribute in the manifest.</report>
       <report test="@submission-type = 'full'" role="error">Only full submissions are currently supported.</report>
-      <assert test="exists(callback/email[normalize-space()])">At least one mail address must be given.</assert>
+      <assert test="exists(callback/email[normalize-space()])" role="warning">At least one mail address must be given if you want to receive a submission report.</assert>
     </rule>
   </pattern>
   
