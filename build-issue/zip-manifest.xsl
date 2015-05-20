@@ -18,7 +18,7 @@
   <xsl:template match="text()" mode="zip"/>
   
   <xsl:template match="c:file[@action]" mode="zip">
-    <c:entry href="{@target-href}" name="{string-join(ancestor-or-self::*/@name, '/')}"/>
+    <c:entry href="{@target-href}" name="{string-join(ancestor-or-self::*[position() lt last()]/@name, '/')}"/>
     <xsl:apply-templates select="c:file[@action]" mode="#current"></xsl:apply-templates>    
   </xsl:template>
   

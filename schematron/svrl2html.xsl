@@ -15,7 +15,7 @@
     <xsl:variable name="doc-uri" select="distinct-values(//svrl:active-pattern/@document)"/>
 
     <xsl:variable name="content" as="element(html:tr)*">
-      <xsl:variable name="msgs" as="element(*)*" select="//svrl:failed-assert | //svrl:successful-report"/>
+      <xsl:variable name="msgs" as="element(*)*" select="collection()//svrl:failed-assert | collection()//svrl:successful-report"/>
       <xsl:if test="$msgs">
         <xsl:for-each-group select="$msgs" group-by="preceding-sibling::svrl:active-pattern[1]/@id">
           <xsl:variable name="active-pattern" select="//svrl:active-pattern[@id = current-grouping-key()]" as="node()"/>
@@ -28,11 +28,14 @@
                 <xsl:value-of select="$active-pattern/@id" />
               </td>
               <td xmlns="http://www.w3.org/1999/xhtml" class="path">
+                <p><a href="{$active-pattern/@document}">
+                  <xsl:value-of select="replace($active-pattern/@document, '^.+/', '')"/>
+                </a></p>
                 <p><xsl:value-of select="@location"/></p>
                 <p><xsl:value-of select="@test"/></p>
               </td>
-              <td xmlns="http://www.w3.org/1999/xhtml" class="impact {@role}">
-                <xsl:value-of select="@role"/>
+              <td xmlns="http://www.w3.org/1999/xhtml" class="impact {(@role, 'error')[1]}">
+                <xsl:value-of select="(@role, 'error')[1]"/>
               </td>
               <td xmlns="http://www.w3.org/1999/xhtml" class="message">
                 <xsl:apply-templates select="svrl:text" mode="#current"/>

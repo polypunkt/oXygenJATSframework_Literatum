@@ -17,19 +17,25 @@
   <p:input port="source" primary="true">
     <p:documentation xmlns="http://www.w3.org/1999/xhtml">
       <p>An Atypon manifest file. We’re currently supporting version 4.1; 4.0 and 4.2 may work, too.</p>
+      <p>Its name must be <code>manifest.xml</code>.</p>
+      <p>The part after the slash in /submission/@group-doi corresponds to the folder name where the 
+      articles reside. manifest.xml must be stored in the same parent folder where this folder resides.</p>
+      <p>Example: group-doi="10.000/med.2015.11.issue-1" ⇒ A folder named med.2015.11.issue-1 must exist,
+      containing the article directories and the issue-files directory.</p>
     </p:documentation>
   </p:input>
 
   <p:input port="schematron">
     <p:document href="../schematron/literatum_package.sch"/>
   </p:input>
+  <p:input port="article-schematron">
+    <p:document href="../schematron/literatum_JATS.sch"/>
+  </p:input>
   <p:input port="svrl2html">
     <p:document href="../schematron/svrl2html.xsl"/>
   </p:input>
 
-  <p:output port="result" primary="true">
-    <!--<p:pipe port="result" step="build-issue"/>-->
-  </p:output>
+  <p:output port="result" primary="true"/>
   <p:serialization port="result" indent="true" omit-xml-declaration="false" method="xhtml"/>
 
   <p:option name="tmpdir" required="false" select="''">
@@ -44,15 +50,32 @@
   <p:import href="recursive-delete.xpl"/>
 
   <p:variable name="exclude-regex" select="'(/(__MACOSX|thumbs\.db)|\.(tmp|debug)/|~$)'"/>
+  <p:variable name="timestamp" select="substring(replace(string(current-dateTime()), '\D', ''), 1, 14)"/>
+  <p:variable name="subdir" select="(for $d in /submission/@group-doi
+                                    return replace($d, '^.+/', ''), 'not.specified')[1]"/>
+  <p:variable name="basedir" select="replace(base-uri(), '^(.+/).+$', '$1')"/>
+  
 
   <transpect:file-uri name="tmpdir-uri">
-    <p:with-option name="filename" select="($tmpdir[normalize-space()], replace(base-uri(), '^(.+)/.+$', '$1.tmp/'))[1]"/>
+    <p:with-option name="filename" select="($tmpdir[normalize-space()], replace(base-uri(), '^(.+)/.+$', '$1/package.tmp/'))[1]"/>
   </transpect:file-uri>
 
   <p:sink/>
 
   <transpect:file-uri name="zip-uri">
-    <p:with-option name="filename" select="(replace(base-uri(), '^(.+)/((([^.]+)\.)?([^/]+))/([^/]+)$', '$1/$4_$2.zip'))[1]">
+    <p:with-option name="filename"
+      select="concat(
+                $basedir, 
+                replace(
+                  $subdir, 
+                  '^(([^.]+)\..+)$',
+                  concat(
+                    '$2_$1_',
+                    $timestamp,
+                    '.zip'
+                  )
+                )
+              )">
       <p:pipe port="source" step="process-manifest"/>
     </p:with-option>
   </transpect:file-uri>
@@ -60,24 +83,29 @@
   <p:sink/>
 
   <l:recursive-directory-list name="recursive-directory-list">
-    <p:with-option name="path" select="replace(base-uri(), '^(.+/).+$', '$1')">
-      <p:pipe port="source" step="process-manifest"/>
-    </p:with-option>
+    <p:with-option name="path" select="$basedir"/>
   </l:recursive-directory-list>
 
-  <p:add-attribute match="/c:directory/c:file[not(@name = 'manifest.xml')]" attribute-name="ignore" attribute-value="true"/>
+  <p:delete>
+    <p:with-option name="match" 
+      select="concat('/c:directory/c:file[not(@name = ''manifest.xml'')] | /c:directory/c:directory[not(@name = ''', $subdir, ''')]')"/>
+  </p:delete>
 
   <p:group>
     <p:variable name="tmpdir-uri" select="/*/@local-href">
       <p:pipe port="result" step="tmpdir-uri"/>
     </p:variable>
+    <p:variable name="issue-dir" select="concat($basedir, $subdir)"/>
     <p:variable name="debug-dir-uri" select="replace($tmpdir-uri, '\.tmp/*$', '.debug/')"/>
     <p:variable name="zip-uri" select="/*/@local-href">
       <p:pipe port="result" step="zip-uri"/>
     </p:variable>
+    <letex:store-debug pipeline-step="0.dirlist" active="yes">
+      <p:with-option name="base-uri" select="$debug-dir-uri"/>
+    </letex:store-debug>
     <p:viewport match="c:file" name="load-xml">
       <p:choose>
-        <p:when test="matches(resolve-uri(/*/@name, base-uri()), $exclude-regex, 'i')">
+        <p:when test="matches(resolve-uri(/*/@name, base-uri(/*)), $exclude-regex, 'i')">
           <p:add-attribute match="/c:file" attribute-name="ignore" attribute-value="true"/>
         </p:when>
         <p:when test="matches(/*/@name, '\.xml$')">
@@ -87,6 +115,9 @@
               <p:load dtd-validate="true">
                 <p:with-option name="href" select="resolve-uri(/*/@name, base-uri())"/>
               </p:load>
+              <p:add-attribute attribute-name="xml:base" match="/*">
+                <p:with-option name="attribute-value" select="base-uri()"/>
+              </p:add-attribute>
             </p:group>
             <p:catch name="catch-load">
               <p:output port="result" primary="true"/>
@@ -113,10 +144,12 @@
     </p:viewport>
 
     <p:viewport match="/c:directory/c:file[not(@ignore = 'true')][not(c:errors)]" name="validate-manifest">
-      <letex:validate-with-rng name="val">
+      <p:delete match="/*/@xml:base">
         <p:input port="source" select="/c:file/*[not(self::c:*)]">
           <p:pipe port="current" step="validate-manifest"/>
         </p:input>
+      </p:delete>
+      <letex:validate-with-rng name="val">
         <p:input port="schema">
           <p:document href="http://hogrefe.com/JATS/schema/submissionmanifest/submissionmanifest.4.1.rng">
             <p:documentation>If 4.2 is a superset of 4.1, we should use 4.2. If Atypon would be so kind as to provide
@@ -228,6 +261,28 @@
 
     <p:sink/>
 
+    <p:for-each name="sch-article" cx:depends-on="clone">
+      <p:iteration-source select="//c:file/article">
+        <p:pipe port="result" step="denote-actions"/>
+      </p:iteration-source>
+      <p:output port="report" primary="true">
+        <p:pipe port="report" step="sch-article1"/>
+      </p:output>
+      <p:validate-with-schematron assert-valid="false" name="sch-article1">
+        <p:input port="parameters">
+          <p:empty/>
+        </p:input>
+        <p:input port="schema">
+          <p:pipe port="article-schematron" step="process-manifest"/>
+        </p:input>
+        <p:with-param name="allow-foreign" select="'true'"/>
+        <p:with-param name="full-path-notation" select="'2'"/>
+      </p:validate-with-schematron>
+      <p:sink/>
+    </p:for-each>
+    
+    <p:sink/>
+
     <p:xslt name="zip-manifest">
       <p:input port="source">
         <p:pipe port="result" step="denote-actions"/>
@@ -307,6 +362,7 @@
       <p:input port="source">
         <p:pipe port="report" step="sch"/>
         <p:pipe port="result" step="conditionally-zip"/>
+        <p:pipe port="report" step="sch-article"/>
       </p:input>
       <p:input port="parameters">
         <p:empty/>
