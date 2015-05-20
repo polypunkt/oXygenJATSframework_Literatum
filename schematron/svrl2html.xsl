@@ -28,9 +28,13 @@
                 <xsl:value-of select="$active-pattern/@id" />
               </td>
               <td xmlns="http://www.w3.org/1999/xhtml" class="path">
-                <p><a href="{$active-pattern/@document}">
-                  <xsl:value-of select="replace($active-pattern/@document, '^.+/', '')"/>
-                </a></p>
+                <xsl:if test="not(matches($active-pattern/@document, '\.xpl$'))">
+                  <p>
+                    <a href="{$active-pattern/@document}">
+                      <xsl:value-of select="replace($active-pattern/@document, '^.+/', '')"/>
+                    </a>
+                  </p>
+                </xsl:if>
                 <p><xsl:value-of select="@location"/></p>
                 <p><xsl:value-of select="@test"/></p>
               </td>

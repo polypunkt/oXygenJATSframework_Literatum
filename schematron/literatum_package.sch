@@ -42,7 +42,7 @@
     </rule>
   </pattern>
   
-  <pattern id="templates">
+  <pattern id="manifest">
     <rule context="/c:directory/c:file/submission">
       <report test="@group-doi = '10.000/dummy'" role="error">Please fill in the 'group-doi' attribute in the manifest.</report>
       <assert test="@submission-type = 'full'" role="error">Only full submissions are currently supported.</assert>
