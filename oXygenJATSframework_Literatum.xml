@@ -2,13 +2,13 @@
 <xt:extensions xmlns:xt="http://www.oxygenxml.com/ns/extension"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.oxygenxml.com/ns/extension http://www.oxygenxml.com/ns/extension/extensions.xsd">
-    <xt:extension id="v0.5.0">
+    <xt:extension id="v0.6.0">
         <xt:location href="https://hobots.hogrefe.com/oXygenJATSframework_Literatum/oXygenJATSframework_Literatum.zip"/>
-        <xt:version>0.5.0</xt:version>
+        <xt:version>0.6.0</xt:version>
         <xt:oxy_version>15.0+</xt:oxy_version>
         <xt:type>framework</xt:type>
         <xt:author>Wendell Piez, Gerrit Imsieke</xt:author>
-        <xt:name>Literatum JATS (v0.5)</xt:name><!--oXygenJATSFramework-->
+        <xt:name>Literatum JATS (v0.6)</xt:name><!--oXygenJATSFramework-->
         <xt:description xmlns="http://www.w3.org/1999/xhtml">
           <h2>oXygen XML Editor framework for NISO JATS 1.0, adapted for Atypon’s Literatum platform</h2>
           <p>NISO JATS Z39.96-2012 defines an XML-based format for the authoring,
@@ -20,6 +20,9 @@
           rules.</p>
           <p>Adaption of Wendell Piez’s original JATS framework was commissioned by 
           Hogrefe Verlag, Göttingen, and was carried out by Gerrit Imsieke of le-tex publishing services.</p>
+          <p>Some Schematron rules in literatum_JATS.sch are specific to Hogrefe’s production or
+          articles in the field of psychology. There is currently no other customization mechanism
+          than to fork the project and build a customized framework.</p>
         </xt:description>
         <xt:license><![CDATA[This work is in the public domain. It includes artifacts published by the National
 Library of Medicine (NLM) with the following language:
