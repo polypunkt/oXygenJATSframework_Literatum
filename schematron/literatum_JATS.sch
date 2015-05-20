@@ -193,10 +193,10 @@
 
   <pattern id="must-have-corresponding">
     <let name="exceptions-en" value="('Book reviews', 'News', 'Announcement', 'Calendar', 'Meeting Report')"/>
-    <rule context="/article[@xml:lang = 'en']
-                     /front
-                       /article-meta[not(article-categories/subj-group[@subj-group-type = 'toc-heading'] = $exceptions-en)]
-                         /contrib-group">
+    <rule context="article[@xml:lang = 'en']
+                    /front
+                      /article-meta[not(article-categories/subj-group[@subj-group-type = 'toc-heading'] = $exceptions-en)]
+                        /contrib-group">
       <assert test="count(contrib[@corresp = 'yes']) = 1">In all articles except those categorized as <value-of 
         select="string-join(for $c in $exceptions-en return concat('''', $c, ''''), ', ')"/>, there must be exactly one
         contrib with corresp="yes".</assert>
@@ -335,7 +335,7 @@
   </pattern>
   
   <pattern id="inline-graphic">
-    <rule context="/">
+    <rule context="article">
       <report test="exists(//inline-graphic | //disp-formula//graphic | //chem-struct//graphic)" role="info">Do the graphics files have the correct size?</report>
     </rule>
   </pattern>
@@ -348,7 +348,7 @@
   
   <pattern id="boxed-text">
     <rule context="boxed-text">
-      <assert test="@id">boxed-text must have an id attribute.</assert>
+      <assert test="@id"><name/> must have an id attribute.</assert>
     </rule>
   </pattern>
 
@@ -407,10 +407,5 @@
     </rule>
   </pattern>
 
-  <pattern id="email">
-    <rule context="email">
-      <report test="matches(., '^(e-mail[:\s\p{Zs}]|mailto:)', 'i')">email element should only contain a plain email address.</report>
-    </rule>
-  </pattern>
 
 </schema>
