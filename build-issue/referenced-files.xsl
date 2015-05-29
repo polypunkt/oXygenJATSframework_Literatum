@@ -3,11 +3,11 @@
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:xlink="http://www.w3.org/1999/xlink"
   xmlns:c="http://www.w3.org/ns/xproc-step" 
-  exclude-result-prefixes="c xs xlink"
+  exclude-result-prefixes="xs"
   version="2.0">
   
   <xsl:template match="* | @*">
-    <xsl:copy>
+    <xsl:copy copy-namespaces="no">
       <xsl:apply-templates select="@*, node()" mode="#current"/>
     </xsl:copy>
   </xsl:template>

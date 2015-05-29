@@ -26,7 +26,7 @@
     <rule context="article-meta">
       <assert test="normalize-space(volume)">The volume element must be present and it must not be empty.</assert>
       <assert test="normalize-space(issue)">The issue element must be present and it must not be empty.</assert>
-      <assert test="normalize-space(fpage)">The fpage element must be present and it must not be empty.</assert>
+      <assert test="normalize-space(fpage)">The fpage element must be present and it must not be empty (or page-range for single-page articles).</assert>
     </rule>
     <rule context="article-meta/volume">
       <report test="italic | bold">No italic or bold in article-meta/volume</report>
@@ -106,7 +106,7 @@
   
   <pattern id="one-abstract">
     <rule context="article-meta">
-      <assert test="count(abstract) ge 1" role="warning">There should be an abstract.</assert>
+      <assert test="count(abstract) ge 1" role="warning">Should there be an abstract?</assert>
       <report test="count(abstract) gt 1">There must only be one abstract. Translations need to be tagged as trans-abstract.</report>
       <assert test="not(abstract/@xml:lang = trans-abstract/@xml-lang)">The trans-abstract language must differ from the main abstract language.</assert>
     </rule>
@@ -159,7 +159,8 @@
   <pattern id="string-names">
     <rule context="contrib/string-name">
       <assert test="surname" role="warning">There should be a surname.</assert>
-      <report test="text()[matches(., '\S')]" role="warning">There should only be whitespace text nodes in string-name.</report>
+      <report test="text()[matches(., '\S')]" role="warning">There should only be whitespace text nodes in string-name. Found: <value-of 
+        select="string-join(for $t in text()[matches(., '\S')] return concat('''', $t, ''''), ', ')"/></report>
     </rule>
     <rule context="contrib/string-name/surname">
       <report test="following-sibling::given-names" role="warning">Given names should appear before the surname.</report>
@@ -175,7 +176,7 @@
                                        [a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*
                                        \.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])$'"/>
     <rule context="email">
-      <assert test="matches(., $email-regex-x, 'x')">The email seems to be incorrect. Note that this element must only contain an email
+      <assert test="matches(., $email-regex-x, 'xi')">The email seems to be incorrect. Note that this element must only contain an email
       address, no 'mailto:' and no 'E-Mail: ', etc.</assert>
     </rule>
   </pattern>
@@ -187,7 +188,14 @@
   </pattern>
   <pattern id="contrib-sep-and">
     <rule context="contrib-group[count(contrib) gt 1]/contrib[position() = last()]">
-      <assert test="preceding-sibling::*[1]/self::x[. = ' and ']">This contrib must be preceded by an x element with the content ' and '.</assert>
+      <let name="and" value="if (ancestor::article/@xml:lang = 'de') then ' und ' else ' and '"/>
+      <assert test="preceding-sibling::*[1]/self::x[replace(., '\s+', ' ') = $and]">This contrib must be preceded by an x element with the content '<value-of select="$and"/>'.</assert>
+    </rule>
+    <rule context="article[@xml:lang = 'de']
+                    /front
+                      /article-meta
+                        /contrib-group[count(contrib) gt 1]/contrib[position() = last()]">
+      <assert test="preceding-sibling::*[1]/self::x[. = ' und ']">This contrib must be preceded by an x element with the content ' und '.</assert>
     </rule>
   </pattern>
 
@@ -197,12 +205,12 @@
                     /front
                       /article-meta[not(article-categories/subj-group[@subj-group-type = 'toc-heading'] = $exceptions-en)]
                         /contrib-group">
-      <assert test="count(contrib[@corresp = 'yes']) = 1">In all articles except those categorized as <value-of 
-        select="string-join(for $c in $exceptions-en return concat('''', $c, ''''), ', ')"/>, there must be exactly one
+      <assert test="exists(contrib[@corresp = 'yes'])">In all articles except those categorized as <value-of 
+        select="string-join(for $c in $exceptions-en return concat('''', $c, ''''), ', ')"/>, there must be at least one
         contrib with corresp="yes".</assert>
     </rule>
     <rule context="article-meta">
-      <assert test="count(author-notes/corresp) = 1">article-meta must include exactly one author-notes/corresp.</assert>
+      <assert test="count(author-notes/corresp) = 1">article-meta must include at least one author-notes/corresp.</assert>
     </rule>
   </pattern>  
 
@@ -369,19 +377,21 @@
 
 
   <pattern id="person-sep-comma" abstract="true">
-    <rule context="person-group[count(string-name) gt 2]/string-name[position() lt last() - 1]">
+    <rule context="person-group[count(string-name) gt 2]/string-name[if (following-sibling::etal) 
+                                                                     then position() lt last() - 1
+                                                                     else position() lt last()]">
       <assert test="following-sibling::node()[1]/self::text()[matches(., ',\s+')]">These <name/>s must be separated by ', '.</assert>
     </rule>
   </pattern>
   <pattern id="person-sep-and">
-    <rule context="person-group[count(string-name) gt 1]/string-name[position() = last()]">
+    <rule context="person-group[count(string-name) gt 1]/string-name[position() = last()][not(following-sibling::etal)]">
       <assert test="preceding-sibling::node()[1]/self::text()[matches(., '\s+&amp;\s+')]">This last <name/> must be preceded by ' &amp; '.</assert>
     </rule>
   </pattern>
   <pattern id="no-text-in-person-group">
     <rule context="person-group">
       <let name="non-conforming" value="text()[normalize-space()][not(matches(., '^(\s+&amp;\s+|,\s+|\s+\(|\))$'))]"/>
-      <report test="exists($non-conforming)">Text in person-group should be one of the following 
+      <report test="exists($non-conforming)" role="warning">Text in person-group should be one of the following 
         (separated by ; to decrease confusion): ', '; ' &amp; '; ' ('; or ')'.
       Found: <value-of select="string-join(for $t in $non-conforming return concat('''', $t, ''''), '; ')"/></report>
     </rule>
@@ -407,5 +417,10 @@
     </rule>
   </pattern>
 
+  <pattern id="single-page-citation">
+    <rule context="mixed-citation//fpage">
+      <report test="ancestor::mixed-citation//lpage[. = current()]">Single-page citations should have their page number in a page-range element, rather than fpage/lpage.</report>
+    </rule>
+  </pattern>
 
 </schema>

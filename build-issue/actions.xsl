@@ -3,7 +3,7 @@
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:xlink="http://www.w3.org/1999/xlink"
   xmlns:c="http://www.w3.org/ns/xproc-step" 
-  exclude-result-prefixes="c xs xlink"
+  exclude-result-prefixes="xlink"
   version="2.0">
 
   <xsl:param name="dest-uri" as="xs:string"/>

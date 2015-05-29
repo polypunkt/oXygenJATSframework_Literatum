@@ -10,7 +10,7 @@
   xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
   xmlns:transpect="http://www.le-tex.de/namespace/transpect"
   xmlns:xlink="http://www.w3.org/1999/xlink"
-  xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
   version="1.0" 
   name="process-manifest">
 
@@ -48,6 +48,27 @@
   <p:import href="http://transpect.le-tex.de/xproc-util/store-debug/store-debug.xpl"/>
   <p:import href="rng.xpl"/>
   <p:import href="recursive-delete.xpl"/>
+
+  <p:declare-step name="remove-ns-decl-and-xml-base" type="transpect:remove-ns-decl-and-xml-base">
+    <p:documentation>The purpose of this identity transformation is to remove all namespace declarations.</p:documentation>
+    <p:input port="source" primary="true"/>
+    <p:output port="result" primary="true"/>
+    <p:xslt>
+      <p:input port="parameters"><p:empty/></p:input>
+      <p:input port="stylesheet">
+        <p:inline>
+          <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0">
+            <xsl:template match="* | @*">
+              <xsl:copy copy-namespaces="no">
+                <xsl:apply-templates select="@*, node()"/>
+              </xsl:copy>
+            </xsl:template>
+            <xsl:template match="@xml:base"/>
+          </xsl:stylesheet>
+        </p:inline>
+      </p:input>
+    </p:xslt> 
+  </p:declare-step>
 
   <p:variable name="exclude-regex" select="'(/(__MACOSX|thumbs\.db)|\.(tmp|debug)/|~$)'"/>
   <p:variable name="timestamp" select="substring(replace(string(current-dateTime()), '\D', ''), 1, 14)"/>
@@ -210,11 +231,11 @@
           </cxf:copy>
         </p:when>
         <p:when test="/*/@action = 'serialize' and /*/*/self::article">
-          <p:identity>
+          <transpect:remove-ns-decl-and-xml-base>
             <p:input port="source" select="/*/article">
               <p:pipe port="current" step="clone"/>
             </p:input>
-          </p:identity>
+          </transpect:remove-ns-decl-and-xml-base>
           <p:store doctype-public="-//NLM//DTD JATS (Z39.96) Journal Archiving and Interchange DTD v1.0 20120330//EN"
             doctype-system="JATS-archivearticle1.dtd" omit-xml-declaration="false">
             <p:with-option name="href" select="/*/@target-href">
@@ -223,11 +244,11 @@
           </p:store>
         </p:when>
         <p:when test="/*/@action = 'serialize' and /*/*/self::submission">
-          <p:identity>
+          <transpect:remove-ns-decl-and-xml-base>
             <p:input port="source" select="/*/submission">
               <p:pipe port="current" step="clone"/>
             </p:input>
-          </p:identity>
+          </transpect:remove-ns-decl-and-xml-base>
           <p:store doctype-public="-//Atypon//DTD Literatum Content Submission Manifest DTD v4.1 20100405//EN"
             doctype-system="submissionmanifest.4.1.dtd" omit-xml-declaration="false">
             <p:with-option name="href" select="/*/@target-href">

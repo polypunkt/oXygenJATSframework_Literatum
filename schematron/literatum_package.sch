@@ -25,10 +25,35 @@
       
     </rule>
   </pattern>
+
+  <pattern id="manifest">
+    <rule context="/c:directory/c:file/submission">
+      <let name="subdir" value="replace((@group-doi, '')[1], '^.+/', '')"/>
+      <assert test="/c:directory/c:directory[@name = $subdir]" role="fatal">The string after the (last) slash in @group-doi must match the 
+      name of a subdirectory that is located in the same directory as manifest.xml.</assert>
+      <report test="@group-doi = '10.000/dummy'" role="error">Please fill in the 'group-doi' attribute in the manifest.</report>
+      <assert test="@submission-type = 'full'" role="error">Only full submissions are currently supported.</assert>
+      <assert test="exists(callback/email[normalize-space()])" role="warning">At least one mail address must be given if you want to receive a submission report.</assert>
+    </rule>
+  </pattern>
   
+  <pattern id="suppl">
+    <rule context="c:directory[ends-with(@xlink:href, 'suppl/')]">
+      <report test="true()" role="info">Directory <a xmlns="http://www.w3.org/1999/xhtml" href="{@xlink:href}">
+      <xsl:value-of select="replace(@xlink:href, '^.+/([^/]+/suppl/)$', '$1')"/></a> contains the following
+      files: <ul xmlns="http://www.w3.org/1999/xhtml"><xsl:apply-templates select="c:file" mode="refd-files"/></ul></report>
+    </rule>
+  </pattern>
+
   <xsl:template match="c:refd-files/*" xmlns="http://www.w3.org/1999/xhtml" mode="refd-files">
     <li>
       <xsl:value-of select="name(), @orig-href" separator=" "/>
+    </li>
+  </xsl:template>
+
+  <xsl:template match="c:directory/c:file" xmlns="http://www.w3.org/1999/xhtml" mode="refd-files">
+    <li>
+      <a href="{@xlink:href}"><xsl:value-of select="@name"/></a>
     </li>
   </xsl:template>
   
@@ -42,15 +67,6 @@
     </rule>
   </pattern>
   
-  <pattern id="manifest">
-    <rule context="/c:directory/c:file/submission">
-      <let name="subdir" value="replace((@group-doi, '')[1], '^.+/', '')"/>
-      <assert test="/c:directory/c:directory[@name = $subdir]" role="fatal">The string after the (last) slash in @group-doi must match the 
-      name of a subdirectory that is located in the same directory as manifest.xml.</assert>
-      <report test="@group-doi = '10.000/dummy'" role="error">Please fill in the 'group-doi' attribute in the manifest.</report>
-      <assert test="@submission-type = 'full'" role="error">Only full submissions are currently supported.</assert>
-      <assert test="exists(callback/email[normalize-space()])" role="warning">At least one mail address must be given if you want to receive a submission report.</assert>
-    </rule>
-  </pattern>
+  
   
 </schema>
