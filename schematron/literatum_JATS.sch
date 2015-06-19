@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="file:/C:/cygwin/home/gerrit/Hogrefe/BookTagSet/repo/schema/iso-schematron/iso-schematron.rng" schematypens="http://relaxng.org/ns/structure/1.0"?>
 <schema xmlns="http://purl.oclc.org/dsdl/schematron" queryBinding="xslt2">
 
   <ns prefix="xlink" uri="http://www.w3.org/1999/xlink"/>
   
   <let name="jid-from-filename" value="replace(base-uri(), '^.+/(.+?)\..+$', '$1')"/>
+  <let name="contrib-article-types" value="('article-commentary', 'brief-report', 'case-report', 'discussion', 
+    'research-article', 'review-article')"/>
+  <let name="abstract-required-en" value="('Brief Report', 'Case Report', 'Research Article')"/>
 
   <pattern id="no-empty">
     <rule context="*[empty(node())]">
@@ -34,7 +38,7 @@
   </pattern>
   
   <pattern id="pdf-self-uri">
-    <rule context="article-meta">
+    <rule context="article-meta[not(contains(ancestor::article/@article-type, 'header'))]">
       <assert test="self-uri[@content-type = 'pdf']">There must be a self-uri[@content-type = 'pdf']</assert>
     </rule>
     <rule context="self-uri[@content-type = 'pdf']">
@@ -43,7 +47,7 @@
   </pattern>
   
   <pattern id="doi">
-    <rule context="article-meta">
+    <rule context="article-meta[not(contains(ancestor::article/@article-type, 'header'))]">
       <assert test="exists(article-id[@pub-id-type = 'doi'])" id="article-id-doi">There must be an article-id with pub-id-type="doi".</assert>
     </rule>
     <rule context="article-id[@pub-id-type = 'doi']">
@@ -106,9 +110,17 @@
   
   <pattern id="one-abstract">
     <rule context="article-meta">
-      <assert test="count(abstract) ge 1" role="warning">Should there be an abstract?</assert>
       <report test="count(abstract) gt 1">There must only be one abstract. Translations need to be tagged as trans-abstract.</report>
       <assert test="not(abstract/@xml:lang = trans-abstract/@xml-lang)">The trans-abstract language must differ from the main abstract language.</assert>
+    </rule>
+  </pattern>
+  
+  <pattern id="one-abstract-for-certain-types">
+    <rule context="article[@xml:lang = 'en']
+                    /front
+                      /article-meta[article-categories/subj-group[@subj-group-type = 'toc-heading']/subject = $abstract-required-en]">
+      <assert test="exists(abstract)">Articles of type '<value-of 
+        select="article-categories/subj-group[@subj-group-type = 'toc-heading']/subject"/>' must have an abstract.</assert>
     </rule>
   </pattern>
 
@@ -133,7 +145,7 @@
   </pattern>
  
   <pattern id="category">
-    <rule context="article-meta">
+    <rule context="article-meta[not(contains(ancestor::article/@article-type, 'header'))]">
       <assert test="article-categories/subj-group[@subj-group-type = 'toc-heading']">There must be an
       article-categories/subj-group[@subj-group-type = 'toc-heading'] category.</assert>
     </rule>
@@ -159,7 +171,8 @@
   <pattern id="string-names">
     <rule context="contrib/string-name">
       <assert test="surname" role="warning">There should be a surname.</assert>
-      <report test="text()[matches(., '\S')]" role="warning">There should only be whitespace text nodes in string-name. Found: <value-of 
+      <report test="text()[matches(., '\S')][not(. = '†')]" role="warning">There should only be whitespace text nodes in string-name
+        (with the exception of text nodes that consist of a single dagger, '†'). Found: <value-of 
         select="string-join(for $t in text()[matches(., '\S')] return concat('''', $t, ''''), ', ')"/></report>
     </rule>
     <rule context="contrib/string-name/surname">
@@ -180,6 +193,12 @@
       address, no 'mailto:' and no 'E-Mail: ', etc.</assert>
     </rule>
   </pattern>
+  
+  <pattern id="lowercase-email-preferred">
+    <rule context="email">
+      <report test="matches(., '\p{Lu}')" role="warning">Email addresses should be all lowercase. Found: '<value-of select="."/>'.</report>
+    </rule>
+  </pattern>
 
   <pattern id="contrib-sep-comma" abstract="true">
     <rule context="contrib-group[count(contrib) gt 2]/contrib[position() lt last() - 1]">
@@ -187,39 +206,34 @@
     </rule>
   </pattern>
   <pattern id="contrib-sep-and">
-    <rule context="contrib-group[count(contrib) gt 1]/contrib[position() = last()]">
-      <let name="and" value="if (ancestor::article/@xml:lang = 'de') then ' und ' else ' and '"/>
+    <rule context="contrib-group[count(contrib) gt 2]/contrib[position() = last()]">
+      <let name="and" value="if (ancestor::article/@xml:lang = 'de') then ' und ' else ', and '"/>
       <assert test="preceding-sibling::*[1]/self::x[replace(., '\s+', ' ') = $and]">This contrib must be preceded by an x element with the content '<value-of select="$and"/>'.</assert>
     </rule>
-    <rule context="article[@xml:lang = 'de']
-                    /front
-                      /article-meta
-                        /contrib-group[count(contrib) gt 1]/contrib[position() = last()]">
-      <assert test="preceding-sibling::*[1]/self::x[. = ' und ']">This contrib must be preceded by an x element with the content ' und '.</assert>
+    <rule context="contrib-group[count(contrib) = 2]/contrib[position() = last()]">
+      <let name="and" value="if (ancestor::article/@xml:lang = 'de') then ' und ' else ' and '"/>
+      <assert test="preceding-sibling::*[1]/self::x[replace(., '\s+', ' ') = $and]">This contrib must be preceded by an x element with the content '<value-of select="$and"/>'.</assert>
     </rule>
   </pattern>
 
   <pattern id="must-have-corresponding">
-    <let name="exceptions-en" value="('Book reviews', 'News', 'Announcement', 'Calendar', 'Meeting Report')"/>
-    <rule context="article[@xml:lang = 'en']
+    <rule context="article[@article-type = $contrib-article-types]
                     /front
-                      /article-meta[not(article-categories/subj-group[@subj-group-type = 'toc-heading'] = $exceptions-en)]
-                        /contrib-group">
-      <assert test="exists(contrib[@corresp = 'yes'])">In all articles except those categorized as <value-of 
-        select="string-join(for $c in $exceptions-en return concat('''', $c, ''''), ', ')"/>, there must be at least one
+                      /article-meta">
+      <assert test="exists(contrib-group/contrib[@corresp = 'yes'])" role="warning">In all articles of type <value-of 
+        select="string-join(for $c in $contrib-article-types return concat('''', $c, ''''), ', ')"/>, there should be at least one
         contrib with corresp="yes".</assert>
-    </rule>
-    <rule context="article-meta">
-      <assert test="count(author-notes/corresp) = 1">article-meta must include at least one author-notes/corresp.</assert>
+      <assert test="count(author-notes/corresp) = 1" role="warning">If there is a corresponding author, article-meta 
+        should include at least one element author-notes/corresp.</assert>
     </rule>
   </pattern>  
 
   <pattern id="corresp">
     <rule context="corresp">
-      <let name="non-conforming" value="text()[normalize-space()][not(matches(., '^,(\s+(Tel\.|E-mail))?\s+$'))]"/>
+      <let name="non-conforming" value="text()[normalize-space()][not(matches(., '^,(\s+(Tel\.|E-mail|Fax))?\s+$'))]"/>
       <report test="exists($non-conforming)">If there is plain text here, it 
         should be one of the following (separated by ; to decrease confusion): 
-        ', '; ', E-mail '; or ', Tel. '. Found: <value-of 
+        ', '; ', E-mail '; ', Fax '; or ', Tel. '. Found: <value-of 
           select="string-join(for $t in $non-conforming return concat('''', $t, ''''), '; ')"/></report>
     </rule>
     <rule context="corresp/email">
@@ -256,7 +270,7 @@
     <rule context="graphic">
       <let name="ext" value="replace(@xlink:href, '^.+?([^.]+)$', '$1')"/>
       <let name="basename" value="replace(@xlink:href, '^(.+/)?([^/.]+)\..+$', '$2')"/>
-      <let name="candidates" value="for $i in (@id, ../@id) return string-join(($jid-from-filename, $i), '_')"/>
+      <let name="candidates" value="for $i in (@id(:, ../@id:)) return string-join(($jid-from-filename, $i), '_')"/>
       <assert test="$basename = $candidates">The file’s base name 
       should be <value-of select="string-join($candidates, ' or ')"/></assert>
       <assert test="if (exists(ancestor::fig | ancestor::table-wrap)) 
@@ -265,10 +279,10 @@
   </pattern>
   
   <pattern id="sec">
-    <rule context="sec[not(ancestor::sec)]">
+    <rule context="sec[not(ancestor::sec | ancestor::boxed-text)]">
       <report test="@disp-level" role="warning">disp-level should only be given for subsections.</report>
     </rule>
-    <rule context="sec[ancestor::sec]">
+    <rule context="sec[ancestor::sec][not(ancestor::boxed-text)]">
       <let name="subsect" value="string-join(('subsect', string(count(ancestor::sec))), '')"/>
       <assert test="@disp-level = $subsect" role="warning">disp-level should be <value-of select="$subsect"/>.</assert>
     </rule>
@@ -280,7 +294,7 @@
   <pattern id="label">
     <let name="label-regex" 
       value="'^((Abb(\.|ildung)|Fig(\.|ure)|Abschn(\.|itt)|Sec(\.|t\.|tion)|Anh(\.|ang)|App(\.|endix))[\p{Zs}\s]+)?[\(\[]?(([ivx]+|[IVX]+|[a-z]|[A-Z]|&#x2007;*[0-9]+)(\.\d+)*)[.:]?[\)\]]?[\p{Zs}\s]+'"/>
-    <rule context="*[('sec', 'app', 'fig', 'table-wrap') = name()][matches(title, $label-regex)]">
+    <rule context="*[('fig', 'table-wrap') = name()][matches(title, $label-regex)]"><!-- excluded 'sec', 'app' from check on Hogrefe’s request -->
       <assert test="exists(label)" id="must-have-label" role="warning">According to Sect. 2.12 of the Literatum Content Tagging Guide, this item must have an explicit label.</assert>
     </rule>
     <rule context="fn[matches(p[1], $label-regex)] | list-item[matches(p[1], $label-regex)]">
@@ -390,10 +404,15 @@
   </pattern>
   <pattern id="no-text-in-person-group">
     <rule context="person-group">
-      <let name="non-conforming" value="text()[normalize-space()][not(matches(., '^(\s+&amp;\s+|,\s+|\s+\(|\))$'))]"/>
+      <let name="regex-list" value="(if (ancestor::article/@xml:lang = 'en') then ',?\s+&amp;\s+' else '\s+&amp;\s+', 
+                                     ',\s+', '\s+\(', '\)')"/>
+      <let name="non-conforming" value="text()[normalize-space()]
+                                              [not(matches(., concat('^(', string-join($regex-list, '|'), ')$')))]"/>
       <report test="exists($non-conforming)" role="warning">Text in person-group should be one of the following 
-        (separated by ; to decrease confusion): ', '; ' &amp; '; ' ('; or ')'.
-      Found: <value-of select="string-join(for $t in $non-conforming return concat('''', $t, ''''), '; ')"/></report>
+        (separated by ; to decrease confusion): ', '; 
+        <value-of select="if (ancestor::article/@xml:lang = 'en') then ''', &amp; ''; ' else ''"/> ' &amp; '; ' ('; or ')'.
+      Found: <value-of select="string-join(for $t in $non-conforming return concat('''', $t, ''''), '; ')"/>.
+      Please note that whitespace matters in <name/>.</report>
     </rule>
   </pattern>
   <pattern id="string-name">
@@ -416,10 +435,38 @@
         select="string-join($ref-pub-types, '|')"/>" required.</assert>
     </rule>
   </pattern>
+  
+  <pattern id="book-chapter-ref">
+    <rule context="mixed-citation[@publication-type = 'book-chapter']">
+      <report test="article-title">Please use chapter-title instead of article-title for book chapters.</report>
+      <assert test="chapter-title">Missing element chapter-title in book chapter.</assert>
+      <assert test="person-group[@person-group-type = 'editor']">There must be a person-group of person-group-type = 'editor' in book chapters.</assert>
+    </rule>
+  </pattern>
+
+  <pattern id="given-surnames">
+    <rule context="given-names[following-sibling::*[1]/self::surname]">
+      <assert test="following-sibling::node()[1]/self::text()[matches(., '^[\s\p{Zs}]+$')]">There must be whitespace between
+      given-names and surname.</assert>
+    </rule>
+  </pattern>
 
   <pattern id="single-page-citation">
     <rule context="mixed-citation//fpage">
       <report test="ancestor::mixed-citation//lpage[. = current()]">Single-page citations should have their page number in a page-range element, rather than fpage/lpage.</report>
+    </rule>
+  </pattern>
+
+  <pattern id="subsup">
+    <rule context="sub | sup">
+      <report test="preceding-sibling::node()[1]/self::text()[matches(., '^\s+$')]" role="warning">There is whitespace text before <name/>. Is this intended? 
+      If this is a text formula, please check that there is no unwanted whitespace (including line breaks).</report>
+      <report test="node()[position() = (1, last())]/self::text()[matches(., '^\s+$')]" role="warning">There is whitespace text in <name/>. Is this intended? 
+      If this is a text formula, please check that there is no unwanted whitespace (including line breaks).</report>
+    </rule>
+    <rule context="italic | bold">
+      <report test="node()[position() = (1, last())]/self::text()[matches(., '^\s+$')]" role="warning">There is whitespace text in <name/>. Is this intended? 
+      If this is a text formula, please check that there is no unwanted whitespace (including line breaks).</report>
     </rule>
   </pattern>
 

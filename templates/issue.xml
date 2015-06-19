@@ -2,14 +2,27 @@
 <?xml-model href="http://hogrefe.com/JATS/schematron/literatum_Issue.sch" schematypens="http://purl.oclc.org/dsdl/schematron"?>
 <!DOCTYPE issue-xml
   PUBLIC "-//Atypon//DTD Atypon JATS Journal Archiving and Interchange Issue XML DTD v1.0 20120831//EN" 
-  "Atypon-Issue-Xml.dtd">
+  "JATS-1.0/Atypon-Issue-Xml.dtd">
 <issue-xml>
-  <issue-meta>
-    <pub-date><month>13</month> <year>3014</year></pub-date>
-    <volume></volume>
-    <issue></issue>
-    <issue-id pub-id-type="doi">issueDoiSuffix</issue-id>
-    <issue-title></issue-title>
+  <!-- journal-meta will be taken from the first article that is found -->
+  <!-- Save this file in the issue directory. For a journal-id 'xyz', publishing year '2013', volume '999', issue '2'
+    this will be 'xyz.2013.999.issue-2/xyz.2013.999.issue-2.xml' -->
+  <issue-meta issue-type="normal">
+    <pub-date pub-type="ppub">
+      <year>2013</year>
+    </pub-date>
+    <pub-date pub-type="epub">
+      <day>30</day>
+      <month>12</month>
+      <year>2013</year>
+      <string-date>December 30, 2013</string-date>
+    </pub-date>
+    <volume>999</volume>
+    <issue>2</issue>
+    <issue-id pub-id-type="doi">10.1027/apf.2017.1000.issue-1</issue-id>
+    <issue-title><bold>Special Issue:</bold> This is a very long title for a special issue - To get an idea what it looks
+      like</issue-title>
+    <self-uri content-type="pdf" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="apf.2017.1000.issue-1.pdf"/>
   </issue-meta>
   <!-- toc will be generated. You may override this according to Sect. 3.1.7 of the Literatum Content
     Tagging Guide. No consistency checks will be performed within the framework though.

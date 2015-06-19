@@ -8,9 +8,19 @@
   <front>
     <article-meta>
       <title-group>
-        <article-title>An oXygen framework for Literatum JATS</article-title>
+        <article-title>An oXygen Framework for JATS 1.0</article-title>
+        <subtitle>With package building support for Atypon’s Literatum platform 
+          and extensive content checking rules</subtitle>
       </title-group>
       <contrib-group>
+        <contrib corresp="yes">
+          <name>
+            <surname>Imsieke</surname>
+            <given-names>Gerrit</given-names>
+          </name>
+          <aff>le-tex publishing services,
+            <uri>http://www.le-tex.de/</uri></aff>
+        </contrib>
         <contrib>
           <name>
             <surname>Piez</surname>
@@ -18,14 +28,6 @@
           </name>
           <aff>Piez Consulting Services,
             <uri>http://www.wendellpiez.org/</uri></aff>
-        </contrib>
-        <contrib>
-          <name>
-            <surname>Imsieke</surname>
-            <given-names>Gerrit</given-names>
-          </name>
-          <aff>le-tex publishing services,
-            <uri>http://www.le-tex.de/</uri></aff>
         </contrib>
       </contrib-group>
       <abstract>
@@ -48,7 +50,36 @@
     <p>There are Schematron checks for both article and issue XML that help content workers comply with Atypon’s requirements,
       such as naming or tagging conventions.</p>
     <sec>
-      <title>Installation</title>
+      <title>Preview stylesheets and transformations</title>
+      <p>Preview stylesheets capable of rendering Publishing (blue) and Authoring (orange) articles are included from
+          <ext-link>https://github.com/NCBITools/JATSPreviewStylesheets</ext-link>. They are designed for local customization
+        and extension, and include many options, as described in their documentation.</p>
+      <p>Please note that the documents that may be created and checked with this Literatum framework are essentially Archiving
+        (green) JATS documents. Archiving is the richest of all JATS frameworks. Some elements may not be rendered properly.</p>
+      <sec>
+        <title>Transformations generating HTML</title>
+        <p>HTML files resulting from running these scenarios will point to a CSS file here (distributed with the
+          XSLT):<preformat>${frameworks}/jats/jats-preview-xslt/jats-preview.css</preformat></p>
+      </sec>
+      <sec>
+        <title>Transformations generating PDF</title>
+        <p>The Preview stylesheets also include XSL-FO stylesheets for generating PDF. These require a capable XSL-FO formatting
+          engine (they were tested with AntennaHouse). So they are left for local users to set up.</p>
+      </sec>
+    </sec>
+    <sec>
+      <title>Submission Package Builder</title>
+      <p>There is an XProc transformation scenario 'build-issue' that operates on an issue-xml file, collects all JATS articles
+        in the same directory and assembles them to a Literatum submission Zip file. This is currently a prototype and needs
+        further development.</p>
+    </sec>
+    <sec>
+      <title>Document templates</title>
+      <p>Document templates are provided only for the Archiving (green) document type, using the HTML table model.</p>
+    </sec>
+
+    <sec>
+      <title>Installating the Framework</title>
       <p>In oXygen 16, go to “Help &gt; Install new add-ons…” as depicted in <xref ref-type="fig" rid="fig-01-install"/>.</p>
       <fig id="fig-01-install">
         <label>Figure 1</label>
@@ -79,46 +110,89 @@
       <p>The package is not digitally signed. We might sign it at a later stage. If you trust the people who control the server
         providing the download link, chances are high that the package hasn’t been tampered with. So press “Continue anyway”
           (<xref ref-type="fig" rid="fig-03-install"/>)</p>
-      <p>After restarting the application, there should be two new document templates in the “Literatum JATS” category when you
+    </sec>
+    <sec>
+      <title>Using the Framework</title>
+      <p>After restarting the application, there should be three new document templates in the “Literatum JATS” category when you
         select “File &gt; New…” from the menu (<xref ref-type="fig" rid="fig-04-install"/>).</p>
       <fig id="fig-04-install">
         <label>Figure 4</label>
         <caption>
-          <title>New document templates: Issue XML and Literatum JATS article</title>
+          <title>New document templates: Issue XML, Literatum JATS article, and submission manifest</title>
         </caption>
         <graphic xlink:href="img/04-install-new.jpg"/>
       </fig>
+      <p>If you create a new article with the Literatum_JATS_article template, you will notice the <monospace>&lt;?xml-model
+          …?&gt;</monospace> processing instruction right below the XML declaration (<xref ref-type="fig"
+          rid="fig-05-article-template"/>). This will make sure (until I managed to declare proper document associations in
+        oXygen…) that the detailed Hogrefe/Literatum Schematron rules will be applied to the article. Press Shift-Ctrl-v or the
+        validation button to get a list of validation messages. Please note that the article template does not pass all
+        Schematron tests. It need to be completed according to the validation messages.</p>
+      <fig id="fig-05-article-template">
+        <label>Figure 5</label>
+        <caption>
+          <title>Literatum JATS article template</title>
+        </caption>
+        <graphic xlink:href="img/05-article-template.jpg"/>
+      </fig>
+      <p>You also need to fill in the issue template (<xref ref-type="fig" rid="fig-06-issue-template"/>) according to the
+        instructions and the Schematron messages.</p>
+      <fig id="fig-06-issue-template">
+        <label>Figure 6</label>
+        <caption>
+          <title>Issue XML template</title>
+        </caption>
+        <graphic xlink:href="img/06-issue-template.jpg"/>
+      </fig>
+      <p>Create the issue workspace in an arbitrary directory. Name the directories within the workspace according to 
+      the publisher’s and Atypon’s specifications. The name of the issue directory must match what comes after the slash
+      in the manifest’s group-doi attribute. Place manifest.xml alongside the issue directory. By “issue
+      directory” we mean <monospace>apf.2017.1000.issue-1</monospace> in <xref ref-type="fig" rid="fig-07-directory-layout"/>, not
+        the directory <monospace>issue-files</monospace> within that issue directory. 
+      </p>
+      <fig id="fig-07-directory-layout">
+        <label>Figure 7</label>
+        <caption>
+          <title>Directory layout</title>
+        </caption>
+        <graphic xlink:href="img/07-directory-layout.jpg"/>
+      </fig>
+      <p>When you are done preparing the content, you may select the transformation scenario named “build issue” (<xref rid="fig-08-build-issue" ref-type="fig"/>).
+        It will run
+      for several seconds, depending on the size of your issue directory. It will perform DTD and Schematron validations of all 
+      contained XML files. In addition, it will check the directory structure, compliance with the naming conventions, and
+      the presence of referenced files, such as graphics.</p>
+      <fig id="fig-08-build-issue">
+        <label>Figure 8</label>
+        <caption>
+          <title>Applying the “build issue” transformation</title>
+        </caption>
+        <graphic xlink:href="img/08-transform-manifest.jpg"/>
+      </fig>
+      <p>Please note: In the resulting zip file, graphic files will be put in a distinct directory,
+          <monospace>graphic</monospace>, for each article. When editing and correcting the articles in the issue directory,
+        however, all images are in the same directory as the XML file. This is ok. Even if you happen to know Atypon’s
+        submission guidelines, don’t try to anticipate the future directory layout of the zip file. The buid script will take
+        care of moving the graphic files to their final destination. This deferred approach allows you to enjoy properly
+      linked images while editing the article.</p>
+      
+      <p>After the package building has been completed, your browser should display the resulting report, as depicted in <xref rid="fig-09-report" ref-type="fig"/>.
+      Even if you didn’t include the Schematron xml-model processing instruction of <xref ref-type="fig" rid="fig-05-article-template"/>,
+      all the Schematron checks will be performed on the contained articles. In order to deal with the issues in a more friendly 
+      environment, you should insert the xml-model processing instruction into your article (copy it from a newly created article)
+      and act on the messages in oXygen. </p>
+      <fig id="fig-09-report">
+        <label>Figure 9</label>
+        <caption>
+          <title>Package validation report</title>
+        </caption>
+        <graphic xlink:href="img/09-package-report.jpg"/>
+      </fig>
+      <p>We cannot guarantee that the messages make sense in each and every case. Please ask your contacts at the publisher for assistance,
+      or provide them with your valuable feedback.</p>
     </sec>
     <sec>
-      <title>Preview stylesheets and transformations</title>
-      <p>Preview stylesheets capable of rendering Publishing (blue) and Authoring (orange) articles are included from
-          <ext-link>https://github.com/NCBITools/JATSPreviewStylesheets</ext-link>. They are designed for local customization
-        and extension, and include many options, as described in their documentation.</p>
-      <p>Please note that the documents that may be created and checked with this Literatum framework are essentially Archiving
-        (green) JATS documents. Archiving is the richest of all JATS frameworks. Some elements may not be rendered properly.</p>
-      <sec>
-        <title>Transformations generating HTML</title>
-        <p>HTML files resulting from running these scenarios will point to a CSS file here (distributed with the
-          XSLT):<preformat>${frameworks}/jats/jats-preview-xslt/jats-preview.css</preformat></p>
-      </sec>
-      <sec>
-        <title>Transformations generating PDF</title>
-        <p>The Preview stylesheets also include XSL-FO stylesheets for generating PDF. These require a capable XSL-FO formatting
-          engine (they were tested with AntennaHouse). So they are left for local users to set up.</p>
-      </sec>
-    </sec>
-    <sec>
-      <title>Submission Package Builder</title>
-      <p>There is an XProc transformation scenario 'build-issue' that operates on an issue-xml file, collects all JATS articles
-        in the same directory and assembles them to a Literatum submission Zip file. This is currently a prototype and needs
-        further development.</p>
-    </sec>
-    <sec>
-      <title>Document templates</title>
-      <p>Document templates are provided only for the Archiving (green) document type, using the HTML table model.</p>
-    </sec>
-    <sec>
-      <title>Extending the framework</title>
+      <title>Extending the Framework</title>
       <p>Local developers may wish to do any or all of the following, extending the customization that this Literatum JATS framework already contains:<list>
           <list-item>
             <p>Rewrite the parameter setting in the HTML Transformation Scenario to point to a local (customized) CSS.</p>

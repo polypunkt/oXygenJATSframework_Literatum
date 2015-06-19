@@ -31,7 +31,7 @@
           <xsl:when test="self::c:directory and exists($process-subs/@action)">
             <xsl:attribute name="action" select="'mkdir'"/>
           </xsl:when>
-          <xsl:when test="exists(self::c:file[not(@ignore = 'true')]/(article | submission | issue))">
+          <xsl:when test="exists(self::c:file[not(@ignore = 'true')]/(article | submission | issue-xml))">
             <xsl:attribute name="action" select="'serialize'"/>
           </xsl:when>
           <xsl:when test="exists(self::c:file[not(@ignore = 'true')])">

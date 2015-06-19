@@ -164,7 +164,12 @@
       </p:choose>
     </p:viewport>
 
+    <letex:store-debug pipeline-step="1.load-xml" active="yes">
+      <p:with-option name="base-uri" select="$debug-dir-uri"/>
+    </letex:store-debug>
+
     <p:viewport match="/c:directory/c:file[not(@ignore = 'true')][not(c:errors)]" name="validate-manifest">
+      <p:output port="result" primary="true"/>
       <p:delete match="/*/@xml:base">
         <p:input port="source" select="/c:file/*[not(self::c:*)]">
           <p:pipe port="current" step="validate-manifest"/>
@@ -189,6 +194,41 @@
       </p:insert>
     </p:viewport>
 
+    <p:viewport match="issue-xml[empty(journal-meta)]" name="insert-issue-journal-meta">
+      <p:documentation>Grab journal-meta from first article and insert it into issue-xml.
+      It might be a better approach to do it the other way round: Leave out journal-meta in each 
+      article and pull it from issue-xml.</p:documentation>
+      <p:output port="result" primary="true"/>
+      <p:insert match="/*" position="first-child">
+        <p:input port="source">
+          <p:pipe port="current" step="insert-issue-journal-meta"/>
+        </p:input>
+        <p:input port="insertion" select="(//article[front/journal-meta])[1]/front/journal-meta">
+          <p:pipe port="result" step="validate-manifest"/>
+        </p:input>
+      </p:insert>
+    </p:viewport>
+
+    <p:viewport match="issue-xml[empty(toc)]" name="insert-toc">
+      <p:xslt name="create-toc" template-name="toc">
+        <p:input port="parameters"><p:empty/></p:input>
+        <p:input port="stylesheet">
+          <p:document href="add-toc.xsl"/>
+        </p:input>
+        <p:input port="source">
+          <p:pipe port="result" step="insert-issue-journal-meta"/>
+        </p:input>
+      </p:xslt>
+      <p:insert match="/*" position="last-child">
+        <p:input port="source">
+          <p:pipe port="current" step="insert-toc"/>
+        </p:input>
+        <p:input port="insertion">
+          <p:pipe port="result" step="create-toc"/>
+        </p:input>
+      </p:insert>
+    </p:viewport>
+
     <p:xslt name="referenced-files">
       <p:input port="parameters">
         <p:empty/>
@@ -198,7 +238,7 @@
       </p:input>
     </p:xslt>
 
-    <letex:store-debug pipeline-step="1.referenced-files" active="yes">
+    <letex:store-debug pipeline-step="2.referenced-files" active="yes">
       <p:with-option name="base-uri" select="$debug-dir-uri"/>
     </letex:store-debug>
 
@@ -212,7 +252,7 @@
       <p:with-param name="dest-uri" select="$tmpdir-uri"/>
     </p:xslt>
 
-    <letex:store-debug pipeline-step="2.denote-actions" active="yes">
+    <letex:store-debug pipeline-step="3.denote-actions" active="yes">
       <p:with-option name="base-uri" select="$debug-dir-uri"/>
     </letex:store-debug>
 
@@ -256,14 +296,14 @@
             </p:with-option>
           </p:store>
         </p:when>
-        <p:when test="/*/@action = 'serialize' and /*/*/self::issue">
-          <p:identity>
-            <p:input port="source" select="/*/issue">
+        <p:when test="/*/@action = 'serialize' and /*/*/self::issue-xml">
+          <transpect:remove-ns-decl-and-xml-base>
+            <p:input port="source" select="/*/issue-xml">
               <p:pipe port="current" step="clone"/>
             </p:input>
-          </p:identity>
+          </transpect:remove-ns-decl-and-xml-base>
           <p:store doctype-public="-//Atypon//DTD Atypon JATS Journal Archiving and Interchange Issue XML DTD v1.0 20120831//EN"
-            doctype-system="Atypon-Issue-Xml.dtd" omit-xml-declaration="false">
+            doctype-system="JATS-1.0/Atypon-Issue-Xml.dtd" omit-xml-declaration="false" indent="true">
             <p:with-option name="href" select="/*/@target-href">
               <p:pipe port="current" step="clone"/>
             </p:with-option>
@@ -316,7 +356,7 @@
       </p:input>
     </p:xslt>
 
-    <letex:store-debug pipeline-step="3.zip-manifest" active="yes">
+    <letex:store-debug pipeline-step="4.zip-manifest" active="yes">
       <p:with-option name="base-uri" select="$debug-dir-uri"/>
     </letex:store-debug>
 
@@ -338,7 +378,7 @@
 
     <p:sink/>
 
-    <letex:store-debug pipeline-step="4.svrl" active="yes">
+    <letex:store-debug pipeline-step="5.svrl" active="yes">
       <p:with-option name="base-uri" select="$debug-dir-uri"/>
       <p:input port="source">
         <p:pipe port="report" step="sch"/>
