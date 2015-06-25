@@ -10,7 +10,7 @@
   <xsl:output method="xml" 
     doctype-public="-//NLM//DTD JATS (Z39.96) Journal Archiving and Interchange DTD v1.0 20120330//EN"
     doctype-system="JATS-1.0/JATS-archivearticle1.dtd"
-    indent="yes" saxon:suppress-indentation="p title label alt-text private-char" use-character-maps="validify"/>
+    use-character-maps="validify"/><!-- indent="yes" saxon:suppress-indentation="p title label alt-text private-char"  -->
   
   <xsl:character-map name="validify">
     <xsl:output-character character="" string="&#x2019;"/>

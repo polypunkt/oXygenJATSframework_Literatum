@@ -7,11 +7,24 @@
   <let name="jid-from-filename" value="replace(base-uri(), '^.+/(.+?)\..+$', '$1')"/>
   <let name="contrib-article-types" value="('article-commentary', 'brief-report', 'case-report', 'discussion', 
     'research-article', 'review-article')"/>
+  <let name="article-types" value="('abstract', 'addendum', 'announcement', 'article-commentary', 'back-matter', 
+    'bibliography', 'book-review', 'books-received', 'brief-report', 'calendar', 'case-report', 'collection', 
+    'correction', 'discussion', 'dissertation', 'editorial', 'front-matter', 'in-brief', 'index', 'instructions', 
+    'introduction', 'letter', 'meeting-report', 'news', 'note', 'obituary', 'opinion', 'oration', 'other', 
+    'partial-retraction', 'product-review', 'rapid-communication', 'reply', 'reprint', 'research-article', 
+    'retraction', 'review-article', 'translation')"/>
   <let name="abstract-required-en" value="('Brief Report', 'Case Report', 'Research Article')"/>
 
   <pattern id="no-empty">
     <rule context="*[empty(node())]">
       <assert test="true()">No empty elements.</assert>
+    </rule>
+  </pattern>
+  
+  <pattern id="types">
+    <rule context="article">
+      <assert test="@article-type = $article-types">article-type must be one of <value-of 
+        select="string-join(for $t in $article-types return concat('''', $t, ''''), ', ')"/>.</assert>
     </rule>
   </pattern>
 
@@ -64,10 +77,16 @@
   </pattern>
 
   <pattern id="apa-id-2">
-    <rule context="article-id[@pub-id-type = 'apaID']">
+    <rule context="article-id[@pub-id-type = 'apaID'][not(../volume = '-1')]">
       <assert test=". = string-join((../../journal-meta/journal-id[@journal-id-type = 'publisher'],
                                      ../volume, ../issue, ../fpage), '_')">The apaID must consist of the journal-id of journal-id-type="publisher",
       volume, issue, and fpage, all joined by underscores. Example: foo_44_3_891</assert>
+    </rule>
+    <rule context="article-id[@pub-id-type = 'apaID'][../volume = '-1']">
+      <assert test=". = string-join((../../journal-meta/journal-id[@journal-id-type = 'publisher'],
+                                     for $d in ../article-id[@pub-id-type = 'doi'] return replace($d, '^.+/', ''),
+                                     '-1', '1'), '_')">The apaID for advance articles must consist of the journal-id of journal-id-type="publisher",
+      an underscore, the part of the doi after the last slash, and the string '_-1_1'. Example: foo_a000381_-1_1</assert>
     </rule>
   </pattern>
 
@@ -157,7 +176,7 @@
       <report test=".//degrees">Don’t include degrees in the contrib names.</report>
     </rule>
     <rule context="contrib/xref[@ref-type = 'aff']">
-      <assert test="preceding-sibling::node()[1]/self::string-name" role="warning">Affiliation xref should follow string-name immediately, without whitespace in between.</assert>
+      <assert test="preceding-sibling::node()[1]/(self::string-name | self::xref | self::x)" role="warning">Affiliation xref should follow string-name immediately, without whitespace in between.</assert>
       <assert test="exists(sup)">The affiliation should be in a sup element.</assert>
       <assert test="exists(../following-sibling::aff[@id = current()/@rid])">The corresponding aff element should follow after the contrib elements.</assert>
       <assert test="deep-equal(../../aff[@id = current()/@rid]/label/node(), node())" role="warning">Affiliation label should match this reference.</assert>
@@ -169,8 +188,9 @@
   </pattern> 
 
   <pattern id="string-names">
-    <rule context="contrib/string-name">
-      <assert test="surname" role="warning">There should be a surname.</assert>
+    <rule context="string-name">
+      <assert test="count(surname) = 1" role="warning">There should be exactly one surname.</assert>
+      <assert test="count(given-names) = 1" role="warning">There should be exactly one given-names.</assert>
       <report test="text()[matches(., '\S')][not(. = '†')]" role="warning">There should only be whitespace text nodes in string-name
         (with the exception of text nodes that consist of a single dagger, '†'). Found: <value-of 
         select="string-join(for $t in text()[matches(., '\S')] return concat('''', $t, ''''), ', ')"/></report>
@@ -236,19 +256,30 @@
         ', '; ', E-mail '; ', Fax '; or ', Tel. '. Found: <value-of 
           select="string-join(for $t in $non-conforming return concat('''', $t, ''''), '; ')"/></report>
     </rule>
-    <rule context="corresp/email">
-      <assert test="preceding-sibling::node()[1]/self::text()[matches(., '\s+E-mail\s+')]">The text preceding the email
+    <rule context="corresp[count(*) gt 1]/email">
+      <assert test="preceding-sibling::node()[1]/self::text()[matches(., '^\s*(E-mail\s+)$')]">The text preceding the email
       element must be ' E-mail '.</assert>
     </rule>
+    <rule context="corresp[count(*) = 1]/email">
+      <assert test="preceding-sibling::node()[1]/self::text()[matches(., '^\s*(E-mail\s+)?$')]">The text preceding the email
+      element must be ' E-mail '.</assert>
+    </rule>
+    <rule context="corresp/fax">
+      <assert test="preceding-sibling::node()[1]/self::text()[matches(., '^\s*(Fax\s+)$')]">The text preceding the fax
+      element must be ' Fax '.</assert>
+    </rule>
     <rule context="corresp/phone">
-      <assert test="preceding-sibling::node()[1]/self::text()[matches(., '\s+Tel\.\s+')]">The text preceding the phone
+      <assert test="preceding-sibling::node()[1]/self::text()[matches(., '^\s*(Tel\.\s+)$')]">The text preceding the phone
       element must be ' Tel. '.</assert>
     </rule>
-    <rule context="corresp/*[preceding-sibling::node()[1]/self::text()[matches(., '\s+Tel\.\s+')]]">
+    <rule context="corresp/*[preceding-sibling::node()[1]/self::text()[matches(., '\s*Tel\.\s+')]]">
       <assert test="self::phone">There must be a phone element after ' Tel. '.</assert>
     </rule>
-    <rule context="corresp/*[preceding-sibling::node()[1]/self::text()[matches(., '\s+E-mail\s+')]]">
-      <assert test="self::phone">There must be an email element after ' E-mail '.</assert>
+    <rule context="corresp/*[preceding-sibling::node()[1]/self::text()[matches(., '\s*Fax\s+')]]">
+      <assert test="self::fax">There must be a fax element after ' Fax '.</assert>
+    </rule>
+    <rule context="corresp/*[preceding-sibling::node()[1]/self::text()[matches(., '\s*E-mail\s+')]]">
+      <assert test="self::email">There must be an email element after ' E-mail '.</assert>
     </rule>
   </pattern>  
 
@@ -391,28 +422,39 @@
 
 
   <pattern id="person-sep-comma" abstract="true">
-    <rule context="person-group[count(string-name) gt 2]/string-name[if (following-sibling::etal) 
-                                                                     then position() lt last() - 1
-                                                                     else position() lt last()]">
+    <rule context="person-group[count(string-name) gt 2][count(string-name) le 7]/string-name[if (following-sibling::etal) 
+                                                                                              then position() lt last() - 1
+                                                                                              else position() lt last()]">
       <assert test="following-sibling::node()[1]/self::text()[matches(., ',\s+')]">These <name/>s must be separated by ', '.</assert>
     </rule>
   </pattern>
   <pattern id="person-sep-and">
-    <rule context="person-group[count(string-name) gt 1]/string-name[position() = last()][not(following-sibling::etal)]">
+    <rule context="person-group[count(string-name) gt 1][count(string-name) lt 7]/string-name[position() = last()][not(following-sibling::etal)]">
       <assert test="preceding-sibling::node()[1]/self::text()[matches(., '\s+&amp;\s+')]">This last <name/> must be preceded by ' &amp; '.</assert>
+    </rule>
+  </pattern>
+  <pattern id="person-ellipsis">
+    <rule context="person-group[count(string-name) gt 7]/string-name[position() = last()][not(following-sibling::etal)]">
+      <assert test="preceding-sibling::node()[1]/self::text()[matches(., ',\s+…,\s+')]">In case of 8 or more
+       authors only list the first six followed by an ellipsis (', …, ') and the last
+        author’s name. The 6th author is '<value-of select="../string-name[6]"/>'</assert>
     </rule>
   </pattern>
   <pattern id="no-text-in-person-group">
     <rule context="person-group">
       <let name="regex-list" value="(if (ancestor::article/@xml:lang = 'en') then ',?\s+&amp;\s+' else '\s+&amp;\s+', 
-                                     ',\s+', '\s+\(', '\)')"/>
+                                     ',\s+', ',\s+…,\s+', '\s+\(', '\)')"/>
       <let name="non-conforming" value="text()[normalize-space()]
                                               [not(matches(., concat('^(', string-join($regex-list, '|'), ')$')))]"/>
       <report test="exists($non-conforming)" role="warning">Text in person-group should be one of the following 
         (separated by ; to decrease confusion): ', '; 
-        <value-of select="if (ancestor::article/@xml:lang = 'en') then ''', &amp; ''; ' else ''"/> ' &amp; '; ' ('; or ')'.
+        <value-of select="if (ancestor::article/@xml:lang = 'en') then ''', &amp; ''; ' else ''"/> ' &amp; '; ', …, '; ' ('; or ')'.
       Found: <value-of select="string-join(for $t in $non-conforming return concat('''', $t, ''''), '; ')"/>.
       Please note that whitespace matters in <name/>.</report>
+    </rule>
+    <rule context="person-group/string-name[not(. is ../string-name[6])]">
+      <report test="following-sibling::node()[1]/self::text()[matches(., '…')]">An ellipsis is only allowed after
+      the 6th string-name. This is string-name #<value-of select="index-of(for $s in ../string-name return generate-id($s), generate-id(.))"/>.</report>
     </rule>
   </pattern>
   <pattern id="string-name">
