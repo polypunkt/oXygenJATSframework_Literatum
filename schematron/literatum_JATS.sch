@@ -22,9 +22,38 @@
   </pattern>
   
   <pattern id="types">
-    <rule context="article">
+    <rule context="article[not(matches(base-uri(), '/issue-files/suppl/[^/]+$'))]">
       <assert test="@article-type = $article-types">article-type must be one of <value-of 
         select="string-join(for $t in $article-types return concat('''', $t, ''''), ', ')"/>.</assert>
+    </rule>
+    <rule context="article[matches(base-uri(), '/issue-files/suppl/[^/]+?\.ad\d+\.xml$')]">
+      <assert test="@article-type = 'header advertisement'">article-type must be 'header advertisement'.</assert>
+    </rule>
+    <rule context="article[matches(base-uri(), '/issue-files/suppl/[^/]+?\.C[1-4]\.xml$')]">
+      <assert test="@article-type = 'header cover'">article-type must be 'header cover'.</assert>
+    </rule>
+    <rule context="article[matches(base-uri(), '/issue-files/suppl/[^/]+?\.i\.xml$')]">
+      <assert test="@article-type = 'header title-page'">article-type must be 'header title-page'.</assert>
+    </rule>
+    <rule context="article[matches(base-uri(), '/issue-files/suppl/[^/]+?\.i\.xml$')]">
+      <assert test="@article-type = 'header table-of-contents'">article-type must be 'header table-of-contents'.</assert>
+    </rule>
+    <rule context="article[matches(base-uri(), '/issue-files/suppl/[^/]+?\.bm\d*\.xml$')]">
+      <assert test="@article-type = 'header backmatter'">article-type must be 'header backmatter'.</assert>
+    </rule>
+    
+  </pattern>
+  
+  <pattern id="issue-suppl">
+    <rule context="article[matches(base-uri(), '/issue-files/suppl/')]">
+      <let name="issue-base" 
+        value="string-join((front/journal-meta/journal-id[@journal-id-type = 'publisher'], 
+                            '.', front/article-meta/pub-date[1]/year, '.', front/article-meta/volume, '.',
+                            'issue-', front/article-meta/issue, '.', distinct-values(front/article-meta/(fpage | lpage))), '')"/>
+      <let name="regex" value="concat('/', $issue-base, '\.xml$')"/>
+      <assert test="matches(base-uri(), $regex)">File names in issue-files/suppl
+      must be named JID.YEAR.VOL.issue-ISSUE.XYZ.xml, where XYZ is ad#, bm#, C#, i, or ii. According to the metadata seen here,
+      the file name should start with '<value-of select="$issue-base"/>'</assert>
     </rule>
   </pattern>
 
@@ -191,7 +220,7 @@
     <rule context="string-name">
       <assert test="count(surname) = 1" role="warning">There should be exactly one surname.</assert>
       <assert test="count(given-names) = 1" role="warning">There should be exactly one given-names.</assert>
-      <report test="text()[matches(., '\S')][not(. = '†')]" role="warning">There should only be whitespace text nodes in string-name
+      <report test="text()[matches(., '\S')][not(matches(., '^(†|,\s+)$'))]" role="warning">There should only be whitespace text nodes in string-name
         (with the exception of text nodes that consist of a single dagger, '†'). Found: <value-of 
         select="string-join(for $t in text()[matches(., '\S')] return concat('''', $t, ''''), ', ')"/></report>
     </rule>
@@ -250,27 +279,39 @@
 
   <pattern id="corresp">
     <rule context="corresp">
-      <let name="non-conforming" value="text()[normalize-space()][not(matches(., '^,(\s+(Tel\.|E-mail|Fax))?\s+$'))]"/>
+      <let name="non-conforming" value="text()[normalize-space()][not(matches(., '^(,\s+|(,\s+)?(Tel\.|E-mail|Fax)\s+)$'))]"/>
       <report test="exists($non-conforming)">If there is plain text here, it 
         should be one of the following (separated by ; to decrease confusion): 
-        ', '; ', E-mail '; ', Fax '; or ', Tel. '. Found: <value-of 
+        ', '; 'E-mail '; 'Fax '; or 'Tel. '. If 'E-mail ', 'Fax ' or 'Tel. ' are not the
+        first words in corresp, they need to be prefixed by ', ' (comma and whitespace). Found: <value-of 
           select="string-join(for $t in $non-conforming return concat('''', $t, ''''), '; ')"/></report>
     </rule>
-    <rule context="corresp[count(*) gt 1]/email">
-      <assert test="preceding-sibling::node()[1]/self::text()[matches(., '^\s*(E-mail\s+)$')]">The text preceding the email
-      element must be ' E-mail '.</assert>
+    <rule context="addr-line">
+      <assert test="normalize-space()" role="warning">Avoid empty addr-line elements.</assert>
     </rule>
-    <rule context="corresp[count(*) = 1]/email">
-      <assert test="preceding-sibling::node()[1]/self::text()[matches(., '^\s*(E-mail\s+)?$')]">The text preceding the email
-      element must be ' E-mail '.</assert>
+    <rule context="corresp/email[not(. is ../*[1])]">
+      <assert test="preceding-sibling::node()[1]/self::text()[matches(., '^,\s+E-mail\s+$')]">The text preceding the email
+      element must be ', E-mail ' because there is at least one other element before this text.</assert>
     </rule>
-    <rule context="corresp/fax">
-      <assert test="preceding-sibling::node()[1]/self::text()[matches(., '^\s*(Fax\s+)$')]">The text preceding the fax
-      element must be ' Fax '.</assert>
+    <rule context="corresp/email[. is ../*[1]]">
+      <assert test="preceding-sibling::node()[1]/self::text()[matches(., '^\s*E-mail\s+$')]" role="warning">The text preceding the email
+      element should be 'E-mail '.</assert>
     </rule>
-    <rule context="corresp/phone">
-      <assert test="preceding-sibling::node()[1]/self::text()[matches(., '^\s*(Tel\.\s+)$')]">The text preceding the phone
-      element must be ' Tel. '.</assert>
+    <rule context="corresp/fax[not(. is ../*[1])]">
+      <assert test="preceding-sibling::node()[1]/self::text()[matches(., '^,\s+Fax\s+$')]">The text preceding the fax
+      element must be ', Fax ' because there is at least one other element before this text.</assert>
+    </rule>
+    <rule context="corresp/fax[. is ../*[1]]">
+      <assert test="preceding-sibling::node()[1]/self::text()[matches(., '^\s*Fax\s+$')]" role="warning">The text preceding the fax
+      element should be 'Fax '.</assert>
+    </rule>
+    <rule context="corresp/phone[not(. is ../*[1])]">
+      <assert test="preceding-sibling::node()[1]/self::text()[matches(., '^,\s+Tel\.\s+$')]">The text preceding the phone
+      element must be ', Tel. ' because there is at least one other element before this text.</assert>
+    </rule>
+    <rule context="corresp/phone[. is ../*[1]]">
+      <assert test="preceding-sibling::node()[1]/self::text()[matches(., '^\s*Tel\.\s+$')]" role="warning">The text preceding the phone
+      element should be 'Tel. '.</assert>
     </rule>
     <rule context="corresp/*[preceding-sibling::node()[1]/self::text()[matches(., '\s*Tel\.\s+')]]">
       <assert test="self::phone">There must be a phone element after ' Tel. '.</assert>
@@ -302,10 +343,10 @@
       <let name="ext" value="replace(@xlink:href, '^.+?([^.]+)$', '$1')"/>
       <let name="basename" value="replace(@xlink:href, '^(.+/)?([^/.]+)\..+$', '$2')"/>
       <let name="candidates" value="for $i in (@id(:, ../@id:)) return string-join(($jid-from-filename, $i), '_')"/>
+      <let name="required-ext" value="if (exists(ancestor::fig | ancestor::table-wrap)) then 'tif' else 'gif'"/>
       <assert test="$basename = $candidates">The file’s base name 
       should be <value-of select="string-join($candidates, ' or ')"/></assert>
-      <assert test="if (exists(ancestor::fig | ancestor::table-wrap)) 
-        then $ext = 'tif' else $ext='gif'">File extension must be <value-of select="$ext"/>.</assert>
+      <assert test="$ext = $required-ext">File extension must be <value-of select="$required-ext"/>.</assert>
     </rule>
   </pattern>
   
@@ -435,20 +476,20 @@
   </pattern>
   <pattern id="person-ellipsis">
     <rule context="person-group[count(string-name) gt 7]/string-name[position() = last()][not(following-sibling::etal)]">
-      <assert test="preceding-sibling::node()[1]/self::text()[matches(., ',\s+…,\s+')]">In case of 8 or more
-       authors only list the first six followed by an ellipsis (', …, ') and the last
+      <assert test="preceding-sibling::node()[1]/self::text()[matches(., ',\s+…\s+')]">In case of 8 or more
+       authors only list the first six followed by an ellipsis (', … ') and the last
         author’s name. The 6th author is '<value-of select="../string-name[6]"/>'</assert>
     </rule>
   </pattern>
   <pattern id="no-text-in-person-group">
     <rule context="person-group">
       <let name="regex-list" value="(if (ancestor::article/@xml:lang = 'en') then ',?\s+&amp;\s+' else '\s+&amp;\s+', 
-                                     ',\s+', ',\s+…,\s+', '\s+\(', '\)')"/>
+                                     ',\s+', ',\s+…\s+', '\s+\(', '\)')"/>
       <let name="non-conforming" value="text()[normalize-space()]
                                               [not(matches(., concat('^(', string-join($regex-list, '|'), ')$')))]"/>
       <report test="exists($non-conforming)" role="warning">Text in person-group should be one of the following 
         (separated by ; to decrease confusion): ', '; 
-        <value-of select="if (ancestor::article/@xml:lang = 'en') then ''', &amp; ''; ' else ''"/> ' &amp; '; ', …, '; ' ('; or ')'.
+        <value-of select="if (ancestor::article/@xml:lang = 'en') then ''', &amp; ''; ' else ''"/> ' &amp; '; ', … '; ' ('; or ')'.
       Found: <value-of select="string-join(for $t in $non-conforming return concat('''', $t, ''''), '; ')"/>.
       Please note that whitespace matters in <name/>.</report>
     </rule>

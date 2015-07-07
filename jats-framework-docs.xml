@@ -124,9 +124,10 @@
       </fig>
       <p>If you create a new article with the Literatum_JATS_article template, you will notice the <monospace>&lt;?xml-model
           …?&gt;</monospace> processing instruction right below the XML declaration (<xref ref-type="fig"
-          rid="fig-05-article-template"/>). This will make sure (until I managed to declare proper document associations in
-        oXygen…) that the detailed Hogrefe/Literatum Schematron rules will be applied to the article. Press Shift-Ctrl-v or the
-        validation button to get a list of validation messages. Please note that the article template does not pass all
+          rid="fig-05-article-template"/>). This will force the Schematron to be applied. However, this should not be necessary 
+        any more because proper document associations seem to be in place &amp; take care of automatic validation. Press Shift-Ctrl-v or the
+        validation button to get a list of validation messages. If you see the messages doubled, remove the xml-model line. 
+        Please note that the article template does not pass all
         Schematron tests. It need to be completed according to the validation messages.</p>
       <fig id="fig-05-article-template">
         <label>Figure 5</label>
