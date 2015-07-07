@@ -3,8 +3,10 @@ oXygenJATSframework
 
 oXygen XML Editor framework for NISO JATS 1.0 / NLM BITS
 
-Atypon Literatum / Hogrefe version 0.6 with Schematron checks and Literatum
+Atypon Literatum / Hogrefe version 0.8.3 with Schematron checks and Literatum
 package building. Use https://hobots.hogrefe.com/oXygenJATSframework_Literatum/oXygenJATSframework_Literatum.xml as the package installation URL in oXygen.
+
+More detailed installation instructions are available at https://hobots.hogrefe.com/oXygenJATSframework_Literatum/jats-framework-docs.html.
 
 
 
@@ -25,4 +27,5 @@ for installation instructions.
 
 Wendell Piez (http://www.wendellpiez.com), November 2012
 
-Adaptions for Literatum/Hogrefe by Gerrit Imsieke
+Adaptions for Literatum/Hogrefe (Schematron checks, XProc build script for 
+Literatum Zip packages) by Gerrit Imsieke
