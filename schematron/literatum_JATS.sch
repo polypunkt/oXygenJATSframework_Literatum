@@ -1,9 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-model href="file:/C:/cygwin/home/gerrit/Hogrefe/BookTagSet/repo/schema/iso-schematron/iso-schematron.rng" schematypens="http://relaxng.org/ns/structure/1.0"?>
-<schema xmlns="http://purl.oclc.org/dsdl/schematron" queryBinding="xslt2">
+<schema xmlns="http://purl.oclc.org/dsdl/schematron" queryBinding="xslt2"
+  xmlns:html="http://www.w3.org/1999/xhtml" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
   <ns prefix="xlink" uri="http://www.w3.org/1999/xlink"/>
-  
+  <ns prefix="html" uri="http://www.w3.org/1999/xhtml"/>
+
+  <xsl:variable name="journal-list" as="document-node(element(html:table))">
+    <xsl:document>
+      <xsl:choose>
+        <xsl:when test="doc-available('journal-list.html')">
+          <xsl:sequence select="doc('journal-list.html')/html:html/html:body/html:table[1]"/> 
+        </xsl:when>
+        <xsl:otherwise>
+          <table xmlns="http://www.w3.org/1999/xhtml"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:document>
+  </xsl:variable>
+
+  <xsl:key name="jl-tr" match="html:tr" 
+    use="for $pos in 1 to count(html:td)
+         return string-join((../html:tr[1]/html:th[$pos], html:td[$pos]), '=')"/>
+
+  <xsl:key name="jl-td" match="html:td" 
+    use="for $pos in index-of(for $td in ../html:td return generate-id($td), generate-id(.)) 
+         return ../../html:tr[1]/html:th[$pos]"/>
+
+  <let name="journal-titles" value="key('jl-td', 'journal-title', $journal-list)"/>
+
   <let name="jid-from-filename" value="replace(base-uri(), '^.+/(.+?)\..+$', '$1')"/>
   <let name="contrib-article-types" value="('article-commentary', 'brief-report', 'case-report', 'discussion', 
     'research-article', 'review-article')"/>
@@ -35,7 +60,7 @@
     <rule context="article[matches(base-uri(), '/issue-files/suppl/[^/]+?\.i\.xml$')]">
       <assert test="@article-type = 'header title-page'">article-type must be 'header title-page'.</assert>
     </rule>
-    <rule context="article[matches(base-uri(), '/issue-files/suppl/[^/]+?\.i\.xml$')]">
+    <rule context="article[matches(base-uri(), '/issue-files/suppl/[^/]+?\.ii\.xml$')]">
       <assert test="@article-type = 'header table-of-contents'">article-type must be 'header table-of-contents'.</assert>
     </rule>
     <rule context="article[matches(base-uri(), '/issue-files/suppl/[^/]+?\.bm\d*\.xml$')]">
@@ -67,7 +92,44 @@
     <rule context="journal-meta">
       <assert test="normalize-space(journal-id[@journal-id-type = 'publisher'])">The publisher-specific journal-id must be present and it must not be empty.</assert>
     </rule>
+    <rule context="journal-meta/journal-id[@journal-id-type = 'publisher']">
+      <let name="jid" value="."/>
+      <let name="corresponding-record" value="key('jl-tr', string-join(('journal-id', $jid), '='), $journal-list)"/>
+      <let name="expected-title" value="$corresponding-record/html:td intersect key('jl-td', 'journal-title', $journal-list)"/>
+      <assert test="key('jl-tr', string-join(('journal-id', .), '='), $journal-list)" role="warning">There is no journal with journal-id='<value-of 
+        select="."/>'.</assert>
+      <assert test="$corresponding-record
+                    is
+                    key('jl-tr', string-join(('journal-title', ../journal-title-group/journal-title), '='), $journal-list)" role="warning">The journal id '<value-of
+      select="$jid"/>' must match the journal title from the journal list, which is '<value-of select="$expected-title"/>'. Found: '<value-of 
+        select="../journal-title-group/journal-title"/>'.</assert>
+      <assert test="if (../issn-l)
+                    then $corresponding-record
+                         is
+                         key('jl-tr', string-join(('issn-l', ../issn-l), '='), $journal-list)
+                    else true()" role="warning">The journal id '<value-of
+      select="$jid"/>' corresponds to an issn-l '<value-of 
+        select="$corresponding-record/html:td intersect key('jl-td', 'issn-l', $journal-list)"/>' in the journal list. Found: '<value-of 
+        select="../issn-l"/>'.</assert>
+      <assert test="if (../issn[@pub-type = 'ppub'])
+                    then $corresponding-record
+                         is
+                         key('jl-tr', string-join(('issn-ppub', ../issn[@pub-type = 'ppub']), '='), $journal-list)
+                    else true()" role="warning">The journal id '<value-of
+      select="$jid"/>' corresponds to an issn of pub-type=ppub, '<value-of 
+        select="$corresponding-record/html:td intersect key('jl-td', 'issn-ppub', $journal-list)"/>', in the journal list. Found: '<value-of 
+        select="../issn[@pub-type = 'ppub']"/>'.</assert>
+      <assert test="if (../issn[@pub-type = 'epub'])
+                    then $corresponding-record
+                         is
+                         key('jl-tr', string-join(('issn-epub', ../issn[@pub-type = 'epub']), '='), $journal-list)
+                    else true()" role="warning">The journal id '<value-of
+      select="$jid"/>' corresponds to an issn of pub-type=epub, '<value-of 
+        select="$corresponding-record/html:td intersect key('jl-td', 'issn-epub', $journal-list)"/>', in the journal list. Found: '<value-of 
+        select="../issn[@pub-type = 'epub']"/>'.</assert>
+    </rule>
   </pattern>
+  
   <pattern id="issue">
     <rule context="article-meta">
       <assert test="normalize-space(volume)">The volume element must be present and it must not be empty.</assert>
@@ -100,8 +162,18 @@
   </pattern>
 
   <pattern id="apa-id-1">
-    <rule context="article-meta">
+    <rule context="article[@xml:lang = 'en']
+                    /front
+                      /article-meta">
       <assert test="exists(article-id[@pub-id-type = 'apaID'])" id="article-id-apaID">There must be an article-id with pub-id-type="apaID".</assert>
+    </rule>
+  </pattern>
+  
+  <pattern id="apa-id-1a">
+    <rule context="article[not(@xml:lang = 'en')]
+                    /front
+                      /article-meta">
+      <assert test="exists(article-id[@pub-id-type = 'apaID'])" id="article-id-apaID-non-en" role="warning">There should be an article-id with pub-id-type="apaID".</assert>
     </rule>
   </pattern>
 
@@ -174,8 +246,8 @@
 
   <pattern id="kwd-x">
     <rule context="kwd-group/x">
-      <report test="matches(., '\s')">An x element in kwd-group must not contain whitespace.</report>
-      <assert test=". = ','">An x element in kwd-group must only contain the string ','.</assert>
+      <!--<report test="matches(., '\s')">An x element in kwd-group must not contain whitespace.</report>-->
+      <assert test="matches(., '^,\s+')">An x element in kwd-group must only contain the string ', '.</assert>
       <assert test="preceding-sibling::node()[1]/self::kwd" role="warning">Don’t insert whitespace before the separator.</assert>
       <assert test="following-sibling::kwd">If there is a separator, there must be a following kwd.</assert>
     </rule>
@@ -192,6 +264,15 @@
     </rule>
   </pattern>
  
+  <pattern id="date">
+    <rule context="month">
+      <assert test="matches(., '^(0[1-9]|1[12])$')" id="numeric-month" role="warning">Month should be 01, 02, …, 12.</assert>
+    </rule>
+    <rule context="day">
+      <assert test="matches(., '^(0[1-9]|[12][0-9]|3[01])$')" id="numeric-day" role="warning">Day should be 01, 02, …, 31.</assert>
+    </rule>
+  </pattern>
+  
   <pattern id="category">
     <rule context="article-meta[not(contains(ancestor::article/@article-type, 'header'))]">
       <assert test="article-categories/subj-group[@subj-group-type = 'toc-heading']">There must be an
@@ -249,7 +330,7 @@
     </rule>
   </pattern>
 
-  <pattern id="contrib-sep-comma" abstract="true">
+  <pattern id="contrib-sep-comma">
     <rule context="contrib-group[count(contrib) gt 2]/contrib[position() lt last() - 1]">
       <assert test="following-sibling::*[1]/self::x[. = ', ']">These contribs must be separated by an x element with the content ', '.</assert>
     </rule>
@@ -279,7 +360,7 @@
 
   <pattern id="corresp">
     <rule context="corresp">
-      <let name="non-conforming" value="text()[normalize-space()][not(matches(., '^(,\s+|(,\s+)?(Tel\.|E-mail|Fax)\s+)$'))]"/>
+      <let name="non-conforming" value="text()[normalize-space()][not(matches(., '^(,\s+|(,\s+)?(Tel\.|E-[Mm]ail|Fax)\s+)$'))]"/>
       <report test="exists($non-conforming)">If there is plain text here, it 
         should be one of the following (separated by ; to decrease confusion): 
         ', '; 'E-mail '; 'Fax '; or 'Tel. '. If 'E-mail ', 'Fax ' or 'Tel. ' are not the
@@ -289,13 +370,21 @@
     <rule context="addr-line">
       <assert test="normalize-space()" role="warning">Avoid empty addr-line elements.</assert>
     </rule>
-    <rule context="corresp/email[not(. is ../*[1])]">
+    <rule context="article[@xml:lang = 'en']//corresp/email[not(. is ../*[1])]">
       <assert test="preceding-sibling::node()[1]/self::text()[matches(., '^,\s+E-mail\s+$')]">The text preceding the email
-      element must be ', E-mail ' because there is at least one other element before this text.</assert>
+      element must be ', E-mail ' (lower-case M – English) because there is at least one other element before this text.</assert>
     </rule>
-    <rule context="corresp/email[. is ../*[1]]">
+    <rule context="article[@xml:lang = 'de']//corresp/email[not(. is ../*[1])]">
+      <assert test="preceding-sibling::node()[1]/self::text()[matches(., '^,\s+E-Mail\s+$')]">The text preceding the email
+      element must be ', E-Mail ' (capital M – German) because there is at least one other element before this text.</assert>
+    </rule>
+    <rule context="article[@xml:lang = 'en']//corresp/email[. is ../*[1]]">
       <assert test="preceding-sibling::node()[1]/self::text()[matches(., '^\s*E-mail\s+$')]" role="warning">The text preceding the email
       element should be 'E-mail '.</assert>
+    </rule>
+    <rule context="article[@xml:lang = 'de']//corresp/email[. is ../*[1]]">
+      <assert test="preceding-sibling::node()[1]/self::text()[matches(., '^\s*E-Mail\s+$')]" role="warning">The text preceding the email
+      element should be 'E-Mail '.</assert>
     </rule>
     <rule context="corresp/fax[not(. is ../*[1])]">
       <assert test="preceding-sibling::node()[1]/self::text()[matches(., '^,\s+Fax\s+$')]">The text preceding the fax
@@ -319,7 +408,7 @@
     <rule context="corresp/*[preceding-sibling::node()[1]/self::text()[matches(., '\s*Fax\s+')]]">
       <assert test="self::fax">There must be a fax element after ' Fax '.</assert>
     </rule>
-    <rule context="corresp/*[preceding-sibling::node()[1]/self::text()[matches(., '\s*E-mail\s+')]]">
+    <rule context="corresp/*[preceding-sibling::node()[1]/self::text()[matches(., '\s*E-[Mm]ail\s+')]]">
       <assert test="self::email">There must be an email element after ' E-mail '.</assert>
     </rule>
   </pattern>  
@@ -475,7 +564,7 @@
     </rule>
   </pattern>
   <pattern id="person-ellipsis">
-    <rule context="person-group[count(string-name) gt 7]/string-name[position() = last()][not(following-sibling::etal)]">
+    <rule context="article[@xml:lang = 'en']//person-group[count(string-name) gt 7]/string-name[position() = last()][not(following-sibling::etal)]">
       <assert test="preceding-sibling::node()[1]/self::text()[matches(., ',\s+…\s+')]">In case of 8 or more
        authors only list the first six followed by an ellipsis (', … ') and the last
         author’s name. The 6th author is '<value-of select="../string-name[6]"/>'</assert>
@@ -483,19 +572,22 @@
   </pattern>
   <pattern id="no-text-in-person-group">
     <rule context="person-group">
-      <let name="regex-list" value="(if (ancestor::article/@xml:lang = 'en') then ',?\s+&amp;\s+' else '\s+&amp;\s+', 
-                                     ',\s+', ',\s+…\s+', '\s+\(', '\)')"/>
+      <let name="regex-list" value="(if (ancestor::article/@xml:lang = 'en') then (',?\s+&amp;\s+', ',\s+…\s+') else '\s+&amp;\s+', 
+                                     ',\s+', '\s+\(', '\)')"/>
       <let name="non-conforming" value="text()[normalize-space()]
                                               [not(matches(., concat('^(', string-join($regex-list, '|'), ')$')))]"/>
       <report test="exists($non-conforming)" role="warning">Text in person-group should be one of the following 
         (separated by ; to decrease confusion): ', '; 
-        <value-of select="if (ancestor::article/@xml:lang = 'en') then ''', &amp; ''; ' else ''"/> ' &amp; '; ', … '; ' ('; or ')'.
+        <value-of select="if (ancestor::article/@xml:lang = 'en') then ''', &amp; ''; '', … ''; ' else ''"/> ' &amp; '; ' ('; or ')'.
       Found: <value-of select="string-join(for $t in $non-conforming return concat('''', $t, ''''), '; ')"/>.
       Please note that whitespace matters in <name/>.</report>
     </rule>
-    <rule context="person-group/string-name[not(. is ../string-name[6])]">
+    <rule context="article[@xml:lang = 'en']//person-group/string-name[not(. is ../string-name[6])]">
       <report test="following-sibling::node()[1]/self::text()[matches(., '…')]">An ellipsis is only allowed after
       the 6th string-name. This is string-name #<value-of select="index-of(for $s in ../string-name return generate-id($s), generate-id(.))"/>.</report>
+    </rule>
+    <rule context="article[@xml:lang = 'de']//person-group">
+      <report test="text()[matches(., '…')]" role="warning">An ellipsis is only allowed in English texts.</report>
     </rule>
   </pattern>
   <pattern id="string-name">
@@ -537,6 +629,12 @@
   <pattern id="single-page-citation">
     <rule context="mixed-citation//fpage">
       <report test="ancestor::mixed-citation//lpage[. = current()]">Single-page citations should have their page number in a page-range element, rather than fpage/lpage.</report>
+    </rule>
+  </pattern>
+  
+  <pattern id="citation-italic">
+    <rule context="mixed-citation//source | mixed-citation//volume ">
+      <assert test="every $n in node() satisfies $n/self::italic" role="warning">The content of <name/> should be wrapped in a single italic element.</assert>
     </rule>
   </pattern>
 
