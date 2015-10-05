@@ -100,7 +100,14 @@
         select="."/>'.</assert>
       <assert test="$corresponding-record
                     is
-                    key('jl-tr', string-join(('journal-title', ../journal-title-group/journal-title), '='), $journal-list)" role="warning">The journal id '<value-of
+                    key('jl-tr', 
+                        string-join(
+                          ('journal-title', 
+                           normalize-space(../journal-title-group/journal-title)
+                          ), 
+                          '='
+                        ),
+                        $journal-list)" role="warning">The journal id '<value-of
       select="$jid"/>' must match the journal title from the journal list, which is '<value-of select="$expected-title"/>'. Found: '<value-of 
         select="../journal-title-group/journal-title"/>'.</assert>
       <assert test="if (../issn-l)
@@ -160,6 +167,15 @@
         you should avoid characters other than digits, A-Z letters of any case, dots, and dashes. This does not apply to the first slash, which separates the publisher part from the DOI suffix.</assert>-->
     </rule>
   </pattern>
+  
+  <pattern id="doi-in-citation">
+    <rule context="ref//comment[matches(., '(^|\s+)doi[:\s]', 'i')]">
+      <report test="true()">DOIs in references should be tagged as pub-id with pub-id-type="doi".</report>
+    </rule>
+    <rule context="ref//*[@pub-id-type = 'doi']">
+      <assert test="self::pub-id">DOIs in references should be tagged as pub-id.</assert>
+    </rule>
+  </pattern>
 
   <pattern id="apa-id-1">
     <rule context="article[@xml:lang = 'en']
@@ -169,13 +185,13 @@
     </rule>
   </pattern>
   
-  <pattern id="apa-id-1a">
+  <!--<pattern id="apa-id-1a">
     <rule context="article[not(@xml:lang = 'en')]
                     /front
                       /article-meta">
       <assert test="exists(article-id[@pub-id-type = 'apaID'])" id="article-id-apaID-non-en" role="warning">There should be an article-id with pub-id-type="apaID".</assert>
     </rule>
-  </pattern>
+  </pattern>-->
 
   <pattern id="apa-id-2">
     <rule context="article-id[@pub-id-type = 'apaID'][not(../volume = '-1')]">
@@ -248,7 +264,7 @@
     <rule context="kwd-group/x">
       <!--<report test="matches(., '\s')">An x element in kwd-group must not contain whitespace.</report>-->
       <assert test="matches(., '^,\s+')">An x element in kwd-group must only contain the string ', '.</assert>
-      <assert test="preceding-sibling::node()[1]/self::kwd" role="warning">Don’t insert whitespace before the separator.</assert>
+      <!--<assert test="preceding-sibling::node()[1]/self::kwd" role="warning">Don’t insert whitespace before the separator.</assert>-->
       <assert test="following-sibling::kwd">If there is a separator, there must be a following kwd.</assert>
     </rule>
     <rule context="kwd[preceding-sibling::*[1]/self::x][following-sibling::*]">
@@ -265,11 +281,11 @@
   </pattern>
  
   <pattern id="date">
-    <rule context="month">
-      <assert test="matches(., '^(0[1-9]|1[12])$')" id="numeric-month" role="warning">Month should be 01, 02, …, 12.</assert>
+    <rule context="front//month">
+      <assert test="matches(., '^(0[1-9]|1[012])$')" id="numeric-month">Month should be 01, 02, …, 12.</assert>
     </rule>
-    <rule context="day">
-      <assert test="matches(., '^(0[1-9]|[12][0-9]|3[01])$')" id="numeric-day" role="warning">Day should be 01, 02, …, 31.</assert>
+    <rule context="front//day">
+      <assert test="matches(., '^(0[1-9]|[12][0-9]|3[01])$')" id="numeric-day">Day should be 01, 02, …, 31.</assert>
     </rule>
   </pattern>
   
@@ -286,7 +302,8 @@
       <report test=".//degrees">Don’t include degrees in the contrib names.</report>
     </rule>
     <rule context="contrib/xref[@ref-type = 'aff']">
-      <assert test="preceding-sibling::node()[1]/(self::string-name | self::xref | self::x)" role="warning">Affiliation xref should follow string-name immediately, without whitespace in between.</assert>
+      <!-- This shouldn’t be an issue since contrib is element only -->
+      <!--<assert test="preceding-sibling::node()[1]/(self::string-name | self::xref | self::x)" role="warning">Affiliation xref should follow string-name immediately, without whitespace in between.</assert>-->
       <assert test="exists(sup)">The affiliation should be in a sup element.</assert>
       <assert test="exists(../following-sibling::aff[@id = current()/@rid])">The corresponding aff element should follow after the contrib elements.</assert>
       <assert test="deep-equal(../../aff[@id = current()/@rid]/label/node(), node())" role="warning">Affiliation label should match this reference.</assert>
@@ -301,8 +318,7 @@
     <rule context="string-name">
       <assert test="count(surname) = 1" role="warning">There should be exactly one surname.</assert>
       <assert test="count(given-names) = 1" role="warning">There should be exactly one given-names.</assert>
-      <report test="text()[matches(., '\S')][not(matches(., '^(†|,\s+)$'))]" role="warning">There should only be whitespace text nodes in string-name
-        (with the exception of text nodes that consist of a single dagger, '†'). Found: <value-of 
+      <report test="text()[matches(., '\S')][not(matches(., '^(†|,\s+)$'))]" role="warning">There should only be whitespace text nodes in string-name. Found: <value-of 
         select="string-join(for $t in text()[matches(., '\S')] return concat('''', $t, ''''), ', ')"/></report>
     </rule>
     <rule context="contrib/string-name/surname">
@@ -354,7 +370,8 @@
         select="string-join(for $c in $contrib-article-types return concat('''', $c, ''''), ', ')"/>, there should be at least one
         contrib with corresp="yes".</assert>
       <assert test="count(author-notes/corresp) = 1" role="warning">If there is a corresponding author, article-meta 
-        should include at least one element author-notes/corresp.</assert>
+        should include at least one element author-notes/corresp. Note: corresponding authors are usually mandatory for:
+      <value-of select="string-join(for $cat in $contrib-article-types return concat('''', $cat, ''''), ', ')"/></assert>
     </rule>
   </pattern>  
 
@@ -414,16 +431,13 @@
   </pattern>  
 
   
-  <pattern id="bio-fig">
+  <pattern id="bio-graphic">
     <rule context="bio">
-      <report test="graphic">Use fig.</report>
-      <report test="count(fig) gt 1">More than one bio figure?</report>
+      <report test="fig">Use graphic (with a tiff image) directly.</report>
+      <report test="count(graphic) gt 1" role="warning">More than one bio figure?</report>
     </rule>
-    <rule context="bio/fig">
-      <assert test="count(graphic) = 1">Should contain exactly one graphic.</assert>
-    </rule>
-    <rule context="bio/fig/graphic">
-      <assert test="starts-with(@id, 'au-')">Bio figure graphic ID must start with 'au-'.</assert>
+    <rule context="bio/graphic">
+      <assert test="starts-with(@id, 'au-')">Bio graphic ID must start with 'au-'.</assert>
     </rule>
   </pattern>
   
@@ -432,10 +446,11 @@
       <let name="ext" value="replace(@xlink:href, '^.+?([^.]+)$', '$1')"/>
       <let name="basename" value="replace(@xlink:href, '^(.+/)?([^/.]+)\..+$', '$2')"/>
       <let name="candidates" value="for $i in (@id(:, ../@id:)) return string-join(($jid-from-filename, $i), '_')"/>
-      <let name="required-ext" value="if (exists(ancestor::fig | ancestor::table-wrap)) then 'tif' else 'gif'"/>
+      <let name="required-ext" value="if (exists(ancestor::fig | ancestor::table-wrap | ancestor::bio)) then 'tif' else 'gif'"/>
       <assert test="$basename = $candidates">The file’s base name 
       should be <value-of select="string-join($candidates, ' or ')"/></assert>
       <assert test="$ext = $required-ext">File extension must be <value-of select="$required-ext"/>.</assert>
+      <assert test="exists(@id)">graphic should have an id attribute.</assert>
     </rule>
   </pattern>
   
@@ -502,15 +517,19 @@
   <pattern id="floatref">
     <rule context="xref[@ref-type = 'fig']">
       <let name="matching-fig" value="//fig[@id = current()/@rid]"/>
+      <let name="fig-label" value="$matching-fig/label/normalize-space()"/>
       <assert test="if ($matching-fig/label) 
-                    then normalize-space(.) = $matching-fig/label/normalize-space()
+                    then replace(., '[\s\p{Zs}]+', ' ') = ($fig-label, replace($fig-label, 'Abbildung', 'Abb.'))
                     else true()" role="warning">Link text should match figure’s label.</assert>
+      <assert test="exists($matching-fig)">The xref element must point to a fig element.</assert>
     </rule>
     <rule context="xref[@ref-type = 'table']">
       <let name="matching-table" value="//table-wrap[@id = current()/@rid]"/>
+      <let name="table-label" value="$matching-table/label/normalize-space()"/>
       <assert test="if ($matching-table/label) 
-                    then normalize-space(.) = $matching-table/label/normalize-space()
+                    then replace(., '[\s\p{Zs}]+', ' ') = ($table-label, replace($table-label, 'Tabelle', 'Tab.'))
                     else true()" role="warning">Link text should match table’s label.</assert>
+      <assert test="exists($matching-table)">The xref element must point to a table-wrap element.</assert>
     </rule>
     <rule context="*[name() = ('fig', 'table-wrap')][not(ancestor::front)]">
       <assert test="preceding-sibling::p" role="warning"><name/> should come after p (outside of p).</assert>
@@ -556,6 +575,11 @@
                                                                                               then position() lt last() - 1
                                                                                               else position() lt last()]">
       <assert test="following-sibling::node()[1]/self::text()[matches(., ',\s+')]">These <name/>s must be separated by ', '.</assert>
+    </rule>
+  </pattern>
+  <pattern id="etal-en">
+    <rule context="article[@xml:lang = 'en']//person-group/etal">
+      <report test="true()" role="warning">English-language articles don’t feature 'etal' elements in person-group.</report>
     </rule>
   </pattern>
   <pattern id="person-sep-and">
