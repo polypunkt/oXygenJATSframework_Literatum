@@ -3,6 +3,7 @@
   <rewriteURI uriStartString="http://hogrefe.com/JATS/" rewritePrefix="../"/>
   <public publicId="-//APA//DTD contentItem DTD v1.6 //EN" uri="../schema/contentItem/contentItem.dtd"/>
   <public publicId="-//Atypon//DTD Literatum Content Submission Manifest DTD v4.1 20100405//EN" uri="../schema/submissionmanifest/submissionmanifest.4.1.dtd"/>
+  <public publicId="-//Atypon//DTD Literatum Content Submission Manifest DTD v4.2 20140519//EN" uri="../schema/submissionmanifest/manifest.4.2.dtd"/>
   <public publicId="-//Atypon//DTD Atypon JATS Journal Archiving and Interchange Issue XML DTD v1.0 20120831//EN" uri="../schema/issue/Atypon-Issue-Xml.dtd"/>
   <!-- The original DTDs will have preference over Wendell’s versions.
     Both versions should be equivalent, but we added the original versions on 

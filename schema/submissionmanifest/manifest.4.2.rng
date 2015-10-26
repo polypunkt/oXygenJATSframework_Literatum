@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  "-//Atypon//DTD Literatum Content Submission Manifest DTD v4.2 20140519//EN"
+  Delivered as file "manifest.4.2.dtd"
+-->
+<grammar xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <start>
+    <ref name="submission"/>
+  </start>
+  <define name="submission">
+    <element name="submission">
+      <ref name="attlist.submission"/>
+      <optional>
+        <ref name="ext-id"/>
+      </optional>
+      <optional>
+        <ref name="callback"/>
+      </optional>
+      <optional>
+        <ref name="processing-instructions"/>
+      </optional>
+      <optional>
+        <ref name="properties"/>
+      </optional>
+    </element>
+  </define>
+  <define name="attlist.submission" combine="interleave">
+    <attribute name="group-doi"/>
+    <attribute name="submission-type">
+      <choice>
+        <value>full</value>
+        <value>partial</value>
+      </choice>
+    </attribute>
+    <optional>
+      <attribute name="dtd-version" a:defaultValue="4.2"/>
+    </optional>
+  </define>
+  <define name="ext-id">
+    <element name="ext-id">
+      <ref name="attlist.ext-id"/>
+      <text/>
+    </element>
+  </define>
+  <define name="attlist.ext-id" combine="interleave">
+    <empty/>
+  </define>
+  <define name="callback">
+    <element name="callback">
+      <ref name="attlist.callback"/>
+      <oneOrMore>
+        <ref name="email"/>
+      </oneOrMore>
+    </element>
+  </define>
+  <define name="attlist.callback" combine="interleave">
+    <empty/>
+  </define>
+  <define name="email">
+    <element name="email">
+      <ref name="attlist.email"/>
+      <text/>
+    </element>
+  </define>
+  <define name="attlist.email" combine="interleave">
+    <empty/>
+  </define>
+  <define name="processing-instructions">
+    <element name="processing-instructions">
+      <ref name="attlist.processing-instructions"/>
+      <optional>
+        <ref name="priority"/>
+      </optional>
+      <optional>
+        <ref name="make-live"/>
+      </optional>
+    </element>
+  </define>
+  <define name="attlist.processing-instructions" combine="interleave">
+    <empty/>
+  </define>
+  <define name="priority">
+    <element name="priority">
+      <ref name="attlist.priority"/>
+      <empty/>
+    </element>
+  </define>
+  <define name="attlist.priority" combine="interleave">
+    <attribute name="level">
+      <choice>
+        <value>low</value>
+        <value>normal</value>
+        <value>high</value>
+      </choice>
+    </attribute>
+  </define>
+  <define name="make-live">
+    <element name="make-live">
+      <ref name="attlist.make-live"/>
+      <empty/>
+    </element>
+  </define>
+  <define name="attlist.make-live" combine="interleave">
+    <optional>
+      <attribute name="on-condition">
+        <choice>
+          <value>no-warnings</value>
+          <value>no-errors</value>
+          <value>no-fatals</value>
+        </choice>
+      </attribute>
+    </optional>
+    <optional>
+      <attribute name="at-time"/>
+    </optional>
+  </define>
+  <define name="properties">
+    <element name="properties">
+      <ref name="attlist.properties"/>
+      <zeroOrMore>
+        <ref name="property"/>
+      </zeroOrMore>
+    </element>
+  </define>
+  <define name="attlist.properties" combine="interleave">
+    <empty/>
+  </define>
+  <define name="property">
+    <element name="property">
+      <ref name="attlist.property"/>
+      <empty/>
+    </element>
+  </define>
+  <define name="attlist.property" combine="interleave">
+    <attribute name="name">
+      <data type="NMTOKEN"/>
+    </attribute>
+    <optional>
+      <attribute name="value"/>
+    </optional>
+  </define>
+</grammar>

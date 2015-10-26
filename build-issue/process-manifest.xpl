@@ -16,7 +16,7 @@
 
   <p:input port="source" primary="true">
     <p:documentation xmlns="http://www.w3.org/1999/xhtml">
-      <p>An Atypon manifest file. We’re currently supporting version 4.1; 4.0 and 4.2 may work, too.</p>
+      <p>An Atypon manifest file. We’re currently supporting version 4.1 and 4.2; 4.0 may work, too.</p>
       <p>Its name must be <code>manifest.xml</code>.</p>
       <p>The part after the slash in /submission/@group-doi corresponds to the folder name where the 
       articles reside. manifest.xml must be stored in the same parent folder where this folder resides.</p>
@@ -177,10 +177,7 @@
       </p:delete>
       <letex:validate-with-rng name="val">
         <p:input port="schema">
-          <p:document href="http://hogrefe.com/JATS/schema/submissionmanifest/submissionmanifest.4.1.rng">
-            <p:documentation>If 4.2 is a superset of 4.1, we should use 4.2. If Atypon would be so kind as to provide
-              it.</p:documentation>
-          </p:document>
+          <p:document href="http://hogrefe.com/JATS/schema/submissionmanifest/manifest.4.2.rng"/>
         </p:input>
       </letex:validate-with-rng>
       <p:sink/>

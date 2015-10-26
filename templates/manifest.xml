@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE submission PUBLIC "-//Atypon//DTD Literatum Content Submission Manifest DTD v4.1 20100405//EN" "submissionmanifest.4.1.dtd">
-<submission group-doi="10.000/issue-id" submission-type="full">
+<!DOCTYPE submission PUBLIC "-//Atypon//DTD Literatum Content Submission Manifest DTD v4.2 20140519//EN" "manifest.4.2.dtd">
+<submission group-doi="10.000/issue-id" submission-type="full" dtd-version="4.2">
   <!-- In group-doi, issue-id corresponds to the name of the folder where the issue’s articles reside
        I.e., the folder that will be zipped alongside manifest.xml. -->
   <ext-id><!-- an optional arbitrary handle for retrieving additional submission reports --></ext-id>
@@ -11,4 +11,7 @@
   <processing-instructions>
     <make-live at-time="2016-10-25 16:00:00" on-condition="no-warnings"/>
   </processing-instructions>
+  <!--<properties>
+    <property name="myProp" value="myVal"/>
+  </properties>-->
 </submission>
