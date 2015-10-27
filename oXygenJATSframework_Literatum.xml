@@ -2,13 +2,13 @@
 <xt:extensions xmlns:xt="http://www.oxygenxml.com/ns/extension"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.oxygenxml.com/ns/extension http://www.oxygenxml.com/ns/extension/extensions.xsd">
-    <xt:extension id="v0.8.7">
+    <xt:extension id="v0.9.0">
         <xt:location href="https://hobots.hogrefe.com/oXygenJATSframework_Literatum/oXygenJATSframework_Literatum.zip"/>
-        <xt:version>0.8.7</xt:version>
+        <xt:version>0.9.0</xt:version>
         <xt:oxy_version>15.0+</xt:oxy_version>
         <xt:type>framework</xt:type>
         <xt:author>Gerrit Imsieke, Wendell Piez</xt:author>
-        <xt:name>Literatum JATS (v0.8.7)</xt:name><!--oXygenJATSFramework-->
+        <xt:name>Literatum JATS (v0.9.0)</xt:name><!--oXygenJATSFramework-->
         <xt:description xmlns="http://www.w3.org/1999/xhtml">
           <h2>oXygen XML Editor framework for NISO JATS 1.0, adapted for Atypon’s Literatum platform</h2>
           <p>NISO JATS Z39.96-2012 defines an XML-based format for the authoring,
