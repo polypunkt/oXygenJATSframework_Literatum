@@ -5,10 +5,15 @@
   
   <pattern id="date">
     <rule context="month">
-      <assert test="matches(., '^(0[1-9]|1[12])$')" id="numeric-month" role="warning">Month should be 01, 02, …,12.</assert>
+      <assert test="matches(., '^(0[1-9]|1[12])$')" id="numeric-month" role="error">Month must be 01, 02, …,12.</assert>
     </rule>
     <rule context="year">
       <assert test="abs(number(.) - year-from-date(current-date())) le 1" id="numeric-year" role="warning">Year should be around the current date.</assert>
+    </rule>
+  </pattern>
+  <pattern id="pub-date">
+    <rule context="pub-date">
+      <assert test="exists(string-date)" role="error">The date must also be given as string-date.</assert>
     </rule>
   </pattern>
   <pattern id="issue-doi">

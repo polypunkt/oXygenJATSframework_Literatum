@@ -34,7 +34,7 @@
     'research-article', 'review-article')"/>
   <let name="article-types" value="('abstract', 'addendum', 'announcement', 'article-commentary', 'back-matter', 
     'bibliography', 'book-review', 'books-received', 'brief-report', 'calendar', 'case-report', 'collection', 
-    'correction', 'discussion', 'dissertation', 'editorial', 'front-matter', 'in-brief', 'index', 'instructions', 
+    'erratum', 'discussion', 'dissertation', 'editorial', 'front-matter', 'in-brief', 'index', 'instructions', 
     'introduction', 'letter', 'meeting-report', 'news', 'note', 'obituary', 'opinion', 'oration', 'other', 
     'partial-retraction', 'product-review', 'rapid-communication', 'reply', 'reprint', 'research-article', 
     'retraction', 'review-article', 'translation')"/>
@@ -145,6 +145,37 @@
     </rule>
     <rule context="article-meta/volume">
       <report test="italic | bold">No italic or bold in article-meta/volume</report>
+    </rule>
+  </pattern>
+  
+  <pattern id="pub-date-type">
+    <rule context="article-meta/pub-date[@pub-type]">
+      <assert test="@pub-type = ('epub', 'ppub')" role="error">pub-type should be 'epub' for the online publication date 
+        or 'ppub' for the print date.</assert>
+    </rule>
+  </pattern>
+  
+  <pattern id="esm">
+    <rule context="supplementary-material | inline-supplementary-material">
+      <let name="start" value="string-join((
+                                              '/doi/suppl', 
+                                              ancestor::article/front/article-meta/article-id[@pub-id-type = 'doi'],
+                                              'suppl_file/'
+                                            ), '/')"/>
+      <assert test="starts-with(@xlink:href, $start)" role="error">
+        A supplementary material xlink:href attribute for this article must start with '<value-of select="$start"/>', that is,
+        it should contain the article’s DOI between the fixed strings '/doi/suppl/' and '/suppl_file/'.
+      </assert>
+    </rule>
+  </pattern>
+  
+  <pattern id="doi-issn">
+    <rule context="article/front/article-meta/article-id[@pub-id-type = 'doi']">
+      <let name="e-issn" value="ancestor::article/front/journal-meta/issn[@pub-type = 'epub']"/>
+      <assert test="replace(., '^.+?/(.+?)/.+$', '$1') = $e-issn">
+        The DOI must contain the E-ISSN between two slashes, e.g., '10.1027/1618-3169/a000292'. The E-ISSN for this
+        article seems to be '<value-of select="$e-issn"/>'.
+      </assert>
     </rule>
   </pattern>
   
