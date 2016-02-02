@@ -90,7 +90,7 @@
   </pattern>
   <pattern id="journal-id">
     <rule context="journal-meta">
-      <assert test="normalize-space(journal-id[@journal-id-type = 'publisher'])">The publisher-specific journal-id must be present and it must not be empty.</assert>
+      <assert test="normalize-space(journal-id[@journal-id-type = 'publisher'])">The publisher-specific journal-id (journal-id-type="publisher") must be present and it must not be empty.</assert>
     </rule>
     <rule context="journal-meta/journal-id[@journal-id-type = 'publisher']">
       <let name="jid" value="."/>
@@ -149,7 +149,7 @@
   </pattern>
   
   <pattern id="pub-date-type">
-    <rule context="article-meta/pub-date[@pub-type]">
+    <rule context="article-meta/pub-date">
       <assert test="@pub-type = ('epub', 'ppub')" role="error">pub-type should be 'epub' for the online publication date 
         or 'ppub' for the print date.</assert>
     </rule>
@@ -171,10 +171,10 @@
   
   <pattern id="doi-issn">
     <rule context="article/front/article-meta/article-id[@pub-id-type = 'doi']">
-      <let name="e-issn" value="ancestor::article/front/journal-meta/issn[@pub-type = 'epub']"/>
-      <assert test="replace(., '^.+?/(.+?)/.+$', '$1') = $e-issn">
-        The DOI must contain the E-ISSN between two slashes, e.g., '10.1027/1618-3169/a000292'. The E-ISSN for this
-        article seems to be '<value-of select="$e-issn"/>'.
+      <let name="pl-issns" value="ancestor::article/front/journal-meta/(issn[@pub-type = 'ppub'] | issn-l)"/>
+      <assert test="replace(., '^.+?/(.+?)/.+$', '$1') = $pl-issns">
+        The DOI must contain either the linking ISSN or the print ISSN between two slashes, e.g., '10.1027/1618-3169/a000292'. 
+        These ISSNs seem to be '<value-of select="string-join(distinct-values($pl-issns), ', ')"/>'.
       </assert>
     </rule>
   </pattern>

@@ -14,6 +14,8 @@
   <pattern id="pub-date">
     <rule context="pub-date">
       <assert test="exists(string-date)" role="error">The date must also be given as string-date.</assert>
+      <assert test="exists(month)" role="error">The month must be given in a month element.</assert>
+      <assert test="exists(year)" role="error">The year must be given in a year element.</assert>
     </rule>
   </pattern>
   <pattern id="issue-doi">
