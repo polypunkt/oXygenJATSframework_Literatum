@@ -374,13 +374,25 @@
 
     <p:sink/>
 
+    <p:wrap-sequence wrapper="c:documents">
+      <p:input port="source">
+        <p:pipe port="report" step="sch"/>
+        <p:pipe port="report" step="sch-article"/>
+      </p:input>
+    </p:wrap-sequence>
+
     <tr:store-debug pipeline-step="5.svrl" active="yes">
       <p:with-option name="base-uri" select="$debug-dir-uri"/>
+    </tr:store-debug>
+
+    <p:sink/>
+    
+    <p:identity>
       <p:input port="source">
         <p:pipe port="report" step="sch"/>
       </p:input>
-    </tr:store-debug>
-  
+    </p:identity>
+
     <p:choose name="conditionally-zip">
       <p:when test="not(exists(/*/(svrl:failed-assert | svrl:successful-report)/@role[. = 'fatal']))">
         <p:output port="result" primary="true">

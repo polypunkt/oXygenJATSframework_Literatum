@@ -32,7 +32,7 @@
 
   <let name="journal-titles" value="key('jl-td', 'journal-title', $journal-list)"/>
 
-  <let name="jid-from-filename" value="replace(base-uri(), '^.+/(.+?)\..+$', '$1')"/>
+  <let name="file-basename" value="replace(base-uri(), '^.+/([^.]+)\..+$', '$1')"/>
   <let name="contrib-article-types" value="('article-commentary', 'brief-report', 'case-report', 'discussion', 
     'research-article', 'review-article')"/>
   <let name="article-types" value="('abstract', 'addendum', 'announcement', 'article-commentary', 'back-matter', 
@@ -78,7 +78,16 @@
     <rule context="article[matches(base-uri(), '/issue-files/suppl/[^/]+?\.bm\d*\.xml$')]">
       <assert test="@article-type = 'header backmatter'">article-type must be 'header backmatter'.</assert>
     </rule>
-    
+    <rule context="article[matches(base-uri(), '/issue-files/suppl/.+\.xml$')]">
+      <let name="tokenized" value="tokenize(@article-type, '\s+')"/>
+      <let name="secondary" value="('title-page', 'backmatter', 'table-of-contents', 'cover', 'advertisement')"/>
+      <let name="secondary-joined" value="string-join(for $s in $secondary return concat('''', $s, ''''), ', ')"/>
+      <assert test="$tokenized = 'header'">article-type must contain 'header'.</assert>
+      <assert test="$tokenized = $secondary">article-type must contain one of <value-of 
+        select="$secondary-joined"/>.</assert>
+      <assert test="count($tokenized) = 2">article-type must contain two tokens ('header' and one of <value-of 
+        select="$secondary-joined"/>).</assert>
+    </rule>
   </pattern>
   
   <pattern id="issue-suppl">
@@ -150,14 +159,14 @@
   </pattern>
   
   <pattern id="issue">
-    <rule context="article-meta">
+    <rule context="article-meta[not(contains(ancestor::article/@article-type, 'header'))]">
       <let name="pl-issns" value="ancestor::article/front/journal-meta/(issn[@pub-type = 'ppub'] | issn-l)"/>
       <let name="base-name-candidates" value="distinct-values(for $i in $pl-issns return string-join(($i, jats:pad-fpage(fpage)), '_'))"/>
       <assert test="normalize-space(volume)">The volume element must be present and it must not be empty.</assert>
       <assert test="normalize-space(issue)">The issue element must be present and it must not be empty.</assert>
       <assert test="normalize-space(fpage)">The fpage element must be present and it must not be empty (or page-range for single-page articles).</assert>
-      <assert test="$jid-from-filename = $base-name-candidates">Base file name '<value-of 
-        select="$jid-from-filename"/>' must be ISSN_a0fpage (expecting <value-of 
+      <assert test="$file-basename = $base-name-candidates">Base file name '<value-of 
+        select="$file-basename"/>' must be ISSN_a0fpage (expecting <value-of 
           select="string-join(for $c in $base-name-candidates return concat('''', $c, ''''), ' or ')"/>).</assert>
     </rule>
     <rule context="article-meta/volume">
@@ -215,7 +224,7 @@
       <assert test="self-uri[@content-type = 'pdf']">There must be a self-uri[@content-type = 'pdf']</assert>
     </rule>
     <rule context="self-uri[@content-type = 'pdf']">
-      <assert test="@xlink:href = concat($jid-from-filename, '.pdf')">The PDF self-uri base name should match the current XML file base name (<value-of select="$jid-from-filename"/>).</assert>
+      <assert test="@xlink:href = concat($file-basename, '.pdf')">The PDF self-uri base name should match the current XML file base name (<value-of select="$file-basename"/>).</assert>
     </rule>
   </pattern>
   
@@ -515,7 +524,7 @@
     <rule context="graphic">
       <let name="ext" value="replace(@xlink:href, '^.+?([^.]+)$', '$1')"/>
       <let name="basename" value="replace(@xlink:href, '^(.+/)?([^/.]+)\..+$', '$2')"/>
-      <let name="candidates" value="for $i in (@id(:, ../@id:)) return string-join(($jid-from-filename, $i), '_')"/>
+      <let name="candidates" value="for $i in (@id(:, ../@id:)) return string-join(($file-basename, $i), '_')"/>
       <let name="required-ext" value="if (exists(ancestor::fig | ancestor::table-wrap | ancestor::bio)) then 'tif' else 'gif'"/>
       <assert test="$basename = $candidates">The file’s base name 
       should be <value-of select="string-join($candidates, ' or ')"/></assert>
