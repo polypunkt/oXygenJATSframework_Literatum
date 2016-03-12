@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-model href="file:/C:/cygwin/home/gerrit/Hogrefe/BookTagSet/repo/schema/iso-schematron/iso-schematron.rng" schematypens="http://relaxng.org/ns/structure/1.0"?>
 <schema xmlns="http://purl.oclc.org/dsdl/schematron" queryBinding="xslt2"
+  xmlns:sqf="http://www.schematron-quickfix.com/validator/process" xmlns:jats="http://jats.nlm.nih.gov"
   xmlns:html="http://www.w3.org/1999/xhtml" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
   <ns prefix="xlink" uri="http://www.w3.org/1999/xlink"/>
   <ns prefix="html" uri="http://www.w3.org/1999/xhtml"/>
+  <ns prefix="sqf" uri="http://www.schematron-quickfix.com/validator/process"/>
+  <ns prefix="jats" uri="http://jats.nlm.nih.gov"/>
 
   <xsl:variable name="journal-list" as="document-node(element(html:table))">
     <xsl:document>
@@ -41,15 +44,24 @@
   <let name="abstract-required-en" value="('Brief Report', 'Case Report', 'Research Article')"/>
 
   <pattern id="no-empty">
-    <rule context="*[empty(node())]">
-      <assert test="true()">No empty elements.</assert>
+    <let name="permitted-empty" value="('graphic', 'inline-graphic', 'th', 'td', 'self-uri')"/>
+    <rule context="*[not(name() = $permitted-empty)]
+                    [empty(*) and not(normalize-space())]">
+      <report test="true()">No empty elements are permitted (except <value-of select="string-join(
+        for $e in $permitted-empty return concat('''', $e, ''''), ', ')"/>).</report>
     </rule>
   </pattern>
   
   <pattern id="types">
     <rule context="article[not(matches(base-uri(), '/issue-files/suppl/[^/]+$'))]">
-      <assert test="@article-type = $article-types">article-type must be one of <value-of 
+      <assert test="@article-type = $article-types" ><!-- sqf:fix="fix-article-type" -->article-type must be one of <value-of 
         select="string-join(for $t in $article-types return concat('''', $t, ''''), ', ')"/>.</assert>
+      <!--<sqf:fix id="fix-article-type" use-for-each="$article-types">
+        <sqf:description>
+          <sqf:title>Choose an article-type</sqf:title>
+        </sqf:description>
+        <sqf:add target="article-type" node-type="attribute" select="$sqf:current"/>
+      </sqf:fix>-->
     </rule>
     <rule context="article[matches(base-uri(), '/issue-files/suppl/[^/]+?\.ad\d+\.xml$')]">
       <assert test="@article-type = 'header advertisement'">article-type must be 'header advertisement'.</assert>
@@ -139,12 +151,24 @@
   
   <pattern id="issue">
     <rule context="article-meta">
+      <let name="pl-issns" value="ancestor::article/front/journal-meta/(issn[@pub-type = 'ppub'] | issn-l)"/>
+      <let name="base-name-candidates" value="distinct-values(for $i in $pl-issns return string-join(($i, jats:pad-fpage(fpage)), '_'))"/>
       <assert test="normalize-space(volume)">The volume element must be present and it must not be empty.</assert>
       <assert test="normalize-space(issue)">The issue element must be present and it must not be empty.</assert>
       <assert test="normalize-space(fpage)">The fpage element must be present and it must not be empty (or page-range for single-page articles).</assert>
+      <assert test="$jid-from-filename = $base-name-candidates">Base file name '<value-of 
+        select="$jid-from-filename"/>' must be ISSN_a0fpage (expecting <value-of 
+          select="string-join(for $c in $base-name-candidates return concat('''', $c, ''''), ' or ')"/>).</assert>
     </rule>
     <rule context="article-meta/volume">
       <report test="italic | bold">No italic or bold in article-meta/volume</report>
+    </rule>
+  </pattern>
+  
+  <pattern id="permissions">
+    <rule context="article-meta">
+      <assert test="exists(permissions/copyright-holder)">There must be a copyright-holder element within article-meta/permissions.</assert>
+      <assert test="exists(permissions/copyright-year)">There must be a copyright-year element within article-meta/permissions.</assert>
     </rule>
   </pattern>
   
@@ -152,6 +176,12 @@
     <rule context="article-meta/pub-date">
       <assert test="@pub-type = ('epub', 'ppub')" role="error">pub-type should be 'epub' for the online publication date 
         or 'ppub' for the print date.</assert>
+    </rule>
+  </pattern>
+  
+  <pattern id="exists-pub-date">
+    <rule context="article-meta">
+      <assert test="exists(pub-date)" role="error">There should be at least one pub-date.</assert>
     </rule>
   </pattern>
   
@@ -172,12 +202,13 @@
   <pattern id="doi-issn">
     <rule context="article/front/article-meta/article-id[@pub-id-type = 'doi']">
       <let name="pl-issns" value="ancestor::article/front/journal-meta/(issn[@pub-type = 'ppub'] | issn-l)"/>
-      <assert test="replace(., '^.+?/(.+?)/.+$', '$1') = $pl-issns">
+      <assert test="replace(., '^.+?/(.+?)/[^/]+$', '$1') = $pl-issns">
         The DOI must contain either the linking ISSN or the print ISSN between two slashes, e.g., '10.1027/1618-3169/a000292'. 
         These ISSNs seem to be '<value-of select="string-join(distinct-values($pl-issns), ', ')"/>'.
       </assert>
     </rule>
   </pattern>
+  
   
   <pattern id="pdf-self-uri">
     <rule context="article-meta[not(contains(ancestor::article/@article-type, 'header'))]">
@@ -188,9 +219,17 @@
     </rule>
   </pattern>
   
+  <xsl:function name="jats:pad-fpage" as="xs:string">
+    <xsl:param name="fpage" as="xs:string"/>
+    <xsl:sequence select="string-join(('a', for $i in (1 to (6 - string-length($fpage))) return '0', $fpage), '')"/>
+  </xsl:function>
+  
   <pattern id="doi">
     <rule context="article-meta[not(contains(ancestor::article/@article-type, 'header'))]">
+      <let name="page-related-doi-part" value="jats:pad-fpage(fpage)"/>
       <assert test="exists(article-id[@pub-id-type = 'doi'])" id="article-id-doi">There must be an article-id with pub-id-type="doi".</assert>
+      <assert test="replace(article-id[@pub-id-type = 'doi'], '^.+/', '') = $page-related-doi-part ">The DOI part after the last slash should 
+        be '<value-of select="$page-related-doi-part"/>'.</assert>
     </rule>
     <rule context="article-id[@pub-id-type = 'doi']">
       <assert test="matches(., '^10\.\d+/')" id="doi-prefix-regex" role="warning">The DOI prefix must start with '10.', followed by digits and a slash.</assert>
@@ -251,7 +290,7 @@
   
   <pattern id="common-langs">
     <rule context="*[@xml:lang]">
-      <assert test="@xml:lang = ('en', 'de')" role="warning">The article language of this publisher is typically 'en' or 'de'.</assert>
+      <assert test="@xml:lang = ('en', 'de', 'fr')" role="warning">The article language of this publisher is typically 'en', 'fr', or 'de'.</assert>
     </rule>
   </pattern>
   
@@ -641,7 +680,7 @@
       <report test="following-sibling::node()[1]/self::text()[matches(., '…')]">An ellipsis is only allowed after
       the 6th string-name. This is string-name #<value-of select="index-of(for $s in ../string-name return generate-id($s), generate-id(.))"/>.</report>
     </rule>
-    <rule context="article[@xml:lang = 'de']//person-group">
+    <rule context="article[not(@xml:lang = 'en')]//person-group">
       <report test="text()[matches(., '…')]" role="warning">An ellipsis is only allowed in English texts.</report>
     </rule>
   </pattern>

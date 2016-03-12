@@ -6,7 +6,7 @@ repository = https://github.com/transpect/xproc-util/trunk/
 scm = svn
 path = xproc-util
 
-[xslt-util/]
+[xslt-util]
 repository = https://github.com/transpect/xslt-util/trunk/
 scm = svn
-path = xslt-util/
+path = xslt-util
