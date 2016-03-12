@@ -5,10 +5,9 @@
   xmlns:cxf="http://xmlcalabash.com/ns/extensions/fileutils"
   xmlns:c="http://www.w3.org/ns/xproc-step" 
   xmlns:l="http://xproc.org/library" 
-  xmlns:letex="http://www.le-tex.de/namespace"
   xmlns:pxp="http://exproc.org/proposed/steps"
   xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
-  xmlns:transpect="http://www.le-tex.de/namespace/transpect"
+  xmlns:tr="http://transpect.io"
   xmlns:xlink="http://www.w3.org/1999/xlink"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   version="1.0" 
@@ -43,13 +42,13 @@
   </p:option>
 
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
-  <p:import href="http://transpect.le-tex.de/xproc-util/file-uri/file-uri.xpl"/>
-  <p:import href="http://transpect.le-tex.de/xproc-util/xproc.org/library/recursive-directory-list.xpl"/>
-  <p:import href="http://transpect.le-tex.de/xproc-util/store-debug/store-debug.xpl"/>
+  <p:import href="http://transpect.io/xproc-util/file-uri/xpl/file-uri.xpl"/>
+  <p:import href="http://transpect.io/xproc-util/recursive-directory-list/xpl/recursive-directory-list.xpl"/>
+  <p:import href="http://transpect.io/xproc-util/store-debug/xpl/store-debug.xpl"/>
   <p:import href="rng.xpl"/>
   <p:import href="recursive-delete.xpl"/>
 
-  <p:declare-step name="remove-ns-decl-and-xml-base" type="transpect:remove-ns-decl-and-xml-base">
+  <p:declare-step name="remove-ns-decl-and-xml-base" type="tr:remove-ns-decl-and-xml-base">
     <p:documentation>The purpose of this identity transformation is to remove all namespace declarations.</p:documentation>
     <p:input port="source" primary="true"/>
     <p:output port="result" primary="true"/>
@@ -77,13 +76,13 @@
   <p:variable name="basedir" select="replace(base-uri(), '^(.+/).+$', '$1')"/>
   
 
-  <transpect:file-uri name="tmpdir-uri">
+  <tr:file-uri name="tmpdir-uri">
     <p:with-option name="filename" select="($tmpdir[normalize-space()], replace(base-uri(), '^(.+)/.+$', '$1/package.tmp/'))[1]"/>
-  </transpect:file-uri>
+  </tr:file-uri>
 
   <p:sink/>
 
-  <transpect:file-uri name="zip-uri">
+  <tr:file-uri name="zip-uri">
     <p:with-option name="filename"
       select="concat(
                 $basedir, 
@@ -99,13 +98,13 @@
               )">
       <p:pipe port="source" step="process-manifest"/>
     </p:with-option>
-  </transpect:file-uri>
+  </tr:file-uri>
   
   <p:sink/>
 
-  <l:recursive-directory-list name="recursive-directory-list">
+  <tr:recursive-directory-list name="recursive-directory-list">
     <p:with-option name="path" select="$basedir"/>
-  </l:recursive-directory-list>
+  </tr:recursive-directory-list>
 
   <p:delete>
     <p:with-option name="match" 
@@ -121,9 +120,9 @@
     <p:variable name="zip-uri" select="/*/@local-href">
       <p:pipe port="result" step="zip-uri"/>
     </p:variable>
-    <letex:store-debug pipeline-step="0.dirlist" active="yes">
+    <tr:store-debug pipeline-step="0.dirlist" active="yes">
       <p:with-option name="base-uri" select="$debug-dir-uri"/>
-    </letex:store-debug>
+    </tr:store-debug>
     <p:viewport match="c:file" name="load-xml">
       <p:choose>
         <p:when test="matches(resolve-uri(/*/@name, base-uri(/*)), $exclude-regex, 'i')">
@@ -164,9 +163,9 @@
       </p:choose>
     </p:viewport>
 
-    <letex:store-debug pipeline-step="1.load-xml" active="yes">
+    <tr:store-debug pipeline-step="1.load-xml" active="yes">
       <p:with-option name="base-uri" select="$debug-dir-uri"/>
-    </letex:store-debug>
+    </tr:store-debug>
 
     <p:viewport match="/c:directory/c:file[not(@ignore = 'true')][not(c:errors)]" name="validate-manifest">
       <p:output port="result" primary="true"/>
@@ -175,11 +174,11 @@
           <p:pipe port="current" step="validate-manifest"/>
         </p:input>
       </p:delete>
-      <letex:validate-with-rng name="val">
+      <tr:validate-with-rng name="val">
         <p:input port="schema">
           <p:document href="http://hogrefe.com/JATS/schema/submissionmanifest/manifest.4.2.rng"/>
         </p:input>
-      </letex:validate-with-rng>
+      </tr:validate-with-rng>
       <p:sink/>
       <p:insert match="/*" position="last-child">
         <p:input port="source">
@@ -235,9 +234,9 @@
       </p:input>
     </p:xslt>
 
-    <letex:store-debug pipeline-step="2.referenced-files" active="yes">
+    <tr:store-debug pipeline-step="2.referenced-files" active="yes">
       <p:with-option name="base-uri" select="$debug-dir-uri"/>
-    </letex:store-debug>
+    </tr:store-debug>
 
     <p:xslt name="denote-actions">
       <p:input port="parameters">
@@ -249,9 +248,9 @@
       <p:with-param name="dest-uri" select="$tmpdir-uri"/>
     </p:xslt>
 
-    <letex:store-debug pipeline-step="3.denote-actions" active="yes">
+    <tr:store-debug pipeline-step="3.denote-actions" active="yes">
       <p:with-option name="base-uri" select="$debug-dir-uri"/>
-    </letex:store-debug>
+    </tr:store-debug>
 
     <p:for-each name="clone">
       <p:iteration-source select="//*[@action]"/>
@@ -268,11 +267,11 @@
           </cxf:copy>
         </p:when>
         <p:when test="/*/@action = 'serialize' and /*/*/self::article">
-          <transpect:remove-ns-decl-and-xml-base>
+          <tr:remove-ns-decl-and-xml-base>
             <p:input port="source" select="/*/article">
               <p:pipe port="current" step="clone"/>
             </p:input>
-          </transpect:remove-ns-decl-and-xml-base>
+          </tr:remove-ns-decl-and-xml-base>
           <p:store doctype-public="-//NLM//DTD JATS (Z39.96) Journal Archiving and Interchange DTD v1.0 20120330//EN"
             doctype-system="JATS-archivearticle1.dtd" omit-xml-declaration="false">
             <p:with-option name="href" select="/*/@target-href">
@@ -281,11 +280,11 @@
           </p:store>
         </p:when>
         <p:when test="/*/@action = 'serialize' and /*/*/self::submission">
-          <transpect:remove-ns-decl-and-xml-base>
+          <tr:remove-ns-decl-and-xml-base>
             <p:input port="source" select="/*/submission">
               <p:pipe port="current" step="clone"/>
             </p:input>
-          </transpect:remove-ns-decl-and-xml-base>
+          </tr:remove-ns-decl-and-xml-base>
           <p:store doctype-public="-//Atypon//DTD Literatum Content Submission Manifest DTD v4.1 20100405//EN"
             doctype-system="submissionmanifest.4.1.dtd" omit-xml-declaration="false">
             <p:with-option name="href" select="/*/@target-href">
@@ -294,11 +293,11 @@
           </p:store>
         </p:when>
         <p:when test="/*/@action = 'serialize' and /*/*/self::issue-xml">
-          <transpect:remove-ns-decl-and-xml-base>
+          <tr:remove-ns-decl-and-xml-base>
             <p:input port="source" select="/*/issue-xml">
               <p:pipe port="current" step="clone"/>
             </p:input>
-          </transpect:remove-ns-decl-and-xml-base>
+          </tr:remove-ns-decl-and-xml-base>
           <p:store doctype-public="-//Atypon//DTD Atypon JATS Journal Archiving and Interchange Issue XML DTD v1.0 20120831//EN"
             doctype-system="JATS-1.0/Atypon-Issue-Xml.dtd" omit-xml-declaration="false" indent="true">
             <p:with-option name="href" select="/*/@target-href">
@@ -353,9 +352,9 @@
       </p:input>
     </p:xslt>
 
-    <letex:store-debug pipeline-step="4.zip-manifest" active="yes">
+    <tr:store-debug pipeline-step="4.zip-manifest" active="yes">
       <p:with-option name="base-uri" select="$debug-dir-uri"/>
-    </letex:store-debug>
+    </tr:store-debug>
 
     <p:sink/>
 
@@ -375,12 +374,12 @@
 
     <p:sink/>
 
-    <letex:store-debug pipeline-step="5.svrl" active="yes">
+    <tr:store-debug pipeline-step="5.svrl" active="yes">
       <p:with-option name="base-uri" select="$debug-dir-uri"/>
       <p:input port="source">
         <p:pipe port="report" step="sch"/>
       </p:input>
-    </letex:store-debug>
+    </tr:store-debug>
   
     <p:choose name="conditionally-zip">
       <p:when test="not(exists(/*/(svrl:failed-assert | svrl:successful-report)/@role[. = 'fatal']))">
@@ -396,9 +395,9 @@
             <p:empty/>
           </p:input>
         </pxp:zip>
-        <letex:recursive-delete name="del" cx:depends-on="zip">
+        <tr:recursive-delete name="del" cx:depends-on="zip">
           <p:with-option name="href" select="$tmpdir-uri"/>
-        </letex:recursive-delete>
+        </tr:recursive-delete>
         <p:sink/>
         <!--<cxf:delete recursive="true" fail-on-error="true" name="del" cx:depends-on="zip">
           <p:with-option name="href" select="$tmpdir-uri"/>
@@ -443,7 +442,5 @@
     </p:identity>
 
   </p:group>
-
-  
 
 </p:declare-step>

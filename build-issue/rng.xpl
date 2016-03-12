@@ -5,13 +5,12 @@
   xmlns:cxf="http://xmlcalabash.com/ns/extensions/fileutils"
   xmlns:c="http://www.w3.org/ns/xproc-step" 
   xmlns:l="http://xproc.org/library" 
-  xmlns:letex="http://www.le-tex.de/namespace"
+  xmlns:tr="http://transpect.io"
   xmlns:pxp="http://exproc.org/proposed/steps"
-  xmlns:transpect="http://www.le-tex.de/namespace/transpect"
   xmlns:xlink="http://www.w3.org/1999/xlink"
   xmlns:xs="http://www.w3.org/2001/XMLSchema" 
   version="1.0" 
-  type="letex:validate-with-rng" name="validate-with-rng">
+  type="tr:validate-with-rng" name="validate-with-rng">
 
   <p:input port="source" primary="true"/>
   <p:input port="schema"/>

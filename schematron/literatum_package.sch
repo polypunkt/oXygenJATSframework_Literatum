@@ -37,6 +37,13 @@
     </rule>
   </pattern>
   
+  <pattern id="xml-valid">
+    <rule context="c:directory/c:directory/c:file">
+      <report test="c:errors" role="error">Error reading file '<value-of select="string-join(ancestor-or-self::*/@name, '/')"/>': 
+      <xsl:sequence select="c:errors"/></report>
+    </rule>
+  </pattern>
+  
   <pattern id="suppl">
     <rule context="c:directory[ends-with(@xlink:href, 'suppl/')]">
       <report test="true()" role="info">Directory <a xmlns="http://www.w3.org/1999/xhtml" href="{@xlink:href}">

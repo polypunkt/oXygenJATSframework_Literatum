@@ -9,8 +9,8 @@
   <xsl:variable name="journal-list" as="document-node(element(html:table))">
     <xsl:document>
       <xsl:choose>
-        <xsl:when test="doc-available('journal-list.html')">
-          <xsl:sequence select="doc('journal-list.html')/html:html/html:body/html:table[1]"/> 
+        <xsl:when test="doc-available('http://hogrefe.com/JATS/schematron/journal-list.html')">
+          <xsl:sequence select="doc('http://hogrefe.com/JATS/schematron/journal-list.html')/html:html/html:body/html:table[1]"/> 
         </xsl:when>
         <xsl:otherwise>
           <table xmlns="http://www.w3.org/1999/xhtml"/>
@@ -97,7 +97,7 @@
       <let name="corresponding-record" value="key('jl-tr', string-join(('journal-id', $jid), '='), $journal-list)"/>
       <let name="expected-title" value="$corresponding-record/html:td intersect key('jl-td', 'journal-title', $journal-list)"/>
       <assert test="key('jl-tr', string-join(('journal-id', .), '='), $journal-list)" role="warning">There is no journal with journal-id='<value-of 
-        select="."/>'.</assert>
+        select="."/>'. <value-of select="count($journal-list/*), count($journal-list/*/*)"/></assert>
       <assert test="$corresponding-record
                     is
                     key('jl-tr', 

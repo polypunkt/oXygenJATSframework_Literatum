@@ -4,14 +4,12 @@
   xmlns:cx="http://xmlcalabash.com/ns/extensions"
   xmlns:cxf="http://xmlcalabash.com/ns/extensions/fileutils"
   xmlns:c="http://www.w3.org/ns/xproc-step" 
-  xmlns:l="http://xproc.org/library" 
-  xmlns:letex="http://www.le-tex.de/namespace"
   xmlns:pxp="http://exproc.org/proposed/steps"
-  xmlns:transpect="http://www.le-tex.de/namespace/transpect"
+  xmlns:tr="http://transpect.io"
   xmlns:xlink="http://www.w3.org/1999/xlink"
   xmlns:xs="http://www.w3.org/2001/XMLSchema" 
   version="1.0" 
-  type="letex:recursive-delete" name="rd">
+  type="tr:recursive-delete" name="rd">
 
   <p:documentation>This is a workaround for a Calabash bug between approx. 1.0.17
   and 1.0.20 (the latter is shipped with oXygen 16.1). In oXygen 15.2, recursive="true"
@@ -23,14 +21,14 @@
   <p:option name="fail-on-error" select="'false'"/>
 
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
-  <p:import href="http://transpect.le-tex.de/xproc-util/xproc.org/library/recursive-directory-list.xpl"/>
-  <p:import href="http://transpect.le-tex.de/xproc-util/store-debug/store-debug.xpl"/>
+  <p:import href="http://transpect.io/xproc-util/recursive-directory-list/xpl/recursive-directory-list.xpl"/>
+  <p:import href="http://transpect.io/xproc-util/store-debug/xpl/store-debug.xpl"/>
 
   <p:try>
     <p:group>
-      <l:recursive-directory-list name="dirlist">
+      <tr:recursive-directory-list name="dirlist">
         <p:with-option name="path" select="$href"/>
-      </l:recursive-directory-list>
+      </tr:recursive-directory-list>
       <p:viewport match="c:file" name="files">
         <cxf:delete name="del-file">
           <p:with-option name="fail-on-error" select="$fail-on-error"><p:empty/></p:with-option>
