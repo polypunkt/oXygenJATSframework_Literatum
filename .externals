@@ -2,11 +2,11 @@
 scm = git
 
 [xproc-util]
-repository = https://subversion.le-tex.de/common/xproc-util/
+repository = https://github.com/transpect/xproc-util/trunk/
 scm = svn
 path = xproc-util
 
-[xslt-util/xslt-based-catalog-resolver/]
-repository = https://subversion.le-tex.de/common/letex-util/xslt-based-catalog-resolver/
+[xslt-util]
+repository = https://github.com/transpect/xslt-util/trunk/
 scm = svn
-path = xslt-util/xslt-based-catalog-resolver/
+path = xslt-util
