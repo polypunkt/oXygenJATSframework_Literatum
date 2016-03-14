@@ -9,8 +9,11 @@
   xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
   xmlns:tr="http://transpect.io"
   xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns:s="http://purl.oclc.org/dsdl/schematron"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
-  version="1.0" 
+  xmlns:jats="http://jats.nlm.nih.gov"
+  version="1.0"
+  type="jats:process-manifest"
   name="process-manifest">
 
   <p:input port="source" primary="true">
@@ -30,15 +33,31 @@
   <p:input port="article-schematron">
     <p:document href="../schematron/literatum_JATS.sch"/>
   </p:input>
-  <p:input port="svrl2html">
-    <p:document href="../schematron/svrl2html.xsl"/>
-  </p:input>
 
-  <p:output port="result" primary="true"/>
-  <p:serialization port="result" indent="true" omit-xml-declaration="false" method="xhtml"/>
+  <p:output port="validation-input" primary="true">
+    <p:documentation>Particularly for RNG validation. Schematron has been done already.</p:documentation>
+    <p:pipe step="main" port="denote-actions"/>
+  </p:output>
+
+  <p:output port="report" sequence="true">
+    <p:pipe port="report" step="main"/>
+  </p:output>
+
+  <p:output port="tmpdir-uri">
+    <p:pipe port="result" step="tmpdir-uri"/>
+  </p:output>
 
   <p:option name="tmpdir" required="false" select="''">
     <p:documentation>URI or file system path. If not given, will be calculated.</p:documentation>
+  </p:option>
+  
+  <p:option name="transpect" select="'false'">
+    <p:documentation>Whether it is invoked from within transpect (true) or oXygen (false). 
+      transpect means:
+      – insert srcpaths into the source documents
+      – patch srcpath inclusion into the Schematrons
+      – do not validate against the DTD when reading articles
+      </p:documentation>
   </p:option>
 
   <p:import href="http://xmlcalabash.com/extension/steps/library-1.0.xpl"/>
@@ -68,6 +87,58 @@
       </p:input>
     </p:xslt> 
   </p:declare-step>
+  
+  <p:declare-step name="add-srcpath-to-schematron" type="tr:add-srcpath-to-schematron">
+    <p:documentation>Add span[@class = 'srcpath'] to Schematron assert and report instructions.
+    This is only needed for transpect.</p:documentation>
+    <p:option name="transpect"/>
+    <p:input port="source" primary="true"/>
+    <p:output port="result" primary="true"/>
+    <p:choose>
+      <p:when test="$transpect = 'true'">
+        <p:xslt>
+          <p:input port="parameters"><p:empty/></p:input>
+          <p:input port="stylesheet">
+            <p:inline>
+              <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xso="xsloutputnamespace" version="2.0">
+                <xsl:namespace-alias stylesheet-prefix="xso" result-prefix="xsl"/>
+                <xsl:template match="* | @*">
+                  <xsl:copy>
+                    <xsl:apply-templates select="@*, node()"/>
+                  </xsl:copy>
+                </xsl:template>
+                <xsl:template match="/s:schema/@queryBinding">
+                  <xsl:copy/>
+                  <xsl:attribute name="tr:rule-family" select="replace(base-uri(), '^.+/([^.]+)\..+$', '$1')"/>
+                  <xsl:attribute name="tr:step-name" select="'schematron-validation'"/>
+                </xsl:template>
+                <xsl:template match="s:assert | s:report">
+                  <xsl:copy>
+                    <xsl:apply-templates select="@*"/>
+                    <xsl:if test="not(@id)">
+                      <xsl:attribute name="id" select="string-join((ancestor::s:pattern/@id, string(position())), '_')"/>
+                    </xsl:if>
+                    <xsl:if test="not(@role)">
+                      <xsl:attribute name="role" select="'error'"/>
+                    </xsl:if>
+                    <xsl:if test="not(exists(s:span[@class eq 'srcpath']))">
+                      <span class="srcpath" xmlns="http://purl.oclc.org/dsdl/schematron">
+                        <xso:value-of select="ancestor-or-self::*[@srcpath][1]/@srcpath"/>
+                      </span>
+                    </xsl:if>
+                    <xsl:apply-templates/>
+                  </xsl:copy>
+                </xsl:template>
+              </xsl:stylesheet>
+            </p:inline>
+          </p:input>
+        </p:xslt>    
+      </p:when>
+      <p:otherwise>
+        <p:identity/>
+      </p:otherwise>
+    </p:choose>
+  </p:declare-step>
 
   <p:variable name="exclude-regex" select="'(/(__MACOSX|thumbs\.db)|\.(tmp|debug)/|~$)'"/>
   <p:variable name="timestamp" select="substring(replace(string(current-dateTime()), '\D', ''), 1, 14)"/>
@@ -75,7 +146,6 @@
                                     return replace($d, '^.+/', ''), 'not.specified')[1]"/>
   <p:variable name="basedir" select="replace(base-uri(), '^(.+/).+$', '$1')"/>
   
-
   <tr:file-uri name="tmpdir-uri">
     <p:with-option name="filename" select="($tmpdir[normalize-space()], replace(base-uri(), '^(.+)/.+$', '$1/package.tmp/'))[1]"/>
   </tr:file-uri>
@@ -102,6 +172,24 @@
   
   <p:sink/>
 
+  <tr:add-srcpath-to-schematron name="patch-article-schematron">
+    <p:with-option name="transpect" select="$transpect"/>
+    <p:input port="source">
+      <p:pipe port="article-schematron" step="process-manifest"/>
+    </p:input>
+  </tr:add-srcpath-to-schematron>
+  
+  <p:sink/>
+  
+  <tr:add-srcpath-to-schematron name="patch-schematron">
+    <p:with-option name="transpect" select="$transpect"/>
+    <p:input port="source">
+      <p:pipe port="schematron" step="process-manifest"/>
+    </p:input>
+  </tr:add-srcpath-to-schematron>
+  
+  <p:sink/>
+
   <tr:recursive-directory-list name="recursive-directory-list">
     <p:with-option name="path" select="$basedir"/>
   </tr:recursive-directory-list>
@@ -111,7 +199,15 @@
       select="concat('/c:directory/c:file[not(@name = ''manifest.xml'')] | /c:directory/c:directory[not(@name = ''', $subdir, ''')]')"/>
   </p:delete>
 
-  <p:group>
+  <p:group name="main">
+    <p:output port="denote-actions" primary="true">
+      <p:pipe port="result" step="denote-actions"/>
+    </p:output>
+    <p:output port="report" sequence="true">
+      <p:pipe port="report" step="sch"/>
+      <p:pipe port="result" step="conditionally-zip"/>
+      <p:pipe port="report" step="sch-article"/>
+    </p:output>
     <p:variable name="tmpdir-uri" select="/*/@local-href">
       <p:pipe port="result" step="tmpdir-uri"/>
     </p:variable>
@@ -132,7 +228,8 @@
           <p:try name="load">
             <p:group>
               <p:output port="result" primary="true"/>
-              <p:load dtd-validate="true">
+              <p:load>
+                <p:with-option name="dtd-validate" select="if ($transpect = 'false') then 'true' else 'false'"/>
                 <p:with-option name="href" select="resolve-uri(/*/@name, base-uri())"/>
               </p:load>
               <p:add-attribute attribute-name="xml:base" match="/*">
@@ -169,7 +266,7 @@
 
     <p:viewport match="/c:directory/c:file[not(@ignore = 'true')][not(c:errors)]" name="validate-manifest">
       <p:output port="result" primary="true"/>
-      <p:delete match="/*/@xml:base">
+      <p:delete match="/*/@xml:base | @srcpath">
         <p:input port="source" select="/c:file/*[not(self::c:*)]">
           <p:pipe port="current" step="validate-manifest"/>
         </p:input>
@@ -233,6 +330,15 @@
         <p:document href="referenced-files.xsl"/>
       </p:input>
     </p:xslt>
+
+    <p:choose>
+      <p:when test="$transpect = 'true'">
+        <p:label-elements match="*[not(ancestor::c:errors)]" attribute="srcpath"/>    
+      </p:when>
+      <p:otherwise>
+        <p:identity/>
+      </p:otherwise>
+    </p:choose>
 
     <tr:store-debug pipeline-step="2.referenced-files" active="yes">
       <p:with-option name="base-uri" select="$debug-dir-uri"/>
@@ -322,20 +428,35 @@
       <p:iteration-source select="//c:file/article">
         <p:pipe port="result" step="denote-actions"/>
       </p:iteration-source>
-      <p:output port="report" primary="true">
-        <p:pipe port="report" step="sch-article1"/>
-      </p:output>
+      <p:output port="report" primary="true"/>
       <p:validate-with-schematron assert-valid="false" name="sch-article1">
         <p:input port="parameters">
           <p:empty/>
         </p:input>
         <p:input port="schema">
-          <p:pipe port="article-schematron" step="process-manifest"/>
+          <p:pipe port="result" step="patch-article-schematron"/>
         </p:input>
         <p:with-param name="allow-foreign" select="'true'"/>
         <p:with-param name="full-path-notation" select="'2'"/>
       </p:validate-with-schematron>
       <p:sink/>
+      <p:identity>
+        <p:input port="source">
+          <p:pipe port="report" step="sch-article1"/>
+        </p:input>
+      </p:identity>
+      <p:choose>
+        <p:when test="$transpect = 'true'">
+          <p:set-attributes match="/*">
+            <p:input port="attributes">
+              <p:pipe port="result" step="patch-article-schematron"/>
+            </p:input>
+          </p:set-attributes>
+        </p:when>
+        <p:otherwise>
+          <p:identity/>
+        </p:otherwise>              
+      </p:choose>
     </p:for-each>
     
     <p:sink/>
@@ -366,7 +487,7 @@
         <p:empty/>
       </p:input>
       <p:input port="schema">
-        <p:pipe port="schematron" step="process-manifest"/>
+        <p:pipe port="result" step="patch-schematron"/>
       </p:input>
       <p:with-param name="allow-foreign" select="'true'"/>
       <p:with-param name="full-path-notation" select="'2'"/>
@@ -374,7 +495,7 @@
 
     <p:sink/>
 
-    <p:wrap-sequence wrapper="c:documents">
+    <p:wrap-sequence wrapper="c:documents" name="svrls">
       <p:input port="source">
         <p:pipe port="report" step="sch"/>
         <p:pipe port="report" step="sch-article"/>
@@ -426,32 +547,6 @@
     </p:choose>
 
     <p:sink/>
-
-    <p:xslt name="svrl2html">
-      <p:input port="source">
-        <p:pipe port="report" step="sch"/>
-        <p:pipe port="result" step="conditionally-zip"/>
-        <p:pipe port="report" step="sch-article"/>
-      </p:input>
-      <p:input port="parameters">
-        <p:empty/>
-      </p:input>
-      <p:input port="stylesheet">
-        <p:pipe port="svrl2html" step="process-manifest"/>
-      </p:input>
-    </p:xslt>
-
-    <!--<cx:message name="msg" cx:depends-on="conditionally-zip">
-      <p:with-option name="message" select="'ZZZZZZZZZZZZZZZ ', $tmpdir-uri, ' ', $zip-uri"/>
-    </cx:message>-->
-
-    <p:sink/>
-
-    <p:identity>
-      <p:input port="source">
-        <p:pipe port="result" step="svrl2html"/>
-      </p:input>
-    </p:identity>
 
   </p:group>
 

@@ -1556,7 +1556,7 @@
                                     <null/>
                                 </field>
                                 <field name="inputXSLURL">
-                                    <String>${framework}/build-issue/process-manifest.xpl</String>
+                                    <String>${framework}/build-issue/process-manifest-oxygen.xpl</String>
                                 </field>
                                 <field name="inputXMLURL">
                                     <String></String>
