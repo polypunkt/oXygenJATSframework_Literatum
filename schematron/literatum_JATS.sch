@@ -161,13 +161,13 @@
   <pattern id="issue">
     <rule context="article-meta[not(contains(ancestor::article/@article-type, 'header'))]">
       <let name="pl-issns" value="ancestor::article/front/journal-meta/(issn[@pub-type = 'ppub'] | issn-l)"/>
-      <let name="base-name-candidates" value="distinct-values(for $i in $pl-issns return string-join(($i, jats:pad-fpage(fpage)), '_'))"/>
+      <let name="base-name-from-doi" value="replace(article-id[@pub-id-type = 'doi'], '^[^/]+/([^/]+)/([^/]+)$', '$1_$2')"/>
       <assert test="normalize-space(volume)">The volume element must be present and it must not be empty.</assert>
       <assert test="normalize-space(issue)">The issue element must be present and it must not be empty.</assert>
       <assert test="normalize-space(fpage)">The fpage element must be present and it must not be empty (or page-range for single-page articles).</assert>
-      <assert test="$file-basename = $base-name-candidates">Base file name '<value-of 
-        select="$file-basename"/>' must be ISSN_a0fpage (expecting <value-of 
-          select="string-join(for $c in $base-name-candidates return concat('''', $c, ''''), ' or ')"/>).</assert>
+      <assert test="$file-basename = $base-name-from-doi">Base file name '<value-of 
+        select="$file-basename"/>' must match the DOI (expecting '<value-of 
+          select="$base-name-from-doi"/>').</assert>
     </rule>
     <rule context="article-meta/volume">
       <report test="italic | bold">No italic or bold in article-meta/volume</report>
@@ -211,9 +211,12 @@
   <pattern id="doi-issn">
     <rule context="article/front/article-meta/article-id[@pub-id-type = 'doi']">
       <let name="pl-issns" value="ancestor::article/front/journal-meta/(issn[@pub-type = 'ppub'] | issn-l)"/>
-      <assert test="replace(., '^.+?/(.+?)/[^/]+$', '$1') = $pl-issns">
+      <assert test="replace(., '^[^/]+/([^/]+)/[^/]+$', '$1') = $pl-issns">
         The DOI must contain either the linking ISSN or the print ISSN between two slashes, e.g., '10.1027/1618-3169/a000292'. 
         These ISSNs seem to be '<value-of select="string-join(distinct-values($pl-issns), ', ')"/>'.
+      </assert>
+      <assert test="matches(., '^[^/]+/([^/]+)/a\d{6}$')">
+        The last part of the DOI must be an 'a', followed by 6 digits (zero-padded article ID).
       </assert>
     </rule>
   </pattern>
@@ -235,10 +238,7 @@
   
   <pattern id="doi">
     <rule context="article-meta[not(contains(ancestor::article/@article-type, 'header'))]">
-      <let name="page-related-doi-part" value="jats:pad-fpage(fpage)"/>
       <assert test="exists(article-id[@pub-id-type = 'doi'])" id="article-id-doi">There must be an article-id with pub-id-type="doi".</assert>
-      <assert test="replace(article-id[@pub-id-type = 'doi'], '^.+/', '') = $page-related-doi-part ">The DOI part after the last slash should 
-        be '<value-of select="$page-related-doi-part"/>'.</assert>
     </rule>
     <rule context="article-id[@pub-id-type = 'doi']">
       <assert test="matches(., '^10\.\d+/')" id="doi-prefix-regex" role="warning">The DOI prefix must start with '10.', followed by digits and a slash.</assert>
