@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-model href="http://hogrefe.com/JATS/schematron/literatum_Issue.sch" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<!-- not needed any more: <?xml-model href="http://hogrefe.com/JATS/schematron/literatum_Issue.sch" schematypens="http://purl.oclc.org/dsdl/schematron"?>-->
 <!DOCTYPE issue-xml
   PUBLIC "-//Atypon//DTD Atypon JATS Journal Archiving and Interchange Issue XML DTD v1.0 20120831//EN" 
   "JATS-1.0/Atypon-Issue-Xml.dtd">
