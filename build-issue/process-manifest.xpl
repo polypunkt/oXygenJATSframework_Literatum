@@ -554,9 +554,9 @@
             <p:empty/>
           </p:input>
         </pxp:zip>
-        <tr:recursive-delete name="del" cx:depends-on="zip">
+        <!--<tr:recursive-delete name="del" cx:depends-on="zip">
           <p:with-option name="href" select="$tmpdir-uri"/>
-        </tr:recursive-delete>
+        </tr:recursive-delete>-->
         <p:sink/>
         <!--<cxf:delete recursive="true" fail-on-error="true" name="del" cx:depends-on="zip">
           <p:with-option name="href" select="$tmpdir-uri"/>
