@@ -236,6 +236,19 @@
     <xsl:sequence select="string-join(('a', for $i in (1 to (6 - string-length($fpage))) return '0', $fpage), '')"/>
   </xsl:function>
   
+  <xsl:function name="jats:remove-srcpath" as="node()*">
+    <xsl:param name="input" as="node()*"/>
+    <xsl:apply-templates select="$input" mode="jats:strip-srcpaths"/>
+  </xsl:function>
+  
+  <xsl:template match="* | @*" mode="jats:strip-srcpaths">
+    <xsl:copy>
+      <xsl:apply-templates select="@*, node()" mode="#current"/>
+    </xsl:copy>
+  </xsl:template>
+  
+  <xsl:template match="@srcpath | text()[not(normalize-space())]" mode="jats:strip-srcpaths"/>
+  
   <pattern id="doi">
     <rule context="article-meta[not(contains(ancestor::article/@article-type, 'header'))]">
       <assert test="exists(article-id[@pub-id-type = 'doi'])" id="article-id-doi">There must be an article-id with pub-id-type="doi".</assert>
@@ -383,9 +396,16 @@
     <rule context="contrib/xref[@ref-type = 'aff']">
       <!-- This shouldn’t be an issue since contrib is element only -->
       <!--<assert test="preceding-sibling::node()[1]/(self::string-name | self::xref | self::x)" role="warning">Affiliation xref should follow string-name immediately, without whitespace in between.</assert>-->
+      <!-- Only for the transpect version it is necessary to strip @srcpath prior to deep-equal() comparisons -->
+      <let name="label" value="jats:remove-srcpath(../../aff[@id = current()/@rid]/label/node())"/>
+      <let name="xref" value="jats:remove-srcpath(node())"/>
       <assert test="exists(sup)">The affiliation should be in a sup element.</assert>
       <assert test="exists(../following-sibling::aff[@id = current()/@rid])">The corresponding aff element should follow after the contrib elements.</assert>
-      <assert test="deep-equal(../../aff[@id = current()/@rid]/label/node(), node())" role="warning">Affiliation label should match this reference.</assert>
+      <assert test="deep-equal($label, $xref)" role="warning">Affiliation label ('<value-of 
+        select="string-join($label, '')"/>') should match this reference ('<value-of 
+          select="string-join($xref, '')"/>')
+        exactly, including element names.
+      </assert>
     </rule>
     <rule context="aff">
       <report test="following-sibling::contrib" role="warning">aff elements should appear after contrib elements.</report>

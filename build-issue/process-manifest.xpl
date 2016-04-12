@@ -111,6 +111,7 @@
                   <xsl:copy/>
                   <xsl:attribute name="tr:rule-family" select="replace(base-uri(), '^.+/([^.]+)\..+$', '$1')"/>
                   <xsl:attribute name="tr:step-name" select="'schematron-validation'"/>
+                  <xsl:attribute name="tr:include-location-in-msg" select="'true'"/>
                 </xsl:template>
                 <xsl:template match="s:assert | s:report">
                   <xsl:copy>
@@ -140,7 +141,9 @@
     </p:choose>
   </p:declare-step>
 
-  <p:variable name="exclude-regex" select="'(/(__MACOSX|thumbs\.db)|\.(tmp|debug)/|~$)'"/>
+  <p:variable name="exclude-regex" select="concat('(/(__MACOSX|thumbs\.db)|\.(', 
+                                                  if ($transpect = 'true') then '' else 'tmp|', 
+                                                  'debug)/|~$)')"/>
   <p:variable name="timestamp" select="substring(replace(string(current-dateTime()), '\D', ''), 1, 14)"/>
   <p:variable name="subdir" select="(for $d in /submission/@group-doi
                                     return replace($d, '^.+/', ''), 'not.specified')[1]"/>
@@ -149,6 +152,9 @@
   <tr:file-uri name="tmpdir-uri">
     <p:with-option name="filename" select="($tmpdir[normalize-space()], replace(base-uri(), '^(.+)/.+$', '$1/package.tmp/'))[1]"/>
   </tr:file-uri>
+  
+  <!--<tr:store-debug active="true" pipeline-step="manifest-source" 
+    base-uri="file:/C:/cygwin/home/gerrit/Hogrefe/Literatum_JATS/input/cri_cri.2015.36.issue-6_20151208122500.tmp/tmp/package.debug"/>-->
 
   <p:sink/>
 
@@ -169,7 +175,7 @@
       <p:pipe port="source" step="process-manifest"/>
     </p:with-option>
   </tr:file-uri>
-  
+
   <p:sink/>
 
   <tr:add-srcpath-to-schematron name="patch-article-schematron">
@@ -204,7 +210,7 @@
       <p:pipe port="result" step="denote-actions"/>
     </p:output>
     <p:output port="report" sequence="true">
-      <p:pipe port="report" step="sch"/>
+      <p:pipe port="result" step="add-rule-family"/>
       <p:pipe port="result" step="conditionally-zip"/>
       <p:pipe port="report" step="sch-article"/>
     </p:output>
@@ -440,6 +446,13 @@
         <p:with-param name="full-path-notation" select="'2'"/>
       </p:validate-with-schematron>
       <p:sink/>
+      <tr:store-debug pipeline-step="patched-article-schematron" active="yes">
+        <p:input port="source">
+          <p:pipe port="result" step="patch-article-schematron"/>
+        </p:input>
+        <p:with-option name="base-uri" select="$debug-dir-uri"/>
+      </tr:store-debug>
+      <p:sink/>
       <p:identity>
         <p:input port="source">
           <p:pipe port="report" step="sch-article1"/>
@@ -452,6 +465,11 @@
               <p:pipe port="result" step="patch-article-schematron"/>
             </p:input>
           </p:set-attributes>
+          <p:add-attribute attribute-name="tr:rule-family" match="/*" name="rename-family">
+            <p:with-option name="attribute-value" select="replace(base-uri(/*), '^.+/', 'article schematron ')">
+              <p:pipe port="current" step="sch-article"/>
+            </p:with-option>
+          </p:add-attribute>
         </p:when>
         <p:otherwise>
           <p:identity/>
@@ -494,10 +512,18 @@
     </p:validate-with-schematron>
 
     <p:sink/>
+    
+    <p:add-attribute attribute-name="tr:rule-family" match="/*" name="add-rule-family" attribute-value="whole_submission">
+      <p:input port="source">
+        <p:pipe port="report" step="sch"/>
+      </p:input>
+    </p:add-attribute>
+
+    <p:sink/>
 
     <p:wrap-sequence wrapper="c:documents" name="svrls">
       <p:input port="source">
-        <p:pipe port="report" step="sch"/>
+        <p:pipe port="result" step="add-rule-family"/>
         <p:pipe port="report" step="sch-article"/>
       </p:input>
     </p:wrap-sequence>
@@ -510,7 +536,7 @@
     
     <p:identity>
       <p:input port="source">
-        <p:pipe port="report" step="sch"/>
+        <p:pipe port="result" step="add-rule-family"/>
       </p:input>
     </p:identity>
 

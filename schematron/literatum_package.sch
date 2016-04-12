@@ -70,7 +70,7 @@
   <pattern id="refd-files">
     <rule context="c:file[c:refd-files]">
       <let name="all-files" value="//c:file/@xlink:href"/>
-      <let name="unresolved" value="c:refd-files/*[@xlink:href[not(. = $all-files)]]"/>
+      <let name="unresolved" value="c:refd-files/*[not((@xlink:href, @resolved-orig-href) = $all-files)]"/>
       <assert test="count($unresolved) = 0" role="error">
         The following files have been referenced in <value-of select="string-join(ancestor-or-self::*/@name, '/')"/>, but they are missing:
       <ul xmlns="http://www.w3.org/1999/xhtml"><xsl:apply-templates select="$unresolved" mode="refd-files"/></ul></assert>

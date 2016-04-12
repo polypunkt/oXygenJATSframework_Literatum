@@ -3,7 +3,8 @@
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:xlink="http://www.w3.org/1999/xlink"
   xmlns:c="http://www.w3.org/ns/xproc-step" 
-  exclude-result-prefixes="xs"
+  xmlns:jats="http://jats.nlm.nih.gov"
+  exclude-result-prefixes="xs jats c"
   version="2.0">
   
   <xsl:template match="* | @*">
@@ -43,6 +44,11 @@
   
   <xsl:template match="text()" mode="referenced-files"/>
   
+  <xsl:function name="jats:normalize-uri" as="xs:string">
+    <xsl:param name="input" as="xs:string"/>
+    <xsl:sequence select="replace($input, '/+', '/')"/>
+  </xsl:function>
+  
   <xsl:template match="graphic | media | self-uri" mode="referenced-files">
     <xsl:copy>
       <xsl:copy-of select="@content-type"/>
@@ -50,7 +56,9 @@
       <xsl:variable name="rel-href" select="string-join(($prefix, @xlink:href), '/')" as="xs:string"/>
       <xsl:attribute name="rel-href" select="$rel-href"/>
       <xsl:attribute name="orig-href" select="@xlink:href"/>
-      <xsl:attribute name="xlink:href" select="resolve-uri($rel-href, base-uri())"/>
+      <xsl:attribute name="resolved-orig-href" select="jats:normalize-uri(resolve-uri(@xlink:href, base-uri()))"/>
+      <!-- the future target file if graphic is still beside the XML: -->
+      <xsl:attribute name="xlink:href" select="jats:normalize-uri(resolve-uri($rel-href, base-uri()))"/>
     </xsl:copy>
   </xsl:template>
   

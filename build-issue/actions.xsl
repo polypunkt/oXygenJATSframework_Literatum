@@ -2,13 +2,19 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:xlink="http://www.w3.org/1999/xlink"
-  xmlns:c="http://www.w3.org/ns/xproc-step" 
-  exclude-result-prefixes="xlink"
+  xmlns:c="http://www.w3.org/ns/xproc-step"
+  xmlns:jats="http://jats.nlm.nih.gov"
+  exclude-result-prefixes="xlink c jats xs"
   version="2.0">
 
   <xsl:param name="dest-uri" as="xs:string"/>
-  <xsl:variable name="source-uri" as="xs:string" select="/c:directory/@xml:base"/>
+  <xsl:variable name="source-uri" as="xs:string" select="jats:normalize-uri(/c:directory/@xml:base)"/>
   <xsl:variable name="source-uri-length" as="xs:integer" select="string-length($source-uri) + 1"/>
+
+  <xsl:function name="jats:normalize-uri" as="xs:string">
+    <xsl:param name="input" as="xs:string"/>
+    <xsl:sequence select="replace($input, '/+', '/')"/>
+  </xsl:function>
 
   <xsl:template match="* | @*">
     <xsl:copy>
@@ -26,7 +32,11 @@
       <xsl:variable name="process-subs" as="element(*)*" 
         select="if (self::c:directory) then c:determine-action(*) else *"/>
       <xsl:copy>
-        <xsl:attribute name="target-href" select="concat($dest-uri, substring(@xlink:href, $source-uri-length))"/>
+        <xsl:variable name="target" as="xs:string" 
+          select="if (//c:refd-files/*/@resolved-orig-href = @xlink:href) (: graphic files that are placed next to the XML but that should be moved to a subdirectory :)
+                  then //c:refd-files/*[@resolved-orig-href = current()/@xlink:href]/@xlink:href
+                  else @xlink:href"/>
+        <xsl:attribute name="target-href" select="concat($dest-uri, substring(jats:normalize-uri($target), $source-uri-length))"/>    
         <xsl:choose>
           <xsl:when test="self::c:directory and exists($process-subs/@action)">
             <xsl:attribute name="action" select="'mkdir'"/>
