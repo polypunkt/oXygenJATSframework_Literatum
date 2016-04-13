@@ -630,7 +630,7 @@
                     else true()" role="warning">Link text should match table’s label.</assert>
       <assert test="exists($matching-table)">The xref element must point to a table-wrap element.</assert>
     </rule>
-    <rule context="*[name() = ('fig', 'table-wrap')][not(ancestor::front)]">
+    <rule context="*[name() = ('fig', 'table-wrap')][not(ancestor::front | ancestor::app)]">
       <assert test="preceding-sibling::p" role="warning"><name/> should come after p (outside of p).</assert>
     </rule>
   </pattern>
