@@ -81,7 +81,7 @@
                 <xsl:apply-templates select="@*, node()"/>
               </xsl:copy>
             </xsl:template>
-            <xsl:template match="@xml:base"/>
+            <xsl:template match="@xml:base | @srcpath"/>
           </xsl:stylesheet>
         </p:inline>
       </p:input>
