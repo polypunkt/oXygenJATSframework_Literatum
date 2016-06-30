@@ -43,14 +43,15 @@
     'retraction', 'review-article', 'translation')"/>
   <let name="abstract-required-en" value="('Brief Report', 'Case Report', 'Research Article')"/>
 
-  <pattern id="no-empty">
+  <!-- disabled as requested in 2016-06 (too many other elements that may be empty) 
+    <pattern id="no-empty">
     <let name="permitted-empty" value="('graphic', 'inline-graphic', 'th', 'td', 'self-uri')"/>
     <rule context="*[not(name() = $permitted-empty)]
                     [empty(*) and not(normalize-space())]">
       <report test="true()">No empty elements are permitted (except <value-of select="string-join(
         for $e in $permitted-empty return concat('''', $e, ''''), ', ')"/>).</report>
     </rule>
-  </pattern>
+  </pattern>-->
   
   <pattern id="types">
     <rule context="article[not(matches(base-uri(), '/issue-files/suppl/[^/]+$'))]">
