@@ -3,8 +3,8 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.oxygenxml.com/ns/extension http://www.oxygenxml.com/ns/extension/extensions.xsd">
     <xt:extension id="v0.9.8">
-        <xt:location href="http://www.fischer-imsieke.de/gerrit/oXygenJATSframework_Literatum.zip"/>
-        <!-- <xt:location href="https://hobots.hogrefe.com/oXygenJATSframework_Literatum/oXygenJATSframework_Literatum.zip"/> -->
+<!--        <xt:location href="http://www.fischer-imsieke.de/gerrit/oXygenJATSframework_Literatum.zip"/>-->
+        <xt:location href="https://hobots.hogrefe.com/oXygenJATSframework_Literatum/oXygenJATSframework_Literatum.zip"/> 
         <xt:version>0.9.8</xt:version>
         <xt:oxy_version>15.0+</xt:oxy_version>
         <xt:type>framework</xt:type>
