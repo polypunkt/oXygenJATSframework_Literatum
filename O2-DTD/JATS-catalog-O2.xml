@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE catalog
-  PUBLIC "-//OASIS//DTD Entity Resolution XML Catalog V3.0//EN" "http://www.oasis-open.org/committees/entity/release/1.0/catalog.dtd">
 <catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="public">
    <group xml:base="." prefer="public">
       <public publicId="-//NLM//DTD BITS Book Interchange DTD v0.2 20121015//EN"

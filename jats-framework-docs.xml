@@ -8,7 +8,7 @@
   <front>
     <article-meta>
       <title-group>
-        <article-title>An oXygen Framework for JATS 1.0</article-title>
+        <article-title>An oXygen Framework for JATS 1.0 and 1.1</article-title>
         <subtitle>With package building support for Atypon’s Literatum platform 
           and extensive content checking rules</subtitle>
       </title-group>
@@ -41,12 +41,15 @@
   </front>
   <body>
     <p>JATS, the journal article tag suite, serves as a basis for Atypon’s Literatum content delivery platform. Articles may be
-      delivered according to version 1.0 of the JATS archiving (“green”) DTD. Please consult Atypon’s Literatum Content Tagging Guide&#xa0;[<xref rid="bib-lctg" ref-type="bibr"/>].</p>
+      delivered according to version 1.0 or 1.1 of the JATS archiving (“green”) DTD. 
+      Please consult Atypon’s Literatum Content Tagging Guide&#xa0;[<xref rid="bib-lctg" ref-type="bibr"/>].</p>
     <p>A typical delivery to Literatum consists of all articles that belong to a given journal issue. In order to describe the
       contents of an issue, Atypon has added a lightweight issue-xml DTD that utilizes JATS vocabulary where available. In
       addition to blank templates for journal articles, this framework also contains a template for issue XML. Issue XML files
       may be saved alongside the articles that form an issue. A transformation scenario 'build-issue' will then collect all
       articles in that directory.</p>
+    <p>Please note that this framework was created in 2013 and has not been updated with respect to newer Atypon 
+      packaging requirements.</p>
     <p>There are Schematron checks for both article and issue XML that help content workers comply with Atypon’s requirements,
       such as naming or tagging conventions.</p>
     <sec>
@@ -100,6 +103,14 @@
       </fig>
       <p>Please note that oXygen version prior to 15.0 are currently not supported. If there is demand, we might be looking into
       supporting 14.x versions.</p>
+      <p>It seems as if oXygen versions prior to 17.0 won’t communicate with hobots.hogrefe.com over HTTPS any more. This is probably
+      caused by a new HTTPS certificate on the server that is not approved by any of the certificate authorities listed with the Java
+      version that shipped with older oXygen versions. As a workaround, you could in principle try to run your old oXygen version
+      on a more recent Java version. Or you can instruct oXygen to install the package from another location. In order to avoid
+      HTTPS issues altogether, we decided to provide the package on an HTTP server that Gerrit operates privately. The Add-on 
+      URL is
+      <uri>http://www.fischer-imsieke.de/gerrit/oXygenJATSframework_Literatum.xml</uri>. This is an alternative location that 
+      will provide the same package. Use it with oXygen versions 15 or 16.</p>
       <fig id="fig-03-install">
         <label>Figure 3</label>
         <caption>
@@ -118,7 +129,8 @@
       <fig id="fig-04-install">
         <label>Figure 4</label>
         <caption>
-          <title>New document templates: Issue XML, Literatum JATS article, and submission manifest</title>
+          <title>New document templates: Issue XML, Literatum JATS article, Literatum JATS 1.1 article (added to the framework 
+            2018-10-08) and submission manifest</title>
         </caption>
         <graphic xlink:href="img/04-install-new.jpg"/>
       </fig>
@@ -177,11 +189,24 @@
         care of moving the graphic files to their final destination. This deferred approach allows you to enjoy properly
       linked images while editing the article.</p>
       
+      <p>This package has been configured to run with XML Calabash that has been shipped with oXygen 16. In a more recent version
+      of oXygen, they renamed the “Calabash XProc” processor. It is now (version 20.1) available as “Add-on for Calabash XProc Engine”.
+      If you are using a recent oXygen version, you need to edit the transformation scenario (oXygen asks you if you want to 
+      create a copy since it is read-only) and select the Calabash Add-on as XProc processor, as depicted in <xref 
+        ref-type="fig" rid="fig-08a-copy-xrpoc-scenario"></xref>.</p>
+      <fig id="fig-08a-copy-xrpoc-scenario">
+        <label>Figure 8a</label>
+        <caption>
+          <title>Modifying a copy of the “build issue” transformation scenario</title>
+        </caption>
+        <graphic xlink:href="img/08a-copy-xproc-scenario.jpg"/>
+      </fig>
+
       <p>After the package building has been completed, your browser should display the resulting report, as depicted in <xref rid="fig-09-report" ref-type="fig"/>.
       Even if you didn’t include the Schematron xml-model processing instruction of <xref ref-type="fig" rid="fig-05-article-template"/>,
       all the Schematron checks will be performed on the contained articles. In order to deal with the issues in a more friendly 
       environment, you should insert the xml-model processing instruction into your article (copy it from a newly created article)
-      and act on the messages in oXygen. </p>
+      and act on the messages in oXygen.</p>
       <fig id="fig-09-report">
         <label>Figure 9</label>
         <caption>
@@ -209,7 +234,9 @@
         </list></p>
       <p>In addition, there are many enhancements possible to this framework, including (but not limited to)<list>
           <list-item>
-            <p>More and better CSS.</p>
+            <p>More and better CSS. In fact, the base JATSKit repository has developed quite a bit since it was forked.
+            It would be good if this framework incorporated all the changes, but this is not easy due to changes in the 
+            file naming structure etc.</p>
           </list-item>
           <list-item>
             <p>Custom actions, tools and buttons in oXygen for operations useful in writing and editing JATS documents, such as

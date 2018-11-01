@@ -11,8 +11,9 @@
     tooltips in oXygen. Recent oXygen versions make use of the embedded comments
     in the DTDs sufficiently well, so Wendell’s versions do not seem to add
     siginifcant value (prove us wrong on this). 
-    This is the original JATS catalog: -->
+    These are the original JATS catalogs (without its 'catalog' DOCTYPE declaration though): -->
   <nextCatalog catalog="../schema/JATS-1.0/dtd/catalog-jats-v1.xml"/>
+  <nextCatalog catalog="../schema/JATS-1.1/dtd/catalog-jats-v1-1-no-base.xml"/>
   <!-- This is the catalog for Wendell’s original flattened DTDs: -->
   <nextCatalog catalog="../O2-DTD/JATS-catalog-O2.xml"/>
   <nextCatalog catalog="../xproc-util/xmlcatalog/catalog.xml"/>
