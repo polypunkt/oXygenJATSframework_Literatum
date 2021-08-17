@@ -17,5 +17,6 @@
   <!-- This is the catalog for Wendell’s original flattened DTDs: -->
   <nextCatalog catalog="../O2-DTD/JATS-catalog-O2.xml"/>
   <nextCatalog catalog="../xproc-util/xmlcatalog/catalog.xml"/>
-  <nextCatalog catalog="../xslt-util/xslt-based-catalog-resolver/xmlcatalog/catalog.xml"/>
+  <nextCatalog catalog="../xslt-util/xmlcatalog/catalog.xml"/>
+  <nextCatalog catalog="transpect.io.catalog.xml"/>
 </catalog>

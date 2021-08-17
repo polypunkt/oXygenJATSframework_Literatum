@@ -377,35 +377,21 @@ td, th { border-color: black; border-width: thin; padding: 5px }
                is demand, we might be looking into
                supporting 14.x versions.
             </p>
-            <p id="d5e106">It seems as if oXygen versions prior to 17.0 won’t communicate with hobots.hogrefe.com
-               over HTTPS any more. This is probably
-               caused by a new HTTPS certificate on the server that is not approved by any of the
-               certificate authorities listed with the Java
-               version that shipped with older oXygen versions. As a workaround, you could in principle
-               try to run your old oXygen version
-               on a more recent Java version. Or you can instruct oXygen to install the package from
-               another location. In order to avoid
-               HTTPS issues altogether, we decided to provide the package on an HTTP server that
-               Gerrit operates privately. The Add-on 
-               URL is
-               <a target="xrefwindow" href="http://www.fischer-imsieke.de/gerrit/oXygenJATSframework_Literatum.xml" id="d5e108">http://www.fischer-imsieke.de/gerrit/oXygenJATSframework_Literatum.xml</a>. This is an alternative location that 
-               will provide the same package. Use it with oXygen versions 15 or 16.
-            </p>
             <div class="fig panel" style="display: float; clear: both"><a id="fig-03-install">
                   <!-- named anchor --></a><h5 class="label">Figure&nbsp;3</h5>
                <div class="caption">
                   <h4 class="subsection-title">Warning: Package is not digitally signed</h4>
                </div><img alt="img/03-install.jpg" src="img/03-install.jpg"></div>
-            <p id="d5e118">The package is not digitally signed. We might sign it at a later stage. If you trust
+            <p id="d5e113">The package is not digitally signed. We might sign it at a later stage. If you trust
                the people who control the server
                providing the download link, chances are high that the package hasn’t been tampered
                with. So press “Continue anyway”
                (<a href="#fig-03-install">Figure&nbsp;3</a>)
             </p>
          </div>
-         <div class="section"><a id="d5e122">
+         <div class="section"><a id="d5e117">
                <!-- named anchor --></a><h2 class="main-title">Using the Framework</h2>
-            <p id="d5e125">After restarting the application, there should be three new document templates in
+            <p id="d5e120">After restarting the application, there should be three new document templates in
                the “Literatum JATS” category when you
                select “File &gt; New…” from the menu (<a href="#fig-04-install">Figure&nbsp;4</a>).
             </p>
@@ -417,7 +403,7 @@ td, th { border-color: black; border-width: thin; padding: 5px }
                      2018-10-08) and submission manifest
                   </h4>
                </div><img alt="img/04-install-new.jpg" src="img/04-install-new.jpg"></div>
-            <p id="d5e136">If you create a new article with the Literatum_JATS_article template, you will notice
+            <p id="d5e131">If you create a new article with the Literatum_JATS_article template, you will notice
                the <code>&lt;?xml-model
                   …?&gt;</code> processing instruction right below the XML declaration (<a href="#fig-05-article-template">Figure&nbsp;5</a>). This will force the Schematron to be applied. However, this should not be necessary
                
@@ -433,7 +419,7 @@ td, th { border-color: black; border-width: thin; padding: 5px }
                <div class="caption">
                   <h4 class="subsection-title">Literatum JATS article template</h4>
                </div><img alt="img/05-article-template.jpg" src="img/05-article-template.jpg"></div>
-            <p id="d5e150">You also need to fill in the issue template (<a href="#fig-06-issue-template">Figure&nbsp;6</a>) according to the
+            <p id="d5e145">You also need to fill in the issue template (<a href="#fig-06-issue-template">Figure&nbsp;6</a>) according to the
                instructions and the Schematron messages.
             </p>
             <div class="fig panel" style="display: float; clear: both"><a id="fig-06-issue-template">
@@ -441,7 +427,7 @@ td, th { border-color: black; border-width: thin; padding: 5px }
                <div class="caption">
                   <h4 class="subsection-title">Issue XML template</h4>
                </div><img alt="img/06-issue-template.jpg" src="img/06-issue-template.jpg"></div>
-            <p id="d5e161">Create the issue workspace in an arbitrary directory. Name the directories within
+            <p id="d5e156">Create the issue workspace in an arbitrary directory. Name the directories within
                the workspace according to 
                the publisher’s and Atypon’s specifications. The name of the issue directory must
                match what comes after the slash
@@ -456,7 +442,7 @@ td, th { border-color: black; border-width: thin; padding: 5px }
                <div class="caption">
                   <h4 class="subsection-title">Directory layout</h4>
                </div><img alt="img/07-directory-layout.jpg" src="img/07-directory-layout.jpg"></div>
-            <p id="d5e178">When you are done preparing the content, you may select the transformation scenario
+            <p id="d5e173">When you are done preparing the content, you may select the transformation scenario
                named “build issue” (<a href="#fig-08-build-issue">Figure&nbsp;8</a>).
                It will run
                for several seconds, depending on the size of your issue directory. It will perform
@@ -470,7 +456,7 @@ td, th { border-color: black; border-width: thin; padding: 5px }
                <div class="caption">
                   <h4 class="subsection-title">Applying the “build issue” transformation</h4>
                </div><img alt="img/08-transform-manifest.jpg" src="img/08-transform-manifest.jpg"></div>
-            <p id="d5e190">Please note: In the resulting zip file, graphic files will be put in a distinct directory,
+            <p id="d5e185">Please note: In the resulting zip file, graphic files will be put in a distinct directory,
                <code>graphic</code>, for each article. When editing and correcting the articles in the issue directory,
                however, all images are in the same directory as the XML file. This is ok. Even if
                you happen to know Atypon’s
@@ -480,7 +466,7 @@ td, th { border-color: black; border-width: thin; padding: 5px }
                allows you to enjoy properly
                linked images while editing the article.
             </p>
-            <p id="d5e195">This package has been configured to run with XML Calabash that has been shipped with
+            <p id="d5e190">This package has been configured to run with XML Calabash that has been shipped with
                oXygen 16. In a more recent version
                of oXygen, they renamed the “Calabash XProc” processor. It is now (version 20.1) available
                as “Add-on for Calabash XProc Engine”.
@@ -494,7 +480,7 @@ td, th { border-color: black; border-width: thin; padding: 5px }
                <div class="caption">
                   <h4 class="subsection-title">Modifying a copy of the “build issue” transformation scenario</h4>
                </div><img alt="img/08a-copy-xproc-scenario.jpg" src="img/08a-copy-xproc-scenario.jpg"></div>
-            <p id="d5e206">After the package building has been completed, your browser should display the resulting
+            <p id="d5e201">After the package building has been completed, your browser should display the resulting
                report, as depicted in <a href="#fig-09-report">Figure&nbsp;9</a>.
                Even if you didn’t include the Schematron xml-model processing instruction of <a href="#fig-05-article-template">Figure&nbsp;5</a>,
                all the Schematron checks will be performed on the contained articles. In order to
@@ -508,30 +494,30 @@ td, th { border-color: black; border-width: thin; padding: 5px }
                <div class="caption">
                   <h4 class="subsection-title">Package validation report</h4>
                </div><img alt="img/09-package-report.jpg" src="img/09-package-report.jpg"></div>
-            <p id="d5e219">We cannot guarantee that the messages make sense in each and every case. Please ask
+            <p id="d5e214">We cannot guarantee that the messages make sense in each and every case. Please ask
                your contacts at the publisher for assistance,
                or provide them with your valuable feedback.
             </p>
          </div>
-         <div class="section"><a id="d5e221">
+         <div class="section"><a id="d5e216">
                <!-- named anchor --></a><h2 class="main-title">Extending the Framework</h2>
-            <p id="d5e224">Local developers may wish to do any or all of the following, extending the customization
+            <p id="d5e219">Local developers may wish to do any or all of the following, extending the customization
                that this Literatum JATS framework already contains:
-               <div class="list"><a id="d5e226">
+               <div class="list"><a id="d5e221">
                      <!-- named anchor --></a><ul>
                      <li>
-                        <p id="d5e228">Rewrite the parameter setting in the HTML Transformation Scenario to point to a local
+                        <p id="d5e223">Rewrite the parameter setting in the HTML Transformation Scenario to point to a local
                            (customized) CSS.
                         </p>
                      </li>
                      <li>
-                        <p id="d5e231">Provide transformation scenarios for any of the JATS Preview transformations or production
+                        <p id="d5e226">Provide transformation scenarios for any of the JATS Preview transformations or production
                            pipelines given in the
                            package, or for customized transformations.
                         </p>
                      </li>
                      <li>
-                        <p id="d5e234">Provide templates using the JATS DTDs supporting OASIS tables instead of or in addition
+                        <p id="d5e229">Provide templates using the JATS DTDs supporting OASIS tables instead of or in addition
                            to the templates
                            here.
                         </p>
@@ -539,12 +525,12 @@ td, th { border-color: black; border-width: thin; padding: 5px }
                   </ul>
                </div>
             </p>
-            <p id="d5e236">In addition, there are many enhancements possible to this framework, including (but
+            <p id="d5e231">In addition, there are many enhancements possible to this framework, including (but
                not limited to)
-               <div class="list"><a id="d5e238">
+               <div class="list"><a id="d5e233">
                      <!-- named anchor --></a><ul>
                      <li>
-                        <p id="d5e240">More and better CSS. In fact, the base JATSKit repository has developed quite a bit
+                        <p id="d5e235">More and better CSS. In fact, the base JATSKit repository has developed quite a bit
                            since it was forked.
                            It would be good if this framework incorporated all the changes, but this is not easy
                            due to changes in the 
@@ -552,7 +538,7 @@ td, th { border-color: black; border-width: thin; padding: 5px }
                         </p>
                      </li>
                      <li>
-                        <p id="d5e243">Custom actions, tools and buttons in oXygen for operations useful in writing and editing
+                        <p id="d5e238">Custom actions, tools and buttons in oXygen for operations useful in writing and editing
                            JATS documents, such as
                            graphics, list and table support.
                         </p>
@@ -563,9 +549,9 @@ td, th { border-color: black; border-width: thin; padding: 5px }
          </div>
       </div>
       <div id="article1-back" class="back">
-         <div class="back-section"><a id="d5e247">
+         <div class="back-section"><a id="d5e242">
                <!-- named anchor --></a><h2 class="main-title">References</h2>
-            <div class="section ref-list"><a id="d5e247">
+            <div class="section ref-list"><a id="d5e242">
                   <!-- named anchor --></a><div class="ref-list table">
                   <div class="row">
                      <div class="ref-label cell">
@@ -573,7 +559,7 @@ td, th { border-color: black; border-width: thin; padding: 5px }
                               <!-- named anchor --></a></p>
                      </div>
                      <div class="ref-content cell">
-                        <p class="citation"><a id="d5e249">
+                        <p class="citation"><a id="d5e244">
                               <!-- named anchor --></a>Atypon, Inc.: Literatum Content Tagging Guide [URL unknown]
                         </p>
                      </div>
