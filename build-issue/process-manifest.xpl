@@ -384,8 +384,9 @@
               <p:pipe port="current" step="clone"/>
             </p:input>
           </tr:remove-ns-decl-and-xml-base>
-          <p:store doctype-public="-//NLM//DTD JATS (Z39.96) Journal Archiving and Interchange DTD v1.0 20120330//EN"
-            doctype-system="JATS-archivearticle1.dtd" omit-xml-declaration="false">
+          <!-- https://redmine.le-tex.de/issues/9758 -->
+          <p:store doctype-public="-//NLM//DTD JATS (Z39.96) Journal Archiving and Interchange DTD with MathML3 v1.1 20151215//EN"
+            doctype-system="JATS-1.1/JATS-archivearticle1-mathml3.dtd" omit-xml-declaration="false">
             <p:with-option name="href" select="/*/@target-href">
               <p:pipe port="current" step="clone"/>
             </p:with-option>
